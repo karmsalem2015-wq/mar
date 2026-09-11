@@ -1,0 +1,73 @@
+// src/app/layout.tsx
+import type { Metadata } from 'next';
+import { Almarai, Alexandria, Cairo, Tajawal, Cormorant_Garamond } from 'next/font/google';
+import '../styles/globals.css';
+import { BRAND } from '@/config/brand';
+
+const almarai = Almarai({
+  subsets: ['arabic'],
+  variable: '--font-mar-almarai',
+  display: 'swap',
+  weight: ['300', '400', '700', '800'],
+});
+
+const alexandria = Alexandria({
+  subsets: ['arabic', 'latin'],
+  variable: '--font-mar-alexandria',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800', '900'],
+});
+
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  variable: '--font-mar-cairo',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800', '900'],
+});
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  variable: '--font-mar-tajawal',
+  display: 'swap',
+  weight: ['300', '400', '500', '700', '800'],
+});
+
+const latinDisplay = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-mar-latin-display',
+  display: 'swap',
+  weight: ['500', '600', '700'],
+});
+
+export const metadata: Metadata = {
+  metadataBase: new URL(BRAND.website),
+  title: { 
+    default: `${BRAND.nameAr} | ${BRAND.promiseAr}`,
+    template: `%s | ${BRAND.nameAr}`,
+  },
+  description: BRAND.storyAr,
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html
+      lang="ar"
+      dir="rtl"
+      className="scroll-smooth"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
+      <body className={`${almarai.variable} ${alexandria.variable} ${cairo.variable} ${tajawal.variable} ${latinDisplay.variable} bg-white font-tajawal text-brand-black antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,37 @@
+{
+  "social": {
+    "instagram": "https://instagram.com/mar.realestate/",
+    "x": "https://twitter.com/Mar_Real_Estate",
+    "facebook": "https://facebook.com/Mar1RealEstate",
+    "youtube": "https://youtube.com/c/%D9%85%D8%A7%D8%B1%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%D9%8A%D8%A9",
+    "tiktok": "https://www.tiktok.com/@mar.realestate",
+    "snapchat": "https://www.snapchat.com/add/mar.realestate",
+    "linkedin": "https://www.linkedin.com/company/mar-realestate/",
+    "whatsapp": "+966560533337"
+  },
+  "contact": {
+    "unifiedNumber": "0560533337",
+    "mobileNumber": "0568526666",
+    "companyEmail": "info@mar-ksa.com",
+    "address": "جدة، حي الصفا، شارع الأمير سلطان"
+  },
+  "hero": {
+    "title": "نعتمد أحدث التقنيات",
+    "subtitle": "لنربطكم بأفضل الفرص السكنية والاستثمارية",
+    "sliderImages": [
+      "/hero-bg-3.webp",
+      "/hero-bg-luxury.webp",
+      "/hero-bg-2.webp"
+    ]
+  },
+  "stats": {
+    "projects": "75",
+    "units": "850",
+    "clients": "1200",
+    "years": "14"
+  },
+  "seo": {
+    "title": "شركة مار العقارية | عقارات فاخرة بالسعودية",
+    "description": "حرفية تشييد وتميّز عقاري — نعتمد أحدث التقنيات لربط عملائنا بأفضل الفرص السكنية والاستثمارية"
+  }
+}

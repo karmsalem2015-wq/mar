@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "postgres-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:[password]@db.[project-id].supabase.co:6543/postgres"
+      ]
+    },
+    "sanity-groq": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-server-sanity-groq",
+        "--project-id",
+        "[project-id]",
+        "--dataset",
+        "production",
+        "--token",
+        "[token]"
+      ]
+    },
+    "vercel-ops": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-server-vercel",
+        "--token",
+        "[vercel-personal-token]"
+      ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-playwright"
+      ]
+    }
+  }
+}

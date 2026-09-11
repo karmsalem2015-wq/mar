@@ -1,0 +1,649 @@
+/* src/styles/globals.css */
+
+@import "tailwindcss";
+
+/* ----------------------------------------------------
+   1. Brand Design Tokens & System Variables (Official MAR Identity)
+   ---------------------------------------------------- */
+:root {
+  direction: rtl;
+
+  /* Official MAR Brand Colors */
+  --brand-black: #121212;
+  --brand-black-pure: #000000;
+  --brand-black-soft: #1E1E1E;
+  --brand-white: #FFFFFF;
+  --brand-cream: #F7F7F7;
+  --brand-cream-warm: #FAF8F5;
+  /* Brand Accent Colors (Architectural Luxury: Black, Gold & White) */
+  --brand-blue: #E6A821;
+  --brand-blue-deep: #B76F0B;
+  --brand-blue-navy: #111315;
+  --brand-blue-pale: #FDF8ED;
+
+  /* Background Hierarchy (Light Architectural Luxury) */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F7F7;
+  --bg-tertiary: #FAF8F5;
+
+  /* Compatibility mappings for existing Tailwind tokens */
+  --bg-midnight: #FFFFFF;
+  --bg-deep: #F7F7F7;
+  --bg-navy: #FFFFFF;
+  --bg-royal: #F4F6F9;
+  --bg-surface: #FFFFFF;
+
+  /* Translucencies */
+  --bg-glass: rgba(255, 255, 255, 0.92);
+  --bg-overlay: rgba(18, 18, 18, 0.65);
+
+  /* Brand Gold & Orange-Amber Accents (Authentic MAR Luxury Palette Extracted Directly From Logo) */
+  --gold-pale: #FDF8ED;
+  --gold-light: #FDE36E;
+  --gold-primary: #E6A821;
+  --gold-warm: #CB841B;
+  --gold-deep: #B76F0B;
+  --gold-dark: #965705;
+
+  /* Typography Colors (High-contrast Black, Charcoal & Gold) */
+  --text-primary: #121212;
+  --text-secondary: #4A4A4A;
+  --text-muted: #7A7A7A;
+  --text-subtle: #9E9E9E;
+  --text-gold: #E6A821;
+  --text-gold-pale: #CB841B;
+  --text-blue: #E6A821;
+
+  /* Borders & Dividers */
+  --border-gold: rgba(230, 168, 33, 0.35);
+  --border-gold-md: rgba(230, 168, 33, 0.65);
+  --border-blue: rgba(230, 168, 33, 0.35);
+  --border-blue-md: rgba(230, 168, 33, 0.65);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --border-white: rgba(0, 0, 0, 0.06);
+
+  /* Property Sales Status Colors */
+  --status-available: #16A34A;
+  --status-reserved: #EA580C;
+  --status-sold: #DC2626;
+  --status-soon: #E6A821;
+
+  /* Gradients */
+  --grad-brand-blue: linear-gradient(135deg, #CB841B 0%, #FDE36E 35%, #E6A821 70%, #B76F0B 100%);
+  --grad-gold: linear-gradient(135deg, #CB841B 0%, #FDE36E 35%, #E6A821 70%, #B76F0B 100%);
+  --grad-navy: linear-gradient(180deg, #FFFFFF 0%, #F7F7F7 50%, #FAF8F5 100%);
+  --grad-hero: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.65) 50%,
+      rgba(255, 255, 255, 0.95) 85%,
+      #FFFFFF 100%);
+  --grad-card-top: linear-gradient(90deg, transparent 0%, #E6A821 50%, transparent 100%);
+  --grad-shimmer: linear-gradient(120deg,
+      transparent 35%,
+      rgba(230, 168, 33, 0.25) 45%,
+      rgba(230, 168, 33, 0.25) 55%,
+      transparent 65%);
+
+  /* Shadows & Glows */
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(230, 168, 33, 0.40);
+  --shadow-btn-gold: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-btn-hover: 0 8px 22px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.10);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+/* ----------------------------------------------------
+   Tailwind CSS v4 Theme Adaptations
+   ---------------------------------------------------- */
+@theme {
+  /* Brand Tokens */
+  --color-brand-black: var(--brand-black);
+  --color-brand-black-pure: var(--brand-black-pure);
+  --color-brand-black-soft: var(--brand-black-soft);
+  --color-brand-white: var(--brand-white);
+  --color-brand-cream: var(--brand-cream);
+  --color-brand-cream-warm: var(--brand-cream-warm);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-deep: var(--brand-blue-deep);
+  --color-brand-blue-navy: var(--brand-blue-navy);
+  --color-brand-blue-pale: var(--brand-blue-pale);
+
+  /* Colors */
+  --color-bg-midnight: var(--bg-midnight);
+  --color-bg-deep: var(--bg-deep);
+  --color-bg-navy: var(--bg-navy);
+  --color-bg-royal: var(--bg-royal);
+  --color-bg-surface: var(--bg-surface);
+
+  --color-bg-glass: var(--bg-glass);
+  --color-bg-overlay: var(--bg-overlay);
+
+  --color-gold-pale: var(--gold-pale);
+  --color-gold-light: var(--gold-light);
+  --color-gold-primary: var(--gold-primary);
+  --color-gold-warm: var(--gold-warm);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-dark: var(--gold-dark);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-text-gold: var(--text-gold);
+  --color-text-gold-pale: var(--text-gold-pale);
+  --color-text-blue: var(--text-blue);
+
+  --color-border-gold: var(--border-gold);
+  --color-border-gold-md: var(--border-gold-md);
+  --color-border-blue: var(--border-blue);
+  --color-border-blue-md: var(--border-blue-md);
+  --color-border-white: var(--border-white);
+  --color-border-light: var(--border-light);
+
+  --color-status-available: var(--status-available);
+  --color-status-reserved: var(--status-reserved);
+  --color-status-sold: var(--status-sold);
+  --color-status-soon: var(--status-soon);
+
+  /* Fonts */
+  --font-almarai: var(--font-mar-almarai), 'Almarai', system-ui, -apple-system, sans-serif;
+  --font-alexandria: var(--font-mar-alexandria), 'Alexandria', system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-mar-almarai), 'Almarai', system-ui, -apple-system, sans-serif;
+  --font-cairo: var(--font-mar-tajawal), 'Tajawal', system-ui, -apple-system, sans-serif;
+  --font-tajawal: var(--font-mar-tajawal), 'Tajawal', system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mar-almarai), 'Almarai', system-ui, -apple-system, sans-serif;
+  --font-numbers: var(--font-mar-almarai), 'Almarai', system-ui, -apple-system, sans-serif;
+  --font-latin-display: var(--font-mar-latin-display), Georgia, serif;
+
+  /* Transitions */
+  --transition-timing-function-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Animations */
+  --animate-marquee: marquee 80s linear infinite;
+  --animate-marquee-ltr: marquee-ltr 120s linear infinite;
+  --animate-marquee-rtl: marquee-rtl 80s linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-ltr {
+    0% {
+      transform: translateX(-50%);
+    }
+
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  @keyframes marquee-rtl {
+    0% {
+      transform: translateX(0%);
+    }
+
+    100% {
+      transform: translateX(50%);
+    }
+  }
+}
+
+/* ----------------------------------------------------
+   2. Base Styles & Body Configuration (MAR Architectural)
+   ---------------------------------------------------- */
+@layer base {
+  body {
+    background-color: var(--brand-white);
+    color: var(--text-primary);
+    font-family: var(--font-mar-tajawal), 'Tajawal', system-ui, sans-serif;
+    font-weight: 500;
+    overflow-x: hidden;
+  }
+
+  p {
+    font-weight: 500;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif;
+    color: var(--brand-black);
+  }
+
+  ::selection {
+    background: rgba(230, 168, 33, 0.25);
+    color: var(--brand-black);
+  }
+}
+
+.font-heading,
+.font-almarai,
+.font-mono,
+.font-numbers {
+  font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif !important;
+}
+
+.font-tajawal,
+.font-cairo {
+  font-family: var(--font-mar-tajawal), 'Tajawal', system-ui, sans-serif;
+  font-weight: 500;
+}
+
+.font-alexandria {
+  font-family: var(--font-mar-alexandria), 'Alexandria', system-ui, sans-serif;
+}
+
+/* ----------------------------------------------------
+   Almarai Architectural Typography Targets:
+   1. Tabs & View Switchers
+   2. Header & Navbar Navigation
+   3. All Button Texts & Interactive CTAs
+   4. Card Internal Titles & Sub-headings
+   5. Numbers, Prices, Specs & Data Counters
+   ---------------------------------------------------- */
+
+/* 1. Header & Navigation */
+header,
+header nav,
+header a,
+header button,
+.navbar,
+.header-nav {
+  font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif !important;
+}
+
+/* 2. Tabs, View Switchers & Category Filter Buttons */
+[role="tab"],
+.tab-btn,
+.tab-item,
+[data-tab],
+.view-switcher-btn,
+.category-tab,
+.filter-tab {
+  font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif !important;
+}
+
+/* 3. All Buttons & CTA Links */
+button,
+.btn,
+.btn-premium-gold,
+.btn-gold,
+.btn-soft-gold-metallic,
+.btn-mar-black,
+.btn-black-gold,
+.btn-mar-outline,
+.btn-mar-outline-light,
+[role="button"] {
+  font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif !important;
+}
+
+/* 4. Card Internal Titles */
+.card h3,
+.card h4,
+.card-title,
+article h3,
+article h4,
+[class*="Card"] h3,
+[class*="Card"] h4,
+[class*="card"] h3,
+[class*="card"] h4 {
+  font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif !important;
+}
+
+/* 5. Numbers, Prices, Specs & Data Values */
+.price-value,
+.stat-number,
+.spec-number,
+.stat-count,
+[data-number] {
+  font-family: var(--font-mar-almarai), 'Almarai', system-ui, sans-serif !important;
+}
+
+/* Custom Scrollbar Styles for the entire site & scrollable panels - Desktop Only */
+@media (min-width: 1024px) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-blue) var(--brand-cream);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--brand-cream);
+  }
+
+  /* Custom scrollbar track offset to start below the header row */
+  .custom-table-wrapper::-webkit-scrollbar-track:vertical {
+    margin-top: 53px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+    border: 2px solid var(--brand-cream);
+    transition: background-color 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-blue);
+  }
+}
+
+/* ----------------------------------------------------
+   3. Pure CSS Animations & Keyframes
+   ---------------------------------------------------- */
+
+/* Button Shimmer Overlay Effect */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(200%);
+  }
+}
+
+.btn-shimmer-trigger {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer-trigger::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--grad-shimmer);
+  transform: translateX(-100%);
+}
+
+.btn-shimmer-trigger:hover::after {
+  animation: shimmer 1s ease-out;
+}
+
+/* Luxury Skeleton Shimmer (Soft Architectural Cream & Blue) */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-luxury {
+  background: linear-gradient(90deg,
+      #F3F4F6 25%,
+      #E1EDF8 50%,
+      #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2.2s ease-in-out infinite;
+}
+
+/* Pulsing Line Scroll Indicator */
+@keyframes pulse-height {
+
+  0%,
+  100% {
+    height: 10px;
+    opacity: 0.3;
+  }
+
+  50% {
+    height: 40px;
+    opacity: 1;
+  }
+}
+
+.indicator-pulse-line {
+  width: 2px;
+  background-color: var(--brand-blue);
+  animation: pulse-height 2s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------
+   MAR Signature Luxury Buttons (Black, Gold & White)
+   ---------------------------------------------------- */
+
+/* 1. Signature Gold & Orange-Amber Metallic Button (Directly from MAR Logo) */
+.btn-premium-gold,
+.btn-gold {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #CB841B 0%, #FDE36E 32%, #E6A821 68%, #B76F0B 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #111315 !important;
+  font-weight: 800;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-premium-gold:hover,
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  filter: brightness(1.03);
+}
+
+.btn-premium-gold:active,
+.btn-gold:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 2. Soft Champagne Metallic Gold Button */
+.btn-soft-gold-metallic {
+  background: linear-gradient(135deg, #CB841B 0%, #FDE36E 35%, #E6A821 70%, #B76F0B 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  color: #111315 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.btn-soft-gold-metallic:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+  filter: brightness(1.03) !important;
+}
+
+/* 3. Obsidian Black Button with Gold Trim */
+.btn-mar-black,
+.btn-black-gold {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1C1E22 0%, #111315 100%);
+  border: 1.5px solid #E6A821;
+  color: #FFFFFF !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-mar-black:hover,
+.btn-black-gold:hover {
+  background: #000000;
+  border-color: #FDE36E;
+  color: #E6A821 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 4. MAR Outline Button */
+.btn-mar-outline {
+  position: relative;
+  background: transparent;
+  border: 1.5px solid #E6A821;
+  color: #111315 !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-mar-outline:hover {
+  background: #111315;
+  border-color: #E6A821;
+  color: #E6A821 !important;
+}
+
+/* 5. Translucent Dark Glass Button */
+.btn-premium-glass {
+  position: relative;
+  overflow: hidden;
+  background: rgba(17, 19, 21, 0.65) !important;
+  border: 1.5px solid rgba(230, 168, 33, 0.45) !important;
+  color: #FFFFFF !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-premium-glass:hover {
+  background: rgba(17, 19, 21, 0.9) !important;
+  border-color: #E6A821 !important;
+  color: #E6A821 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.btn-premium-glass:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ----------------------------------------------------
+   Luxury Tabs Architecture (التابات: أسود، جولد، أبيض)
+   ---------------------------------------------------- */
+.tab-luxury-active {
+  background-color: #111315 !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #E6A821 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+}
+
+.tab-luxury-inactive {
+  background-color: #FFFFFF !important;
+  color: #4A4A4A !important;
+  border: 1px solid #E5E7EB !important;
+  transition: all 0.25s ease !important;
+}
+
+.tab-luxury-inactive:hover {
+  border-color: #E6A821 !important;
+  color: #111315 !important;
+  background-color: #FAF8F5 !important;
+}
+
+/* ----------------------------------------------------
+   Luxury Card Borders Architecture (بوردر الكروت: أسود، جولد، أبيض)
+   ---------------------------------------------------- */
+.card-luxury {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  transition: border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-luxury:hover {
+  border-color: #E6A821 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(230, 168, 33, 0.45) !important;
+  transform: translateY(-3px);
+}
+
+/* ----------------------------------------------------
+   4. Accessibility & prefers-reduced-motion
+   ---------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Footer skyline parallax - fixed doesn't work on mobile browsers */
+.footer-parallax-bg {
+  background-image: url('/footer shape.webp');
+  background-position: center calc(100% + 4vh);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-attachment: scroll;
+  opacity: 0.15;
+
+}
+
+@media (min-width: 768px) {
+  .footer-parallax-bg {
+    background-attachment: fixed;
+    background-position: center calc(100% + 20vh);
+  }
+}
+
+/* Premium Architectural Engraved / Chiseled Typography (حفر معماري فاخر وبارز للأوجه) */
+.heading-engraved,
+.liquid-gold-heading {
+  position: relative;
+  color: #121212;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95),
+    0 -1px 1px rgba(0, 0, 0, 0.28),
+    0 2px 4px rgba(0, 0, 0, 0.04);
+  letter-spacing: -0.015em;
+  transition: text-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease;
+}
+
+.heading-engraved:hover,
+.liquid-gold-heading:hover {
+  transform: translateY(-1px);
+  color: #0f172a;
+  text-shadow:
+    0 1px 0 #ffffff,
+    0 -1px 1.5px rgba(0, 0, 0, 0.38),
+    0 0 20px rgba(230, 168, 33, 0.28);
+}
