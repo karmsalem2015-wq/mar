@@ -171,9 +171,9 @@ export default function HeroSection() {
     const current = smoothTimeRef.current;
     const delta = target - current;
 
-    // LERP dampening: responsive 60fps interpolation for an instantaneous luxury glide
+    // LERP dampening: responsive 60fps interpolation for a silky luxury glide
     if (Math.abs(delta) > 0.005) {
-      smoothTimeRef.current += delta * 0.08;
+      smoothTimeRef.current += delta * 0.30;
 
       if (!video.seeking) {
         video.currentTime = smoothTimeRef.current;
@@ -312,7 +312,7 @@ export default function HeroSection() {
       ref={sectionRef}
       id="mar-story"
       aria-label="جولة مار العقارية"
-      className={`relative w-full bg-[#060D1A] ${shouldReduceMotion ? 'h-[100svh]' : 'h-[700svh] md:h-[650vh] lg:h-[600vh]'
+      className={`relative w-full bg-[#060D1A] ${shouldReduceMotion ? 'h-[100svh]' : 'h-[1250svh] md:h-[1200vh] lg:h-[1100vh]'
         }`}
     >
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#060D1A]">
