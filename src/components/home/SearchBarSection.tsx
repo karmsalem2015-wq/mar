@@ -89,7 +89,7 @@ export default function SearchBarSection({
   }, [showMobileFilters]);
 
   return (
-    <section id="search-filter-section" className="relative z-40 w-[94%] sm:w-[92%] max-w-5xl mx-auto px-2 sm:px-4 -mt-10 sm:-mt-28 lg:-mt-32">
+    <section id="search-filter-section" className="relative z-40 w-full max-w-5xl mx-auto">
       <form ref={formRef} onSubmit={handleSearch} className="relative w-full">
         {/* Fully rounded (pill) search bar container */}
         <div className="p-2 sm:p-2.5 bg-white/95 backdrop-blur-xl border border-gray-200/90 rounded-full shadow-[0_15px_45px_rgba(0,0,0,0.08)] hover:border-[#CAA048]/50 relative z-50 transition-all duration-300">
@@ -151,15 +151,15 @@ export default function SearchBarSection({
           </div>
         </div>
 
-        {/* Collapsible Advanced Filters Card (Absolute Overlay) */}
+        {/* Collapsible Advanced Filters Card (Absolute Overlay - Opens Upwards) */}
         <AnimatePresence>
           {showMobileFilters && (
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full absolute left-0 right-0 top-full mt-3 z-50 overflow-visible"
+              className="w-full absolute left-0 right-0 bottom-full mb-3 z-50 max-h-[72vh] overflow-y-auto rounded-3xl"
             >
               <div className="p-5 sm:p-7 bg-white/98 backdrop-blur-2xl border border-gray-200/90 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.18)] flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">

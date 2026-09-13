@@ -124,7 +124,11 @@ function StoryCardBody({
   );
 }
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  searchBar?: React.ReactNode;
+}
+
+export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progressTrackRef = useRef<HTMLDivElement>(null);
@@ -132,9 +136,11 @@ export default function HeroSection() {
   const animationFrameRef = useRef<number | null>(null);
   const mediaVariantRef = useRef<HeroMediaVariant | null>(null);
   const activeStopIndexRef = useRef(0);
+  const isStoryCompletedRef = useRef(false);
 
   const [mediaVariant, setMediaVariant] = useState<HeroMediaVariant | null>(null);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
+  const [isStoryCompleted, setIsStoryCompleted] = useState(false);
   const [isCanvasReady, setIsCanvasReady] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const openInquiry = useInquiryStore((state) => state.open);
@@ -319,6 +325,19 @@ export default function HeroSection() {
       // Render crisp frame
       drawFrame(currentFloatFrame);
 
+      // Story card sync tied to current camera progress
+      const progress = (currentFloatFrame - 1) / (totalFrames - 1);
+      const nextStopIndex = getActiveHeroStopByVideoProgress(progress, activeStopIndexRef.current);
+      if (activeStopIndexRef.current !== nextStopIndex) {
+        activeStopIndexRef.current = nextStopIndex;
+        setActiveStopIndex(nextStopIndex);
+      }
+      const completed = progress >= 0.85;
+      if (isStoryCompletedRef.current !== completed) {
+        isStoryCompletedRef.current = completed;
+        setIsStoryCompleted(completed);
+      }
+
       if (Math.abs(targetFrameRef.current - smoothFrameRef.current) > 0.01) {
         scrubRafRef.current = window.requestAnimationFrame(stepSmoothAnimation);
       } else {
@@ -497,6 +516,8 @@ export default function HeroSection() {
       lastDrawnFrameRef.current = -1;
       activeStopIndexRef.current = 0;
       setActiveStopIndex(0);
+      isStoryCompletedRef.current = false;
+      setIsStoryCompleted(false);
       setIsCanvasReady(false);
       setMediaVariant(nextVariant);
     };
@@ -548,6 +569,12 @@ export default function HeroSection() {
     }
     targetFrameRef.current = targetFrame;
     prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
+
+    const completed = videoProgress >= 0.85;
+    if (isStoryCompletedRef.current !== completed) {
+      isStoryCompletedRef.current = completed;
+      setIsStoryCompleted(completed);
+    }
 
     startSmoothAnimation();
   }, [getStableViewportHeight, shouldReduceMotion, startSmoothAnimation]);
@@ -617,8 +644,8 @@ export default function HeroSection() {
   }, [mediaVariant, requestScrollSync, shouldReduceMotion, updateCanvasSize, updateSectionMetrics]);
 
   const activeStop =
-    activeStopIndex >= 0 ? HERO_STORY_STOPS[activeStopIndex] : null;
-  const displayedStop = shouldReduceMotion ? HERO_STORY_STOPS[0] : activeStop;
+    activeStopIndex >= 0 && !isStoryCompleted ? HERO_STORY_STOPS[activeStopIndex] : null;
+  const displayedStop = shouldReduceMotion ? (searchBar ? null : HERO_STORY_STOPS[0]) : activeStop;
 
   return (
     <section
@@ -744,6 +771,21 @@ export default function HeroSection() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Search Bar: Docked cleanly inside Hero Section at bottom-[10vh] with full hero backdrop */}
+        {searchBar && (
+          <div
+            className={`absolute inset-x-0 bottom-[10vh] z-30 flex justify-center px-3 sm:px-6 transition-all duration-500 pointer-events-none ${
+              shouldReduceMotion || isStoryCompleted
+                ? 'opacity-100 translate-y-0 pointer-events-auto'
+                : 'opacity-0 translate-y-6 pointer-events-none'
+            }`}
+          >
+            <div className="w-full max-w-5xl">
+              {searchBar}
+            </div>
+          </div>
+        )}
 
         {/* Bottom Tour Progress Indicator */}
         {!shouldReduceMotion && (

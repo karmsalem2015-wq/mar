@@ -93,35 +93,36 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-bg-midnight text-text-primary font-tajawal" dir="rtl">
-      {/* 1. Hero Section */}
-      <HeroSection />
+      {/* 1. Hero Section with Integrated Search Bar */}
+      <HeroSection
+        searchBar={
+          <SearchBarSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            selectedRooms={selectedRooms}
+            setSelectedRooms={setSelectedRooms}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            handleSearch={handleSearch}
+          />
+        }
+      />
 
-      {/* 2. Advanced Search Bar Section */}
-      <div id="content-start" className="scroll-mt-24">
-        <SearchBarSection
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+      {/* 2. Cities Destinations Grid */}
+      <div id="content-start" className="relative w-full bg-[#FAF8F5] scroll-mt-24">
+        <CitiesSection
           selectedCity={selectedCity}
           setSelectedCity={setSelectedCity}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          selectedRooms={selectedRooms}
-          setSelectedRooms={setSelectedRooms}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-          handleSearch={handleSearch}
+          properties={dbProperties}
+          isLoading={isLoading}
         />
       </div>
 
-      {/* 3. Cities Destinations Grid */}
-      <CitiesSection
-        selectedCity={selectedCity}
-        setSelectedCity={setSelectedCity}
-        properties={dbProperties}
-        isLoading={isLoading}
-      />
-
-      {/* 4. Latest Offers & Property Listings */}
+      {/* 3. Latest Offers & Property Listings */}
       <PropertyListingsSection
         properties={filteredProperties}
         selectedCity={selectedCity}
