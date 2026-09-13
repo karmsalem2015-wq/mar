@@ -173,7 +173,7 @@ export default function HeroSection() {
 
     // LERP dampening — pure GPU-side work, NO React state updates here
     if (Math.abs(delta) > 0.008) {
-      smoothTimeRef.current += delta * 0.10;
+      smoothTimeRef.current += delta * 0.09;
 
       if (!video.seeking) {
         video.currentTime = smoothTimeRef.current;

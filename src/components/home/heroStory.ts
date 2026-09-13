@@ -28,12 +28,12 @@ export type HeroStoryStop = {
 
 export const HERO_MEDIA = {
   desktop: {
-    src: '/media/hero/mar-hero-desktop.mp4',
+    src: '/media/hero/mar-hero-desktop-v3.mp4',
     poster: '/media/hero/mar-hero-desktop-poster.jpg',
     duration: 50.8,
   },
   mobile: {
-    src: '/media/hero/mar-hero-mobile.mp4',
+    src: '/media/hero/mar-hero-mobile-v3.mp4',
     poster: '/media/hero/mar-hero-mobile-poster.jpg',
     duration: 50.583333,
   },
