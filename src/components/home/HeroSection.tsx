@@ -162,7 +162,9 @@ export default function HeroSection() {
     const section = sectionRef.current;
     if (!section) return;
     sectionHeightRef.current = section.offsetHeight;
-    sectionTopRef.current = section.offsetTop;
+    const rect = section.getBoundingClientRect();
+    const currentScrollY = window.scrollY || window.pageYOffset || 0;
+    sectionTopRef.current = rect.top + currentScrollY;
   }, []);
 
   const getStableViewportHeight = useCallback(() => {
@@ -483,7 +485,7 @@ export default function HeroSection() {
     
     // Read window.scrollY directly: zero layout thrashing, 100% GPU composited
     const scrollY = window.scrollY || window.pageYOffset || 0;
-    const relativeScroll = scrollY - (sectionTopRef.current || 0);
+    const relativeScroll = Math.max(0, scrollY - (sectionTopRef.current || 0));
     const scrollProgress = Math.min(Math.max(relativeScroll / scrollableDistance, 0), 1);
 
     if (progressBarRef.current) {
@@ -580,10 +582,10 @@ export default function HeroSection() {
       id="mar-story"
       aria-label="جولة مار العقارية"
       className={`relative w-full bg-[#060D1A] ${
-        shouldReduceMotion ? 'h-[100svh]' : 'h-[340svh] md:h-[900vh] lg:h-[1100vh]'
+        shouldReduceMotion ? 'h-[100svh]' : 'h-[420svh] md:h-[900vh] lg:h-[1100vh]'
       }`}
     >
-      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[#060D1A]">
+      <div className="sticky top-0 h-screen h-[100svh] w-full overflow-hidden bg-[#060D1A]">
         {/* Instant Poster Background while frame 1 initializes */}
         <div
           className={`absolute inset-0 transition-opacity duration-700 ${

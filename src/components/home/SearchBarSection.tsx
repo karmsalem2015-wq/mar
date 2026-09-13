@@ -89,7 +89,7 @@ export default function SearchBarSection({
   }, [showMobileFilters]);
 
   return (
-    <section id="search-filter-section" className="relative z-40 w-[94%] sm:w-[92%] max-w-5xl mx-auto px-2 sm:px-4 -mt-[18vh] sm:-mt-28 lg:-mt-32">
+    <section id="search-filter-section" className="relative z-40 w-[94%] sm:w-[92%] max-w-5xl mx-auto px-2 sm:px-4 -mt-10 sm:-mt-28 lg:-mt-32">
       <form ref={formRef} onSubmit={handleSearch} className="relative w-full">
         {/* Fully rounded (pill) search bar container */}
         <div className="p-2 sm:p-2.5 bg-white/95 backdrop-blur-xl border border-gray-200/90 rounded-full shadow-[0_15px_45px_rgba(0,0,0,0.08)] hover:border-[#CAA048]/50 relative z-50 transition-all duration-300">

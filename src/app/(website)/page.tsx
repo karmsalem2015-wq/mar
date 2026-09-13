@@ -92,7 +92,7 @@ export default function HomePage() {
   }, [dbProperties, selectedCity, selectedType, selectedRooms, maxPrice, searchQuery]);
 
   return (
-    <div className="relative min-h-screen bg-bg-midnight text-text-primary overflow-x-clip font-tajawal" dir="rtl">
+    <div className="relative min-h-screen bg-bg-midnight text-text-primary font-tajawal" dir="rtl">
       {/* 1. Hero Section */}
       <HeroSection />
 
