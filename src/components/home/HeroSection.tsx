@@ -582,7 +582,7 @@ export default function HeroSection() {
       id="mar-story"
       aria-label="جولة مار العقارية"
       className={`relative w-full bg-[#060D1A] ${
-        shouldReduceMotion ? 'h-[100svh]' : 'h-[420svh] md:h-[900vh] lg:h-[1100vh]'
+        shouldReduceMotion ? 'h-[100svh]' : 'h-[420svh] md:h-[750vh] lg:h-[850vh]'
       }`}
     >
       <div className="sticky top-0 h-screen h-[100svh] w-full overflow-hidden bg-[#060D1A]">
@@ -635,8 +635,8 @@ export default function HeroSection() {
           </div>
         )}
 
-        {/* Mobile Card: Centered Horizontally at Bottom */}
-        <div className="md:hidden pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-[calc(4.5rem+env(safe-area-inset-bottom))] px-4">
+        {/* Mobile Card: Centered Horizontally Raised ~20vh to avoid colliding with floating buttons */}
+        <div className="md:hidden pointer-events-none absolute inset-x-0 bottom-[20vh] z-20 flex justify-center pb-[env(safe-area-inset-bottom)] px-4">
           <AnimatePresence mode="wait" initial={false}>
             {displayedStop && (
               <motion.div
