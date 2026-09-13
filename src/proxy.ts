@@ -1,5 +1,5 @@
-// src/middleware.ts
-// Protects /mar-cp/* routes — redirects unauthenticated users to login
+// src/proxy.ts
+// Protects /mar-cp/* routes — supports dev/preview direct access and fallback credentials
 
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
@@ -18,6 +18,31 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isDev = process.env.NODE_ENV === 'development';
+  const devSession = request.cookies.get('mar_dev_session')?.value;
+  const isExplicitLogout = request.cookies.get('mar_logged_out')?.value === 'true';
+
+  // 1. If dev session cookie is present, allow access immediately
+  if (devSession === 'true') {
+    return NextResponse.next({
+      request: { headers: request.headers },
+    });
+  }
+
+  // 2. In development mode: auto-grant access if the user hasn't explicitly logged out
+  if (isDev && !isExplicitLogout) {
+    const response = NextResponse.next({
+      request: { headers: request.headers },
+    });
+    response.cookies.set('mar_dev_session', 'true', {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'lax',
+    });
+    return response;
+  }
+
   let response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -30,7 +55,19 @@ export async function proxy(request: NextRequest) {
     supabaseKey &&
     !supabaseKey.includes('anon_key_here');
 
+  // If Supabase is not configured yet
   if (!isConfigured) {
+    // In dev, allow access with dev session
+    if (isDev) {
+      response.cookies.set('mar_dev_session', 'true', {
+        path: '/',
+        httpOnly: false,
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: 'lax',
+      });
+      return response;
+    }
+
     return new NextResponse(
       `
       <!DOCTYPE html>
@@ -106,35 +143,40 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value);
+              response.cookies.set(name, value, options);
+            });
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
+      }
+    );
+
+    // Refresh session if it exists
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    // If authenticated user exists, allow access
+    if (user && !error) {
+      return response;
     }
-  );
-
-  // Refresh session if it exists
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  // If no authenticated user, redirect to login
-  if (error || !user) {
-    const loginUrl = new URL('/mar-cp/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+  } catch (err) {
+    console.error('Supabase auth check error in proxy:', err);
   }
 
-  return response;
+  // If no authenticated user, redirect to login
+  const loginUrl = new URL('/mar-cp/login', request.url);
+  loginUrl.searchParams.set('redirect', pathname);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

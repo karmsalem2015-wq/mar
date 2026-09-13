@@ -90,10 +90,12 @@ export default function AdminSidebar({
     try {
       const supabase = getSupabaseBrowserClient();
       await supabase.auth.signOut();
-      router.push('/mar-cp/login');
-      router.refresh();
     } catch (err) {
       console.error('Logout error:', err);
+    } finally {
+      document.cookie = 'mar_dev_session=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'mar_logged_out=true; path=/; max-age=86400; SameSite=Lax';
+      localStorage.removeItem('mar_admin_user');
       window.location.href = '/mar-cp/login';
     }
   };
