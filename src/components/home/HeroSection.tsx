@@ -310,17 +310,20 @@ export default function HeroSection() {
       const current = smoothFrameRef.current;
       const delta = target - current;
 
-      // Steadicam inertia smoothing:
-      // Desktop: calibrated lambda = 9.5 for filmic, luxurious Steadicam motion.
-      // Advances smoothly across ~250ms without snapping or dropping frames.
-      // Mobile: lambda = 18.0 for snappy direct touch tracking glued to the user's finger.
-      const SMOOTHING_LAMBDA = isMobile ? 18.0 : 9.5;
-      const factor = 1 - Math.exp(-SMOOTHING_LAMBDA * dt);
-
-      if (Math.abs(delta) > 0.005) {
-        smoothFrameRef.current += delta * factor;
-      } else {
+      if (isMobile) {
+        // Mobile touch: direct 1:1 tracking.
+        // Mobile OS (iOS Safari & Android Chrome) provides native 120Hz momentum deceleration.
+        // Eliminating artificial software lag makes swiping feel feather-light with zero dragging resistance.
         smoothFrameRef.current = target;
+      } else {
+        // Desktop: Lenis handles the smooth cubic-bezier scroll easing.
+        // Responsive tracking (lambda 26.0) locks the canvas to Lenis without trailing lag or float.
+        const factor = 1 - Math.exp(-26.0 * dt);
+        if (Math.abs(delta) > 0.005) {
+          smoothFrameRef.current += delta * factor;
+        } else {
+          smoothFrameRef.current = target;
+        }
       }
 
       const currentFloatFrame = Math.min(
@@ -405,26 +408,34 @@ export default function HeroSection() {
         drawFrame(1, true);
       }
 
-      // 2. High-speed Sequential Runway (frames 2 through 45)
+      // 2. High-speed Sequential Runway (frames 2 through 40)
       // Loads contiguously so the user has an immediate smooth buffer with zero missing frames
       const runway: number[] = [];
-      for (let i = 2; i <= Math.min(45, total); i++) {
+      for (let i = 2; i <= Math.min(40, total); i++) {
         runway.push(i);
       }
       await Promise.all(runway.map(loadSingleFrame));
       if (isAborted) return;
 
-      // 3. Sequential Continuous Pipeline (no skipping frames!)
-      // Stream in batches of 16 contiguous frames so intermediate frames are never missing
-      const BATCH_SIZE = 16;
-      for (let i = 46; i <= total; i += BATCH_SIZE) {
-        if (isAborted) break;
-        const chunk: number[] = [];
-        for (let j = i; j < i + BATCH_SIZE && j <= total; j++) {
-          if (!cache.has(j)) chunk.push(j);
-        }
-        await Promise.all(chunk.map(loadSingleFrame));
+      // 3. High-throughput continuous worker pool for all remaining frames
+      // 8 parallel workers continuously drain the queue so slow individual frames never stall the pipeline
+      const remaining: number[] = [];
+      for (let i = 41; i <= total; i++) {
+        if (!cache.has(i)) remaining.push(i);
       }
+
+      const CONCURRENCY = 8;
+      let nextIndex = 0;
+      const worker = async () => {
+        while (nextIndex < remaining.length && !isAborted) {
+          const frameIdx = remaining[nextIndex++];
+          if (frameIdx !== undefined && !cache.has(frameIdx)) {
+            await loadSingleFrame(frameIdx);
+          }
+        }
+      };
+
+      await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     };
 
     loadHierarchicalSequence();
@@ -569,7 +580,7 @@ export default function HeroSection() {
       id="mar-story"
       aria-label="جولة مار العقارية"
       className={`relative w-full bg-[#060D1A] ${
-        shouldReduceMotion ? 'h-[100svh]' : 'h-[520svh] md:h-[750vh] lg:h-[820vh]'
+        shouldReduceMotion ? 'h-[100svh]' : 'h-[340svh] md:h-[900vh] lg:h-[1100vh]'
       }`}
     >
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[#060D1A]">
