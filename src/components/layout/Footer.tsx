@@ -5,14 +5,12 @@ import Link from 'next/link';
 import {
   ArrowUp,
   Clock,
-  Facebook,
   Instagram,
   Mail,
   MapPin,
   Phone,
   ShieldCheck,
   Youtube,
-  Linkedin,
 } from 'lucide-react';
 import BrandMark from '@/components/brand/BrandMark';
 import { BRAND } from '@/config/brand';
@@ -51,25 +49,16 @@ export default function Footer({ settings }: FooterProps) {
   const social = settings?.social;
   const contact = settings?.contact;
 
-  // Build active dynamic social links
+  // Build active dynamic social links (Focused Top Saudi Real Estate Channels)
   const dynamicSocialLinks: { id: string; href: string; label: string; icon: React.ReactNode }[] = [];
 
-  const rawInstagram = social?.instagram ?? BRAND.social.instagram;
-  if (rawInstagram && rawInstagram.trim()) {
-    dynamicSocialLinks.push({
-      id: 'instagram',
-      href: rawInstagram,
-      label: 'Instagram',
-      icon: <Instagram className="size-4" aria-hidden="true" />,
-    });
-  }
-
+  // 1. X (Twitter)
   const rawX = social?.x ?? BRAND.social.x;
   if (rawX && rawX.trim()) {
     dynamicSocialLinks.push({
       id: 'x',
       href: rawX,
-      label: 'X (Twitter)',
+      label: 'منصة إكس (تويتر)',
       icon: (
         <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -78,63 +67,24 @@ export default function Footer({ settings }: FooterProps) {
     });
   }
 
-  const rawWhatsapp = social?.whatsapp ?? BRAND.contact.primaryPhone.tel;
-  if (rawWhatsapp && rawWhatsapp.trim()) {
-    const waHref = rawWhatsapp.startsWith('http')
-      ? rawWhatsapp
-      : `https://wa.me/${rawWhatsapp.replace(/[^0-9]/g, '')}`;
+  // 2. Instagram
+  const rawInstagram = social?.instagram ?? BRAND.social.instagram;
+  if (rawInstagram && rawInstagram.trim()) {
     dynamicSocialLinks.push({
-      id: 'whatsapp',
-      href: waHref,
-      label: 'WhatsApp',
-      icon: (
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
-          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 012.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1s.9 2.43 1.03 2.6c.13.17 1.77 2.7 4.28 3.79.6.26 1.07.41 1.44.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.12-.23-.19-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.454 5.709 1.455h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-        </svg>
-      ),
+      id: 'instagram',
+      href: rawInstagram,
+      label: 'إنستغرام',
+      icon: <Instagram className="size-4" aria-hidden="true" />,
     });
   }
 
-  const rawYoutube = social?.youtube ?? BRAND.social.youtube;
-  if (rawYoutube && rawYoutube.trim()) {
-    dynamicSocialLinks.push({
-      id: 'youtube',
-      href: rawYoutube,
-      label: 'YouTube',
-      icon: <Youtube className="size-4" aria-hidden="true" />,
-    });
-  }
-
-  const rawFacebook = social?.facebook ?? BRAND.social.facebook;
-  if (rawFacebook && rawFacebook.trim()) {
-    dynamicSocialLinks.push({
-      id: 'facebook',
-      href: rawFacebook,
-      label: 'Facebook',
-      icon: <Facebook className="size-4" aria-hidden="true" />,
-    });
-  }
-
-  const rawTiktok = social?.tiktok;
-  if (rawTiktok && rawTiktok.trim()) {
-    dynamicSocialLinks.push({
-      id: 'tiktok',
-      href: rawTiktok,
-      label: 'TikTok',
-      icon: (
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.27 6.27 0 0 0 1.95-4.49V8.58a8.3 8.3 0 0 0 4.82 1.54v-3.43h-.59z" />
-        </svg>
-      ),
-    });
-  }
-
-  const rawSnapchat = social?.snapchat;
+  // 3. Snapchat
+  const rawSnapchat = social?.snapchat || 'https://www.snapchat.com/add/mar_realestate';
   if (rawSnapchat && rawSnapchat.trim()) {
     dynamicSocialLinks.push({
       id: 'snapchat',
       href: rawSnapchat,
-      label: 'Snapchat',
+      label: 'سناب شات',
       icon: (
         <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
           <path d="M12.003 2c-3.74 0-6.02 2.72-6.02 5.56 0 1.25.43 2.5 1.09 3.42.13.18.17.41.1.62-.12.35-.61 1.05-1.57 1.34-.35.11-.53.47-.41.81.18.52.79.88 1.47.88.22 0 .44-.04.64-.11.29-.11.62.01.76.28.27.52.8 1.09 1.58 1.38-.61.35-1.53.72-2.58.91-.42.08-.7.46-.64.88.06.45.45.79.91.79.16 0 .32-.04.47-.11 1.21-.58 2.58-.87 3.69-.87 1.11 0 2.48.29 3.69.87.15.07.31.11.47.11.46 0 .85-.34.91-.79.06-.42-.22-.8-.64-.88-1.05-.19-1.97-.56-2.58-.91.78-.29 1.31-.86 1.58-1.38.14-.27.47-.39.76-.28.2.07.42.11.64.11.68 0 1.29-.36 1.47-.88.12-.34-.06-.7-.41-.81-.96-.29-1.45-.99-1.57-1.34-.07-.21-.03-.44.1-.62.66-.92 1.09-2.17 1.09-3.42 0-2.84-2.28-5.56-6.02-5.56z" />
@@ -143,24 +93,50 @@ export default function Footer({ settings }: FooterProps) {
     });
   }
 
-  const rawLinkedin = social?.linkedin;
-  if (rawLinkedin && rawLinkedin.trim()) {
+  // 4. TikTok
+  const rawTiktok = social?.tiktok || 'https://www.tiktok.com/@mar.realestate';
+  if (rawTiktok && rawTiktok.trim()) {
     dynamicSocialLinks.push({
-      id: 'linkedin',
-      href: rawLinkedin,
-      label: 'LinkedIn',
-      icon: <Linkedin className="size-4" aria-hidden="true" />,
+      id: 'tiktok',
+      href: rawTiktok,
+      label: 'تيك توك',
+      icon: (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-current">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.27 6.27 0 0 0 1.95-4.49V8.58a8.3 8.3 0 0 0 4.82 1.54v-3.43h-.59z" />
+        </svg>
+      ),
+    });
+  }
+
+  // 5. YouTube
+  const rawYoutube = social?.youtube ?? BRAND.social.youtube;
+  if (rawYoutube && rawYoutube.trim()) {
+    dynamicSocialLinks.push({
+      id: 'youtube',
+      href: rawYoutube,
+      label: 'يوتيوب',
+      icon: <Youtube className="size-4" aria-hidden="true" />,
     });
   }
 
   return (
     <footer
-      className="relative overflow-hidden bg-black/78 text-white border-t border-white/15 backdrop-blur-xl"
+      className="relative overflow-hidden bg-[#050B14] text-white border-t border-[#CAA048]/30"
       dir="rtl"
     >
+      {/* Deep Solid Base with Architectural Lighting Gradients (No washed-out transparency) */}
+      <div 
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#081220] via-[#050A14] to-[#020408]" 
+        aria-hidden="true" 
+      />
+      <div 
+        className="pointer-events-none absolute -top-28 left-1/2 -translate-x-1/2 w-[1000px] h-[260px] bg-gradient-to-b from-[#CAA048]/12 via-[#0073B6]/6 to-transparent blur-3xl opacity-80" 
+        aria-hidden="true" 
+      />
+
       {/* Decorative Gold Crown Divider */}
-      <div className="relative w-full h-[1px] bg-gradient-to-r from-transparent via-[#CAA048]/40 to-transparent z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rotate-45 border border-[#CAA048]/70 bg-black" />
+      <div className="relative w-full h-[1px] bg-gradient-to-r from-transparent via-[#CAA048]/60 to-transparent z-10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rotate-45 border border-[#CAA048] bg-[#050A14]" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12">
@@ -344,7 +320,7 @@ export default function Footer({ settings }: FooterProps) {
         </div>
 
         {/* Accreditation & Government Licensing Strip (شريط الامتثال والتراخيص الرسمية) */}
-        <div className="mt-10 rounded-2xl border border-white/10 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent p-5 sm:p-7 backdrop-blur-sm">
+        <div className="mt-10 rounded-2xl border border-white/12 bg-white/[0.04] p-5 sm:p-7 shadow-inner">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
             {/* Government Authority Logos */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
@@ -396,7 +372,7 @@ export default function Footer({ settings }: FooterProps) {
       </div>
 
       {/* Deep Black Bottom Copyright & Legal Bar */}
-      <div className="relative z-10 border-t border-white/[0.08] bg-black/40 py-6 px-5 sm:px-8 lg:px-12">
+      <div className="relative z-10 border-t border-white/[0.08] bg-[#020408] py-6 px-5 sm:px-8 lg:px-12">
         <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 text-xs font-cairo text-white/60">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-start">
             <p>
