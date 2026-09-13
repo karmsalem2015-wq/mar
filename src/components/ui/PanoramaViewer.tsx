@@ -19,6 +19,8 @@ export default function PanoramaViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const isInViewRef = useRef(false);
 
   // Interaction State
   const stateRef = useRef({
@@ -36,7 +38,31 @@ export default function PanoramaViewer({
     idleTimer: 0,
   });
 
+  // Track viewport visibility to pause 60fps canvas loop when off-screen
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === 'undefined') {
+      setIsInView(true);
+      isInViewRef.current = true;
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const visible = entry.isIntersecting;
+        setIsInView(visible);
+        isInViewRef.current = visible;
+      },
+      { rootMargin: '100px 0px', threshold: 0 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isInView) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -152,7 +178,7 @@ export default function PanoramaViewer({
       window.removeEventListener('resize', resizeCanvas);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [imageSrc, autoplay]);
+  }, [imageSrc, autoplay, isInView]);
 
   // Drag interaction handlers
   const handleStart = (clientX: number, clientY: number) => {

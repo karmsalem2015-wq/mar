@@ -12,7 +12,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useInquiryStore } from '@/store/useInquiryStore';
 import {
-  getActiveHeroStop,
+  getActiveHeroStopByVideoProgress,
   getHeroVideoProgress,
   HERO_MEDIA,
   HERO_STORY_STOPS,
@@ -21,8 +21,12 @@ import {
   HeroStoryStop,
 } from './heroStory';
 
-
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px) and (orientation: landscape)';
+
+function getFrameUrl(variant: HeroMediaVariant, index: number): string {
+  const padded = String(index).padStart(4, '0');
+  return `${HERO_MEDIA[variant].framesPath}/frame_${padded}.webp`;
+}
 
 function StoryAction({
   action,
@@ -122,20 +126,328 @@ function StoryCardBody({
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const progressTrackRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const mediaVariantRef = useRef<HeroMediaVariant | null>(null);
   const activeStopIndexRef = useRef(0);
-  const lastTargetTimeRef = useRef(-1);
+
   const [mediaVariant, setMediaVariant] = useState<HeroMediaVariant | null>(null);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
-  const [isVideoReady, setIsVideoReady] = useState(false);
-  const [hasVideoError, setHasVideoError] = useState(false);
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const openInquiry = useInquiryStore((state) => state.open);
 
+  // Progressive image cache (Apple style)
+  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
+  const isMountedRef = useRef(true);
+
+  // Canvas animation & smoothing refs
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const targetFrameRef = useRef(1);
+  const smoothFrameRef = useRef(1);
+  const lastDrawnFrameRef = useRef(-1);
+  const lastRafTimestampRef = useRef(0);
+  const scrubRafRef = useRef<number | null>(null);
+  const loadSingleFrameRef = useRef<((index: number) => Promise<HTMLImageElement | null>) | null>(null);
+
+  // Viewport & section layout stability (prevents synchronous layout thrashing)
+  const stableViewportHeightRef = useRef(0);
+  const lastViewportWidthRef = useRef(0);
+  const sectionHeightRef = useRef(0);
+  const sectionTopRef = useRef(0);
+
+  const updateSectionMetrics = useCallback(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    sectionHeightRef.current = section.offsetHeight;
+    sectionTopRef.current = section.offsetTop;
+  }, []);
+
+  const getStableViewportHeight = useCallback(() => {
+    if (typeof window === 'undefined') return 800;
+    const currentWidth = window.innerWidth;
+    if (
+      stableViewportHeightRef.current === 0 ||
+      Math.abs(currentWidth - lastViewportWidthRef.current) > 2
+    ) {
+      stableViewportHeightRef.current = window.innerHeight;
+      lastViewportWidthRef.current = currentWidth;
+    }
+    return stableViewportHeightRef.current;
+  }, []);
+
+  // Priority Window Preloader: pre-emptively buffers frames around the user's scroll direction
+  const preloadWindow = useCallback((centerIndex: number, ahead = 35, behind = 10) => {
+    const variant = mediaVariantRef.current;
+    if (!variant || !loadSingleFrameRef.current) return;
+    const total = HERO_MEDIA[variant].totalFrames;
+    const cache = imageCacheRef.current;
+
+    const start = Math.max(1, Math.floor(centerIndex - behind));
+    const end = Math.min(total, Math.ceil(centerIndex + ahead));
+
+    for (let i = start; i <= end; i++) {
+      if (!cache.has(i)) {
+        loadSingleFrameRef.current(i);
+      }
+    }
+  }, []);
+
+  // Find the closest loaded frame to prevent any blank gaps while streaming
+  const getBestAvailableImage = useCallback(
+    (targetIndex: number, total: number): HTMLImageElement | null => {
+      const cache = imageCacheRef.current;
+      if (cache.has(targetIndex)) return cache.get(targetIndex)!;
+
+      for (let offset = 1; offset < total; offset++) {
+        const lower = targetIndex - offset;
+        if (lower >= 1 && cache.has(lower)) return cache.get(lower)!;
+        const upper = targetIndex + offset;
+        if (upper <= total && cache.has(upper)) return cache.get(upper)!;
+      }
+      return null;
+    },
+    [],
+  );
+
+  // Crisp single-frame GPU renderer (Apple-standard: pure 1080p, zero ghosting, zero crossfade judder)
+  const drawFrame = useCallback(
+    (floatFrame: number, forceRedraw = false) => {
+      const canvas = canvasRef.current;
+      const variant = mediaVariantRef.current;
+      if (!canvas || !variant) return;
+
+      const total = HERO_MEDIA[variant].totalFrames;
+      const frameIndex = Math.min(Math.max(Math.round(floatFrame), 1), total);
+
+      // Skip painting if this exact integer frame is already painted on screen
+      if (!forceRedraw && lastDrawnFrameRef.current === frameIndex) return;
+
+      const img = getBestAvailableImage(frameIndex, total);
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+
+      let ctx = ctxRef.current;
+      if (!ctx) {
+        ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+        ctxRef.current = ctx;
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'medium';
+        }
+      }
+      if (!ctx) return;
+
+      lastDrawnFrameRef.current = frameIndex;
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const canvasRatio = width / height;
+
+      let renderWidth = width;
+      let renderHeight = height;
+      let x = 0;
+      let y = 0;
+
+      if (canvasRatio > imgRatio) {
+        renderHeight = width / imgRatio;
+        y = (height - renderHeight) / 2;
+      } else {
+        renderWidth = height * imgRatio;
+        x = (width - renderWidth) / 2;
+      }
+
+      ctx.drawImage(img, x, y, renderWidth, renderHeight);
+    },
+    [getBestAvailableImage],
+  );
+
+  // Update canvas resolution with devicePixelRatio (capped at 1.5 for ultra-fast GPU throughput)
+  const updateCanvasSize = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const width = window.innerWidth;
+    // On mobile, use getStableViewportHeight() so the canvas resolution is NEVER wiped by address bar collapse
+    const height = getStableViewportHeight();
+
+    const targetWidth = Math.round(width * dpr);
+    const targetHeight = Math.round(height * dpr);
+
+    if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      ctxRef.current = canvas.getContext('2d', { alpha: false, desynchronized: true });
+      if (ctxRef.current) {
+        ctxRef.current.imageSmoothingEnabled = true;
+        ctxRef.current.imageSmoothingQuality = 'medium';
+      }
+      if (smoothFrameRef.current > 0) {
+        drawFrame(smoothFrameRef.current, true);
+      }
+    }
+  }, [drawFrame, getStableViewportHeight]);
+
+  // Steadicam inertia smoothing loop: continuous sub-frame floating-point tracking
+  const stepSmoothAnimation = useCallback(
+    (timestamp: number) => {
+      const variant = mediaVariantRef.current;
+      if (!variant) {
+        scrubRafRef.current = null;
+        lastRafTimestampRef.current = 0;
+        return;
+      }
+
+      const totalFrames = HERO_MEDIA[variant].totalFrames;
+      const lastTime = lastRafTimestampRef.current;
+      lastRafTimestampRef.current = timestamp;
+      const dt = lastTime === 0 ? 0.016 : Math.min((timestamp - lastTime) / 1000, 0.05);
+
+      const isMobile = variant === 'mobile';
+      const target = targetFrameRef.current;
+      const current = smoothFrameRef.current;
+      const delta = target - current;
+
+      // Dynamic responsiveness:
+      // When delta is small: silky Steadicam inertia (lambda 15.0 on desktop, 18.0 on mobile)
+      // When user spins wheel or scrolls quickly (|delta| > 6): snappy catchup (lambda 24.0)
+      const baseLambda = isMobile ? 18.0 : 15.0;
+      const effectiveLambda = Math.abs(delta) > 6 ? 24.0 : baseLambda;
+      const factor = 1 - Math.exp(-effectiveLambda * dt);
+
+      if (Math.abs(delta) > 0.005) {
+        smoothFrameRef.current += delta * factor;
+      } else {
+        smoothFrameRef.current = target;
+      }
+
+      const currentFloatFrame = Math.min(
+        Math.max(smoothFrameRef.current, 1),
+        totalFrames,
+      );
+
+      // Render crisp frame
+      drawFrame(currentFloatFrame);
+
+      // Story card sync tied to current camera progress
+      const progress = (currentFloatFrame - 1) / (totalFrames - 1);
+      const nextStopIndex = getActiveHeroStopByVideoProgress(progress, activeStopIndexRef.current);
+      if (activeStopIndexRef.current !== nextStopIndex) {
+        activeStopIndexRef.current = nextStopIndex;
+        setActiveStopIndex(nextStopIndex);
+      }
+
+      if (Math.abs(targetFrameRef.current - smoothFrameRef.current) > 0.005) {
+        scrubRafRef.current = window.requestAnimationFrame(stepSmoothAnimation);
+      } else {
+        scrubRafRef.current = null;
+        lastRafTimestampRef.current = 0;
+      }
+    },
+    [drawFrame],
+  );
+
+  const startSmoothAnimation = useCallback(() => {
+    if (scrubRafRef.current === null) {
+      lastRafTimestampRef.current = 0;
+      scrubRafRef.current = window.requestAnimationFrame(stepSmoothAnimation);
+    }
+  }, [stepSmoothAnimation]);
+
+  // Progressive Runway + Proximity Preloader
+  useEffect(() => {
+    if (!mediaVariant) return;
+
+    isMountedRef.current = true;
+    const variant = mediaVariant;
+    const total = HERO_MEDIA[variant].totalFrames;
+    const cache = imageCacheRef.current;
+    cache.clear();
+
+    let isAborted = false;
+    const pendingPromises = new Map<number, Promise<HTMLImageElement | null>>();
+
+    const loadSingleFrame = (index: number): Promise<HTMLImageElement | null> => {
+      if (cache.has(index)) return Promise.resolve(cache.get(index)!);
+      if (pendingPromises.has(index)) return pendingPromises.get(index)!;
+
+      const p = new Promise<HTMLImageElement | null>((resolve) => {
+        const img = new window.Image();
+        img.src = getFrameUrl(variant, index);
+        img.decoding = 'async';
+        img.onload = () => {
+          if (!isAborted && isMountedRef.current) {
+            cache.set(index, img);
+            resolve(img);
+          } else {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+      });
+
+      pendingPromises.set(index, p);
+      return p;
+    };
+
+    loadSingleFrameRef.current = loadSingleFrame;
+
+    const loadHierarchicalSequence = async () => {
+      // 1. Instant initial frame paint
+      const firstImg = await loadSingleFrame(1);
+      if (isAborted) return;
+
+      if (firstImg) {
+        setIsCanvasReady(true);
+        updateCanvasSize();
+        drawFrame(1, true);
+      }
+
+      // 2. Immediate Runway: pre-load frames 2 through 30 sequentially (instant buffer!)
+      const runway: number[] = [];
+      for (let i = 2; i <= Math.min(30, total); i++) {
+        runway.push(i);
+      }
+      await Promise.all(runway.map(loadSingleFrame));
+      if (isAborted) return;
+
+      // 3. Sparse Backbone: every 4th frame (1, 5, 9, 13... total ~95 frames)
+      const backbone: number[] = [];
+      for (let i = 1; i <= total; i += 4) {
+        if (!cache.has(i)) backbone.push(i);
+      }
+      const BATCH_BACKBONE = 12;
+      for (let i = 0; i < backbone.length; i += BATCH_BACKBONE) {
+        if (isAborted) break;
+        await Promise.all(backbone.slice(i, i + BATCH_BACKBONE).map(loadSingleFrame));
+      }
+      if (isAborted) return;
+
+      // 4. Fill all remaining frames progressively
+      const remaining: number[] = [];
+      for (let i = 1; i <= total; i++) {
+        if (!cache.has(i)) remaining.push(i);
+      }
+
+      const BATCH_SIZE = 8;
+      for (let i = 0; i < remaining.length; i += BATCH_SIZE) {
+        if (isAborted) break;
+        await Promise.all(remaining.slice(i, i + BATCH_SIZE).map(loadSingleFrame));
+        await new Promise((r) => setTimeout(r, 20));
+      }
+    };
+
+    loadHierarchicalSequence();
+
+    return () => {
+      isAborted = true;
+      loadSingleFrameRef.current = null;
+    };
+  }, [drawFrame, mediaVariant, updateCanvasSize]);
+
+  // Variant change detection
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
 
@@ -144,9 +456,12 @@ export default function HeroSection() {
       if (mediaVariantRef.current === nextVariant) return;
 
       mediaVariantRef.current = nextVariant;
-      lastTargetTimeRef.current = -1;
-      setIsVideoReady(false);
-      setHasVideoError(false);
+      targetFrameRef.current = 1;
+      smoothFrameRef.current = 1;
+      lastDrawnFrameRef.current = -1;
+      activeStopIndexRef.current = 0;
+      setActiveStopIndex(0);
+      setIsCanvasReady(false);
       setMediaVariant(nextVariant);
     };
 
@@ -156,70 +471,21 @@ export default function HeroSection() {
     return () => mediaQuery.removeEventListener('change', updateMediaVariant);
   }, []);
 
-  const targetTimeRef = useRef(0);
-  const smoothTimeRef = useRef(0);
-  const scrubRafRef = useRef<number | null>(null);
-
-  const stepSmoothScrub = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !video.duration) {
-      scrubRafRef.current = null;
-      return;
-    }
-
-    const target = targetTimeRef.current;
-    const current = smoothTimeRef.current;
-    const delta = target - current;
-
-    // LERP dampening — pure GPU-side work, NO React state updates here
-    if (Math.abs(delta) > 0.008) {
-      smoothTimeRef.current += delta * 0.09;
-
-      if (!video.seeking) {
-        video.currentTime = smoothTimeRef.current;
-      }
-      scrubRafRef.current = window.requestAnimationFrame(stepSmoothScrub);
-    } else {
-      smoothTimeRef.current = target;
-      if (!video.seeking && Math.abs(video.currentTime - target) > 0.02) {
-        video.currentTime = target;
-      }
-      scrubRafRef.current = null;
-    }
-  }, []);
-
-  const startSmoothScrub = useCallback(() => {
-    if (scrubRafRef.current === null) {
-      scrubRafRef.current = window.requestAnimationFrame(stepSmoothScrub);
-    }
-  }, [stepSmoothScrub]);
-
-  const handleSeeked = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const target = targetTimeRef.current;
-    const delta = target - video.currentTime;
-    if (Math.abs(delta) > 0.03) {
-      startSmoothScrub();
-    }
-  }, [startSmoothScrub]);
-
+  // Scroll sync handler
   const syncStoryToScroll = useCallback(() => {
     animationFrameRef.current = null;
 
     const section = sectionRef.current;
     if (!section || shouldReduceMotion) return;
 
-    const rect = section.getBoundingClientRect();
-    const scrollableDistance = Math.max(section.offsetHeight - window.innerHeight, 1);
-    const scrollProgress = Math.min(Math.max(-rect.top / scrollableDistance, 0), 1);
-
-    // Story stop detection — runs once per scroll tick, not inside LERP loop
-    const nextStopIndex = getActiveHeroStop(scrollProgress, activeStopIndexRef.current);
-    if (activeStopIndexRef.current !== nextStopIndex) {
-      activeStopIndexRef.current = nextStopIndex;
-      setActiveStopIndex(nextStopIndex);
-    }
+    const viewportHeight = getStableViewportHeight();
+    const sectionHeight = sectionHeightRef.current || section.offsetHeight;
+    const scrollableDistance = Math.max(sectionHeight - viewportHeight, 1);
+    
+    // Read window.scrollY directly: zero layout thrashing, 100% GPU composited
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const relativeScroll = scrollY - (sectionTopRef.current || 0);
+    const scrollProgress = Math.min(Math.max(relativeScroll / scrollableDistance, 0), 1);
 
     if (progressBarRef.current) {
       progressBarRef.current.style.transform = `scaleX(${scrollProgress})`;
@@ -229,25 +495,32 @@ export default function HeroSection() {
       String(Math.round(scrollProgress * 100)),
     );
 
-    const video = videoRef.current;
-    if (!video || !mediaVariant || video.readyState < HTMLMediaElement.HAVE_METADATA) {
-      return;
-    }
+    const variant = mediaVariantRef.current;
+    if (!variant) return;
 
-    const configuredDuration = HERO_MEDIA[mediaVariant].duration;
-    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : configuredDuration;
+    const totalFrames = HERO_MEDIA[variant].totalFrames;
     const videoProgress = getHeroVideoProgress(scrollProgress);
-    const targetTime = Math.min(videoProgress * duration, Math.max(duration - 0.04, 0));
+    
+    // Continuous floating-point target (NO integer rounding here!)
+    const targetFrame = Math.min(
+      Math.max(videoProgress * (totalFrames - 1) + 1, 1),
+      totalFrames,
+    );
 
-    targetTimeRef.current = targetTime;
-    startSmoothScrub();
-  }, [mediaVariant, shouldReduceMotion, startSmoothScrub]);
+    targetFrameRef.current = targetFrame;
+    
+    // Proximity window preload ahead of current target
+    preloadWindow(targetFrame);
+
+    startSmoothAnimation();
+  }, [getStableViewportHeight, preloadWindow, shouldReduceMotion, startSmoothAnimation]);
 
   const requestScrollSync = useCallback(() => {
     if (animationFrameRef.current !== null) return;
     animationFrameRef.current = window.requestAnimationFrame(syncStoryToScroll);
   }, [syncStoryToScroll]);
 
+  // Event listeners for scroll and resize
   useEffect(() => {
     if (shouldReduceMotion) {
       activeStopIndexRef.current = 0;
@@ -255,13 +528,38 @@ export default function HeroSection() {
       return;
     }
 
+    const handleOrientationChange = () => {
+      stableViewportHeightRef.current = 0;
+      updateSectionMetrics();
+      updateCanvasSize();
+      requestScrollSync();
+    };
+
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      // Only recalculate canvas dimensions if WIDTH changed (orientation flip or desktop resize)
+      // Disregard height-only shifts caused by the mobile browser address bar sliding!
+      if (Math.abs(currentWidth - lastViewportWidthRef.current) > 2) {
+        stableViewportHeightRef.current = window.innerHeight;
+        lastViewportWidthRef.current = currentWidth;
+        updateSectionMetrics();
+        updateCanvasSize();
+      }
+      requestScrollSync();
+    };
+
+    updateSectionMetrics();
+    updateCanvasSize();
     requestScrollSync();
+
     window.addEventListener('scroll', requestScrollSync, { passive: true });
-    window.addEventListener('resize', requestScrollSync);
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
       window.removeEventListener('scroll', requestScrollSync);
-      window.removeEventListener('resize', requestScrollSync);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -271,16 +569,7 @@ export default function HeroSection() {
         scrubRafRef.current = null;
       }
     };
-  }, [requestScrollSync, shouldReduceMotion]);
-
-  const handleVideoReady = () => {
-    const video = videoRef.current;
-    if (video) video.pause();
-    setIsVideoReady(true);
-    setHasVideoError(false);
-    requestScrollSync();
-  };
-
+  }, [requestScrollSync, shouldReduceMotion, updateCanvasSize, updateSectionMetrics]);
 
   const activeStop =
     activeStopIndex >= 0 ? HERO_STORY_STOPS[activeStopIndex] : null;
@@ -291,11 +580,17 @@ export default function HeroSection() {
       ref={sectionRef}
       id="mar-story"
       aria-label="جولة مار العقارية"
-      className={`relative w-full bg-[#060D1A] ${shouldReduceMotion ? 'h-[100svh]' : 'h-[900svh] md:h-[850vh] lg:h-[800vh]'
-        }`}
+      className={`relative w-full bg-[#060D1A] ${
+        shouldReduceMotion ? 'h-[100svh]' : 'h-[750svh] md:h-[600vh] lg:h-[540vh]'
+      }`}
     >
-      <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#060D1A]">
-        <div className="absolute inset-0">
+      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[#060D1A]">
+        {/* Instant Poster Background while frame 1 initializes */}
+        <div
+          className={`absolute inset-0 transition-opacity duration-700 ${
+            isCanvasReady ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
           <Image
             src={HERO_MEDIA.desktop.poster}
             alt="واجهة مشروع سكني من مار العقارية"
@@ -314,62 +609,51 @@ export default function HeroSection() {
           />
         </div>
 
-        {mediaVariant && !shouldReduceMotion && !hasVideoError && (
-          <video
-            key={mediaVariant}
-            ref={videoRef}
-            src={HERO_MEDIA[mediaVariant].src}
-            className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ${isVideoReady ? 'opacity-100' : 'opacity-0'
-              }`}
-            muted
-            playsInline
-            preload="auto"
+        {/* 60fps/120fps GPU Canvas Renderer */}
+        {mediaVariant && !shouldReduceMotion && (
+          <canvas
+            ref={canvasRef}
+            className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ${
+              isCanvasReady ? 'opacity-100' : 'opacity-0'
+            }`}
             aria-hidden="true"
-            tabIndex={-1}
-            onLoadedMetadata={requestScrollSync}
-            onCanPlay={handleVideoReady}
-            onSeeked={handleSeeked}
-            onError={() => {
-              setHasVideoError(true);
-              setIsVideoReady(false);
-            }}
           />
         )}
 
+        {/* Elegant Luxury Vignette & Contrast Overlay */}
         <div
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(6,13,26,0.28)_0%,rgba(6,13,26,0.03)_36%,rgba(6,13,26,0.72)_100%)] md:bg-[linear-gradient(90deg,rgba(6,13,26,0.48)_0%,rgba(6,13,26,0.06)_45%,rgba(6,13,26,0.46)_100%)]"
           aria-hidden="true"
         />
 
-
-        {!isVideoReady && !hasVideoError && !shouldReduceMotion && (
+        {/* Subtle loading badge before initial frame arrives */}
+        {!isCanvasReady && !shouldReduceMotion && (
           <div className="absolute right-4 top-20 z-20 flex items-center gap-2 rounded-full border border-[#E6A821]/30 bg-black/60 px-4 py-2 text-xs text-white backdrop-blur-md sm:right-8 sm:top-24 font-cairo shadow-lg">
             <span className="w-2 h-2 rounded-full bg-[#E6A821] animate-pulse" />
             <span>جارٍ تجهيز الجولة السينمائية…</span>
           </div>
         )}
 
-        {/* Mobile Card: Centered Horizontally at Bottom, Shell is Persistent to Prevent any Flash */}
+        {/* Mobile Card: Centered Horizontally at Bottom */}
         <div className="md:hidden pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-[calc(4.5rem+env(safe-area-inset-bottom))] px-4">
-          {displayedStop && (
-            <div className="pointer-events-auto w-full max-w-[19rem] sm:max-w-[20.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/70 p-3 sm:p-3.5 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={displayedStop.id}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
-                  transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: 'easeOut' }}
-                >
-                  <StoryCardBody
-                    stop={displayedStop}
-                    shouldReduceMotion={shouldReduceMotion}
-                    openInquiry={openInquiry}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            {displayedStop && (
+              <motion.div
+                key={displayedStop.id}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6, scale: 0.98 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: 'easeOut' }}
+                className="pointer-events-auto w-full max-w-[19rem] sm:max-w-[20.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/70 p-3 sm:p-3.5 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200"
+              >
+                <StoryCardBody
+                  stop={displayedStop}
+                  shouldReduceMotion={shouldReduceMotion}
+                  openInquiry={openInquiry}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Desktop Right Side Slot */}
@@ -380,8 +664,8 @@ export default function HeroSection() {
                 key={displayedStop.id}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="pointer-events-auto w-full max-w-[21.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/65 p-4 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200"
               >
                 <StoryCardBody
@@ -402,8 +686,8 @@ export default function HeroSection() {
                 key={displayedStop.id}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="pointer-events-auto w-full max-w-[21.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/65 p-4 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200"
               >
                 <StoryCardBody
@@ -416,7 +700,7 @@ export default function HeroSection() {
           </AnimatePresence>
         </div>
 
-
+        {/* Bottom Tour Progress Indicator */}
         {!shouldReduceMotion && (
           <div
             ref={progressTrackRef}

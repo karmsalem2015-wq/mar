@@ -2,16 +2,16 @@ export type HeroMediaVariant = 'desktop' | 'mobile';
 
 export type HeroStoryAction =
   | {
-      kind: 'link';
-      label: string;
-      href: string;
-      emphasis: 'primary' | 'secondary';
-    }
+    kind: 'link';
+    label: string;
+    href: string;
+    emphasis: 'primary' | 'secondary';
+  }
   | {
-      kind: 'inquiry';
-      label: string;
-      emphasis: 'primary' | 'secondary';
-    };
+    kind: 'inquiry';
+    label: string;
+    emphasis: 'primary' | 'secondary';
+  };
 
 export type HeroStoryStop = {
   id: string;
@@ -30,16 +30,29 @@ export const HERO_MEDIA = {
   desktop: {
     src: '/media/hero/mar-hero-desktop-v3.mp4',
     poster: '/media/hero/mar-hero-desktop-poster.jpg',
+    framesPath: '/media/hero/frames/desktop',
+    totalFrames: 381,
     duration: 50.8,
+    fps: 30,
   },
   mobile: {
     src: '/media/hero/mar-hero-mobile-v3.mp4',
     poster: '/media/hero/mar-hero-mobile-poster.jpg',
+    framesPath: '/media/hero/frames/mobile',
+    totalFrames: 379,
     duration: 50.583333,
+    fps: 24,
   },
 } as const satisfies Record<
   HeroMediaVariant,
-  { src: string; poster: string; duration: number }
+  {
+    src: string;
+    poster: string;
+    framesPath: string;
+    totalFrames: number;
+    duration: number;
+    fps: number;
+  }
 >;
 
 /**
@@ -108,8 +121,8 @@ export const HERO_STORY_STOPS: readonly HeroStoryStop[] = [
     id: 'discover-mar',
     sceneNumber: '05',
     scrollStart: 0.80,
-    scrollEnd: 1,
-    videoProgress: 0.90,
+    scrollEnd: 0.88,
+    videoProgress: 0.85,
     eyebrow: 'ابدأ من هنا',
     title: 'اكتشف مشاريع مار العقارية',
     description:
@@ -153,12 +166,18 @@ export function getHeroVideoProgress(scrollProgress: number) {
 export function getActiveHeroStop(scrollProgress: number, currentStopIndex: number = 0) {
   const progress = Math.min(Math.max(scrollProgress, 0), 1);
 
-  // Hysteresis deadband (3% margin) to prevent rapid flickering near stop transitions
-  const current = HERO_STORY_STOPS[currentStopIndex];
-  if (current) {
-    const margin = 0.03;
+  // If progress has scrolled past the last story stop, hide cards completely
+  const lastStop = HERO_STORY_STOPS[HERO_STORY_STOPS.length - 1];
+  if (progress > lastStop.scrollEnd) {
+    return -1;
+  }
+
+  // Hysteresis deadband (2.5% margin) to prevent rapid flickering near stop transitions
+  if (currentStopIndex >= 0 && currentStopIndex < HERO_STORY_STOPS.length) {
+    const current = HERO_STORY_STOPS[currentStopIndex];
+    const margin = 0.025;
     const start = currentStopIndex === 0 ? 0 : current.scrollStart - margin;
-    const end = currentStopIndex === HERO_STORY_STOPS.length - 1 ? 1 : current.scrollEnd + margin;
+    const end = currentStopIndex === HERO_STORY_STOPS.length - 1 ? current.scrollEnd : current.scrollEnd + margin;
     if (progress >= start && progress <= end) {
       return currentStopIndex;
     }
@@ -167,7 +186,41 @@ export function getActiveHeroStop(scrollProgress: number, currentStopIndex: numb
   const index = HERO_STORY_STOPS.findIndex(
     (stop) => progress >= stop.scrollStart && progress <= stop.scrollEnd,
   );
-  if (index !== -1) return index;
-  return HERO_STORY_STOPS.length - 1;
+  return index;
 }
+
+/**
+ * Determine active story stop directly from the actually displayed video progress.
+ * Cards update strictly when the corresponding scene frame is rendered on screen.
+ * Returns -1 when past the final story scene so cards cleanly disappear before SearchBar enters.
+ */
+export function getActiveHeroStopByVideoProgress(
+  videoProgress: number,
+  currentStopIndex: number = 0,
+) {
+  const progress = Math.min(Math.max(videoProgress, 0), 1);
+
+  // If video progress has passed the last story stop, hide cards completely
+  const lastStop = HERO_STORY_STOPS[HERO_STORY_STOPS.length - 1];
+  if (progress > lastStop.scrollEnd) {
+    return -1;
+  }
+
+  // Hysteresis deadband (2.5% margin) to prevent rapid flickering near stop transitions
+  if (currentStopIndex >= 0 && currentStopIndex < HERO_STORY_STOPS.length) {
+    const current = HERO_STORY_STOPS[currentStopIndex];
+    const margin = 0.025;
+    const start = currentStopIndex === 0 ? 0 : current.scrollStart - margin;
+    const end = currentStopIndex === HERO_STORY_STOPS.length - 1 ? current.scrollEnd : current.scrollEnd + margin;
+    if (progress >= start && progress <= end) {
+      return currentStopIndex;
+    }
+  }
+
+  const index = HERO_STORY_STOPS.findIndex(
+    (stop) => progress >= stop.scrollStart && progress <= stop.scrollEnd,
+  );
+  return index;
+}
+
 

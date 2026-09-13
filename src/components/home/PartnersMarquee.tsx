@@ -14,6 +14,24 @@ const PARTNERS = [
 
 export default function PartnersMarquee() {
   const shouldReduceMotion = useReducedMotion();
+  const sectionRef = React.useRef<HTMLElement>(null);
+  const [isInView, setIsInView] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '150px 0px', threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const fadeUpVariants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
@@ -27,7 +45,7 @@ export default function PartnersMarquee() {
   const MARQUEE_ITEMS = [...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS];
 
   return (
-    <section className="relative w-full overflow-hidden py-20 bg-white border-b border-gray-200/70 z-10">
+    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 bg-white border-b border-gray-200/70 z-10">
       <div className="relative w-full mx-auto z-10">
         <motion.div
           initial="hidden"
@@ -56,7 +74,10 @@ export default function PartnersMarquee() {
 
         <div className="w-full max-w-[1200px] mx-auto relative overflow-hidden py-2 select-none" dir="ltr">
 
-          <div className="flex flex-row flex-nowrap gap-4 sm:gap-6 w-max animate-marquee-ltr hover:[animation-play-state:paused] cursor-pointer">
+          <div
+            className="flex flex-row flex-nowrap gap-4 sm:gap-6 w-max animate-marquee-ltr hover:[animation-play-state:paused] cursor-pointer"
+            style={{ animationPlayState: isInView ? 'running' : 'paused' }}
+          >
             {MARQUEE_ITEMS.map((partner, idx) => (
               <div
                 key={`${partner.id}-marquee-${idx}`}
@@ -69,6 +90,7 @@ export default function PartnersMarquee() {
                     alt={partner.alt}
                     width={120}
                     height={60}
+                    loading="lazy"
                     className="h-auto w-auto max-h-full max-w-full object-contain"
                   />
                 </div>

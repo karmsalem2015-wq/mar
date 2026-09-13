@@ -31,6 +31,26 @@ export default function RTLContinuousCarousel({
   const startScrollLeftRef = useRef(0);
   const hasDraggedRef = useRef(false);
   const [isDraggingState, setIsDraggingState] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  // Lazy-load auto-scroll: only activate when carousel is near viewport
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === 'undefined') {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '150px 0px', threshold: 0 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // Pause auto-scroll temporarily (e.g. after clicking an arrow or ending touch)
   const pauseTemporarily = useCallback((ms = 2500) => {
@@ -71,10 +91,10 @@ export default function RTLContinuousCarousel({
     return () => clearTimeout(timer);
   }, [duplicatedItems.length]);
 
-  // Continuous auto-scroll loop
+  // Continuous auto-scroll loop (only executes when carousel is scrolled into view)
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || duplicatedItems.length === 0) return;
+    if (!container || duplicatedItems.length === 0 || !isInView) return;
 
     let lastTime = performance.now();
 
@@ -121,7 +141,7 @@ export default function RTLContinuousCarousel({
         clearTimeout(resumeTimerRef.current);
       }
     };
-  }, [duplicatedItems.length, speed]);
+  }, [duplicatedItems.length, speed, isInView]);
 
   // Arrow navigation handlers
   // Next in RTL: advances forward to the left (points Left)

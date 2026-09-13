@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Star, Quote, ChevronRight, ChevronLeft } from 'lucide-react';
 
@@ -49,12 +49,32 @@ const TESTIMONIALS = [
 
 export default function TestimonialsSection() {
   const shouldReduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isInView, setIsInView] = useState(false);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isTestimonialHovered, setIsTestimonialHovered] = useState(false);
   const minSwipeDistance = 50;
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '100px 0px', threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleNext = () => {
     setDirection(1);
@@ -73,12 +93,12 @@ export default function TestimonialsSection() {
   };
 
   useEffect(() => {
-    if (isTestimonialHovered) return;
+    if (isTestimonialHovered || !isInView) return;
     const timer = setInterval(() => {
       handleNext();
     }, 6000);
     return () => clearInterval(timer);
-  }, [isTestimonialHovered]);
+  }, [isTestimonialHovered, isInView]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -139,7 +159,7 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="relative w-full overflow-hidden py-20 sm:py-24 bg-[#F7F7F7] border-y border-gray-200/80 z-10">
+    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 sm:py-24 bg-[#F7F7F7] border-y border-gray-200/80 z-10">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
         <motion.div
           initial="hidden"

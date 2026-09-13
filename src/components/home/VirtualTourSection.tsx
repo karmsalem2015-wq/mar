@@ -20,6 +20,29 @@ interface VirtualTourSectionProps {
 
 export default function VirtualTourSection({ onOpenInquiry }: VirtualTourSectionProps) {
   const shouldReduceMotion = useReducedMotion();
+  const sectionRef = React.useRef<HTMLElement>(null);
+  const [shouldLoadViewer, setShouldLoadViewer] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setShouldLoadViewer(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadViewer(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px 0px', threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const fadeUpVariants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
@@ -31,7 +54,7 @@ export default function VirtualTourSection({ onOpenInquiry }: VirtualTourSection
   };
 
   return (
-    <section className="relative w-full overflow-hidden py-20 sm:py-24 bg-white border-y border-gray-200/80">
+    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 sm:py-24 bg-white border-y border-gray-200/80">
       <div className="absolute top-1/2 start-0 -translate-y-1/2 w-[500px] h-[500px] bg-[#E6A821]/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -69,12 +92,18 @@ export default function VirtualTourSection({ onOpenInquiry }: VirtualTourSection
           </div>
         </motion.div>
 
-        {/* Interactive Panorama Canvas */}
+        {/* Interactive Panorama Canvas - Lazy loaded when approaching viewport */}
         <div className="lg:col-span-8 w-full z-10 rounded-3xl overflow-hidden border border-gray-200 shadow-[0_15px_45px_rgba(0,0,0,0.08)] bg-gray-50 p-1.5 hover:border-[#E6A821] hover:shadow-[0_15px_45px_rgba(0,0,0,0.08),0_0_0_1px_rgba(230,168,33,0.3)] transition-all duration-500">
-          <PanoramaViewer
-            imageSrc="/projects/panorama-penthouse.webp"
-            heightClass="h-[400px] sm:h-[450px]"
-          />
+          {shouldLoadViewer ? (
+            <PanoramaViewer
+              imageSrc="/projects/panorama-penthouse.webp"
+              heightClass="h-[400px] sm:h-[450px]"
+            />
+          ) : (
+            <div className="w-full h-[400px] sm:h-[450px] bg-bg-midnight/10 animate-pulse rounded-2xl flex items-center justify-center text-text-muted text-xs font-cairo">
+              جاري تجهيز العرض البانورامي 360°...
+            </div>
+          )}
         </div>
       </div>
     </section>

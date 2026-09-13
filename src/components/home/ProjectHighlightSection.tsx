@@ -35,7 +35,7 @@ function FeaturedProjectCard({ project }: { project: Project }) {
             src={project.media.hero || "/projects/amal-stars-showcase.webp"}
             alt={project.name}
             fill
-            priority
+            loading="lazy"
             sizes="(max-width: 1024px) 100vw, 60vw"
             className="object-cover transition-transform duration-[8000ms] ease-luxury group-hover:scale-108"
           />

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Almarai, Alexandria, Cairo, Tajawal, Cormorant_Garamond } from 'next/font/google';
 import '../styles/globals.css';
 import { BRAND } from '@/config/brand';
+import SmoothScrollProvider from '@/components/providers/SmoothScrollProvider';
 
 const almarai = Almarai({
   subsets: ['arabic'],
@@ -61,12 +62,12 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className="scroll-smooth"
-      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className={`${almarai.variable} ${alexandria.variable} ${cairo.variable} ${tajawal.variable} ${latinDisplay.variable} bg-white font-tajawal text-brand-black antialiased`}>
-        {children}
+        <SmoothScrollProvider>
+          {children}
+        </SmoothScrollProvider>
       </body>
     </html>
   );
