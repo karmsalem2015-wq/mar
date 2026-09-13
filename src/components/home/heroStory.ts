@@ -150,11 +150,24 @@ export function getHeroVideoProgress(scrollProgress: number) {
   return 1;
 }
 
-export function getActiveHeroStop(scrollProgress: number) {
+export function getActiveHeroStop(scrollProgress: number, currentStopIndex: number = 0) {
   const progress = Math.min(Math.max(scrollProgress, 0), 1);
+
+  // Hysteresis deadband (3% margin) to prevent rapid flickering near stop transitions
+  const current = HERO_STORY_STOPS[currentStopIndex];
+  if (current) {
+    const margin = 0.03;
+    const start = currentStopIndex === 0 ? 0 : current.scrollStart - margin;
+    const end = currentStopIndex === HERO_STORY_STOPS.length - 1 ? 1 : current.scrollEnd + margin;
+    if (progress >= start && progress <= end) {
+      return currentStopIndex;
+    }
+  }
+
   const index = HERO_STORY_STOPS.findIndex(
     (stop) => progress >= stop.scrollStart && progress <= stop.scrollEnd,
   );
   if (index !== -1) return index;
   return HERO_STORY_STOPS.length - 1;
 }
+

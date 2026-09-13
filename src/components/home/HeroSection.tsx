@@ -18,7 +18,9 @@ import {
   HERO_STORY_STOPS,
   HeroMediaVariant,
   HeroStoryAction,
+  HeroStoryStop,
 } from './heroStory';
+
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px) and (orientation: landscape)';
 
@@ -31,19 +33,19 @@ function StoryAction({
 }) {
   const className =
     action.emphasis === 'primary'
-      ? 'inline-flex min-h-8 flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] px-3.5 py-1.5 text-xs font-bold text-[#111315] shadow-md shadow-[#E6A821]/15 hover:brightness-105 active:scale-[0.98] transition-all duration-300 font-cairo sm:flex-none cursor-pointer'
-      : 'inline-flex min-h-8 flex-1 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-black/40 hover:bg-white/15 px-3.5 py-1.5 text-xs font-bold text-white backdrop-blur-md transition-all duration-300 hover:border-white/40 font-cairo sm:flex-none cursor-pointer';
+      ? 'inline-flex min-h-7 sm:min-h-8 flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] px-2.5 py-1 sm:px-3 sm:py-1.5 text-[0.68rem] sm:text-xs font-bold text-[#111315] shadow-md shadow-[#E6A821]/15 hover:brightness-105 active:scale-[0.98] transition-colors duration-200 font-cairo sm:flex-none cursor-pointer'
+      : 'inline-flex min-h-7 sm:min-h-8 flex-1 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-black/40 hover:bg-white/15 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[0.68rem] sm:text-xs font-bold text-white backdrop-blur-md transition-colors duration-200 hover:border-white/40 font-cairo sm:flex-none cursor-pointer';
 
   const content = (
     <>
       {action.kind === 'inquiry' ? (
-        <MessageCircle className="size-3.5 text-[#E6A821]" aria-hidden="true" />
+        <MessageCircle className="size-3 sm:size-3.5 text-[#E6A821]" aria-hidden="true" />
       ) : (
-        <Building2 className="size-3.5" aria-hidden="true" />
+        <Building2 className="size-3 sm:size-3.5" aria-hidden="true" />
       )}
       <span>{action.label}</span>
       {action.kind === 'link' && (
-        <ArrowLeft className="size-3.5" aria-hidden="true" />
+        <ArrowLeft className="size-3 sm:size-3.5" aria-hidden="true" />
       )}
     </>
   );
@@ -60,6 +62,61 @@ function StoryAction({
     <button type="button" className={className} onClick={onOpenInquiry}>
       {content}
     </button>
+  );
+}
+
+function StoryCardBody({
+  stop,
+  shouldReduceMotion,
+  openInquiry,
+}: {
+  stop: HeroStoryStop;
+  shouldReduceMotion?: boolean | null;
+  openInquiry: () => void;
+}) {
+  return (
+    <>
+      {/* Subtle Luxury Top Gold Accent Line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#E6A821] to-transparent opacity-85" />
+
+      <div className="mb-1.5 sm:mb-2 flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#E6A821]/15 px-2 py-0.5 text-[0.62rem] sm:text-[0.68rem] font-bold text-[#FDE36E] border border-[#E6A821]/30 font-cairo shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E6A821] animate-pulse" />
+          <span>{stop.eyebrow}</span>
+        </span>
+        <span className="font-mono text-[0.62rem] sm:text-[0.68rem] font-bold text-white/50 tracking-wider" dir="ltr">
+          {stop.sceneNumber} / 05
+        </span>
+      </div>
+
+      <h2 className="text-balance text-xs sm:text-sm md:text-base font-black leading-snug text-white font-heading drop-shadow-md">
+        {stop.title}
+      </h2>
+      <p className="mt-1 text-[0.68rem] sm:text-xs leading-relaxed text-white/85 max-w-xs font-cairo drop-shadow-xs line-clamp-2 sm:line-clamp-none">
+        {stop.description}
+      </p>
+
+      {stop.actions && (
+        <div className="mt-2.5 flex flex-row gap-2">
+          {stop.actions.map((action) => (
+            <StoryAction
+              key={`${action.kind}-${action.label}`}
+              action={action}
+              onOpenInquiry={openInquiry}
+            />
+          ))}
+        </div>
+      )}
+
+      {stop.sceneNumber === '01' && !shouldReduceMotion && (
+        <div className="mt-2 flex items-center gap-1.5 border-t border-white/10 pt-1.5 text-[0.62rem] sm:text-[0.68rem] text-white/65 font-cairo">
+          <span className="w-3.5 h-3.5 rounded-full bg-[#E6A821]/20 border border-[#E6A821]/35 flex items-center justify-center text-[#E6A821] shrink-0">
+            <ArrowDown className="size-2 animate-bounce" aria-hidden="true" />
+          </span>
+          <span>مرّر للأسفل للتجوّل داخل المشروع</span>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -116,17 +173,40 @@ export default function HeroSection() {
 
     // LERP dampening: responsive 60fps interpolation for an instantaneous luxury glide
     if (Math.abs(delta) > 0.005) {
-      smoothTimeRef.current += delta * 0.10;
+      smoothTimeRef.current += delta * 0.08;
 
       if (!video.seeking) {
         video.currentTime = smoothTimeRef.current;
       }
+
+      // Smooth story stop sync matching the video's camera position
+      const duration = video.duration;
+      if (duration > 0) {
+        const smoothedProgress = smoothTimeRef.current / duration;
+        const nextStopIndex = getActiveHeroStop(smoothedProgress, activeStopIndexRef.current);
+        if (activeStopIndexRef.current !== nextStopIndex) {
+          activeStopIndexRef.current = nextStopIndex;
+          setActiveStopIndex(nextStopIndex);
+        }
+      }
+
       scrubRafRef.current = window.requestAnimationFrame(stepSmoothScrub);
     } else {
       smoothTimeRef.current = target;
       if (!video.seeking && Math.abs(video.currentTime - target) > 0.015) {
         video.currentTime = target;
       }
+
+      const duration = video.duration;
+      if (duration > 0) {
+        const smoothedProgress = target / duration;
+        const nextStopIndex = getActiveHeroStop(smoothedProgress, activeStopIndexRef.current);
+        if (activeStopIndexRef.current !== nextStopIndex) {
+          activeStopIndexRef.current = nextStopIndex;
+          setActiveStopIndex(nextStopIndex);
+        }
+      }
+
       scrubRafRef.current = null;
     }
   }, []);
@@ -156,12 +236,6 @@ export default function HeroSection() {
     const rect = section.getBoundingClientRect();
     const scrollableDistance = Math.max(section.offsetHeight - window.innerHeight, 1);
     const scrollProgress = Math.min(Math.max(-rect.top / scrollableDistance, 0), 1);
-    const nextStopIndex = getActiveHeroStop(scrollProgress);
-
-    if (activeStopIndexRef.current !== nextStopIndex) {
-      activeStopIndexRef.current = nextStopIndex;
-      setActiveStopIndex(nextStopIndex);
-    }
 
     if (progressBarRef.current) {
       progressBarRef.current.style.transform = `scaleX(${scrollProgress})`;
@@ -173,6 +247,11 @@ export default function HeroSection() {
 
     const video = videoRef.current;
     if (!video || !mediaVariant || video.readyState < HTMLMediaElement.HAVE_METADATA) {
+      const nextStopIndex = getActiveHeroStop(scrollProgress, activeStopIndexRef.current);
+      if (activeStopIndexRef.current !== nextStopIndex) {
+        activeStopIndexRef.current = nextStopIndex;
+        setActiveStopIndex(nextStopIndex);
+      }
       return;
     }
 
@@ -291,62 +370,73 @@ export default function HeroSection() {
           </div>
         )}
 
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-end px-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] pt-24 sm:px-8 md:items-center md:px-10 md:pb-0 md:pt-20 lg:px-16 xl:px-24">
+        {/* Mobile Card: Centered Horizontally at Bottom, Shell is Persistent to Prevent any Flash */}
+        <div className="md:hidden pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-[calc(4.5rem+env(safe-area-inset-bottom))] px-4">
+          {displayedStop && (
+            <div className="pointer-events-auto w-full max-w-[19rem] sm:max-w-[20.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/70 p-3 sm:p-3.5 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={displayedStop.id}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: 'easeOut' }}
+                >
+                  <StoryCardBody
+                    stop={displayedStop}
+                    shouldReduceMotion={shouldReduceMotion}
+                    openInquiry={openInquiry}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Right Side Slot */}
+        <div className="hidden md:flex pointer-events-none absolute inset-y-0 right-10 lg:right-16 xl:right-24 z-20 items-center">
           <AnimatePresence mode="wait" initial={false}>
-            {displayedStop && (
+            {displayedStop && displayedStop.desktopSide === 'right' && (
               <motion.article
                 key={displayedStop.id}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.22, 1, 0.36, 1] }}
-                className={`pointer-events-auto w-full max-w-[18.5rem] sm:max-w-[20.5rem] md:max-w-[22.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/60 p-3.5 sm:p-4 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-300 relative overflow-hidden ${displayedStop.desktopSide === 'left' ? 'md:mr-auto' : 'md:ml-auto'
-                  }`}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="pointer-events-auto w-full max-w-[21.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/65 p-4 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200"
               >
-                {/* Subtle Luxury Top Gold Accent Line */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#E6A821] to-transparent opacity-85" />
-
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E6A821]/15 px-2.5 py-0.5 text-[0.68rem] font-bold text-[#FDE36E] border border-[#E6A821]/30 font-cairo shadow-xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E6A821] animate-pulse" />
-                    <span>{displayedStop.eyebrow}</span>
-                  </span>
-                  <span className="font-mono text-[0.68rem] font-bold text-white/50 tracking-wider" dir="ltr">
-                    {displayedStop.sceneNumber} / 05
-                  </span>
-                </div>
-
-                <h2 className="text-balance text-sm sm:text-base md:text-lg font-black leading-snug text-white font-heading drop-shadow-md">
-                  {displayedStop.title}
-                </h2>
-                <p className="mt-1 text-[0.72rem] sm:text-xs leading-relaxed text-white/85 max-w-xs font-cairo drop-shadow-xs">
-                  {displayedStop.description}
-                </p>
-
-                {displayedStop.actions && (
-                  <div className="mt-3 flex flex-row gap-2">
-                    {displayedStop.actions.map((action) => (
-                      <StoryAction
-                        key={`${action.kind}-${action.label}`}
-                        action={action}
-                        onOpenInquiry={openInquiry}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {displayedStop.sceneNumber === '01' && !shouldReduceMotion && (
-                  <div className="mt-2 flex items-center gap-1.5 border-t border-white/10 pt-1.5 text-[0.68rem] text-white/65 font-cairo">
-                    <span className="w-4 h-4 rounded-full bg-[#E6A821]/20 border border-[#E6A821]/35 flex items-center justify-center text-[#E6A821] shrink-0">
-                      <ArrowDown className="size-2.5 animate-bounce" aria-hidden="true" />
-                    </span>
-                    <span>مرّر للأسفل للتجوّل داخل المشروع</span>
-                  </div>
-                )}
+                <StoryCardBody
+                  stop={displayedStop}
+                  shouldReduceMotion={shouldReduceMotion}
+                  openInquiry={openInquiry}
+                />
               </motion.article>
             )}
           </AnimatePresence>
         </div>
+
+        {/* Desktop Left Side Slot */}
+        <div className="hidden md:flex pointer-events-none absolute inset-y-0 left-10 lg:left-16 xl:left-24 z-20 items-center">
+          <AnimatePresence mode="wait" initial={false}>
+            {displayedStop && displayedStop.desktopSide === 'left' && (
+              <motion.article
+                key={displayedStop.id}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="pointer-events-auto w-full max-w-[21.5rem] rounded-2xl border border-white/15 hover:border-[#E6A821]/40 bg-black/65 p-4 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl relative overflow-hidden transition-colors duration-200"
+              >
+                <StoryCardBody
+                  stop={displayedStop}
+                  shouldReduceMotion={shouldReduceMotion}
+                  openInquiry={openInquiry}
+                />
+              </motion.article>
+            )}
+          </AnimatePresence>
+        </div>
+
 
         {!shouldReduceMotion && (
           <div
