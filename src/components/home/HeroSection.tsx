@@ -644,8 +644,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   }, [mediaVariant, requestScrollSync, shouldReduceMotion, updateCanvasSize, updateSectionMetrics]);
 
   const activeStop =
-    activeStopIndex >= 0 && !isStoryCompleted ? HERO_STORY_STOPS[activeStopIndex] : null;
-  const displayedStop = shouldReduceMotion ? (searchBar ? null : HERO_STORY_STOPS[0]) : activeStop;
+    activeStopIndex >= 0 ? HERO_STORY_STOPS[activeStopIndex] : null;
+  const displayedStop = shouldReduceMotion ? HERO_STORY_STOPS[0] : activeStop;
 
   return (
     <section
@@ -709,7 +709,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         {/* Mobile Card: Centered Horizontally Raised ~20vh to avoid colliding with floating buttons */}
         <div className="md:hidden pointer-events-none absolute inset-x-0 bottom-[20vh] z-20 flex justify-center pb-[env(safe-area-inset-bottom)] px-4">
           <AnimatePresence mode="wait" initial={false}>
-            {displayedStop && (
+            {!isStoryCompleted && displayedStop && (
               <motion.div
                 key={displayedStop.id}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
@@ -772,10 +772,10 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
           </AnimatePresence>
         </div>
 
-        {/* Search Bar: Docked cleanly inside Hero Section at bottom-[10vh] with full hero backdrop */}
+        {/* Mobile Search Bar: Docked cleanly inside Hero Section on mobile only at bottom-[10vh] */}
         {searchBar && (
           <div
-            className={`absolute inset-x-0 bottom-[10vh] z-30 flex justify-center px-3 sm:px-6 transition-all duration-500 pointer-events-none ${
+            className={`md:hidden absolute inset-x-0 bottom-[10vh] z-30 flex justify-center px-3 transition-all duration-500 pointer-events-none ${
               shouldReduceMotion || isStoryCompleted
                 ? 'opacity-100 translate-y-0 pointer-events-auto'
                 : 'opacity-0 translate-y-6 pointer-events-none'

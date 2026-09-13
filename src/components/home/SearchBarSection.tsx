@@ -48,6 +48,8 @@ interface SearchBarSectionProps {
   maxPrice: string;
   setMaxPrice: (val: string) => void;
   handleSearch: (e: React.FormEvent) => void;
+  mode?: 'docked' | 'flow';
+  idPrefix?: string;
 }
 
 export default function SearchBarSection({
@@ -62,9 +64,12 @@ export default function SearchBarSection({
   maxPrice,
   setMaxPrice,
   handleSearch,
+  mode = 'flow',
+  idPrefix = '',
 }: SearchBarSectionProps) {
   const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const isDocked = mode === 'docked';
 
   // Close filter overlay when clicking outside or pressing Escape
   useEffect(() => {
@@ -89,7 +94,14 @@ export default function SearchBarSection({
   }, [showMobileFilters]);
 
   return (
-    <section id="search-filter-section" className="relative z-40 w-full max-w-5xl mx-auto">
+    <section
+      id={`${idPrefix}search-filter-section`}
+      className={
+        isDocked
+          ? "relative z-40 w-full max-w-5xl mx-auto px-2"
+          : "relative z-40 w-[94%] sm:w-[92%] max-w-5xl mx-auto px-2 sm:px-4 -mt-10 sm:-mt-28 lg:-mt-32"
+      }
+    >
       <form ref={formRef} onSubmit={handleSearch} className="relative w-full">
         {/* Fully rounded (pill) search bar container */}
         <div className="p-2 sm:p-2.5 bg-white/95 backdrop-blur-xl border border-gray-200/90 rounded-full shadow-[0_15px_45px_rgba(0,0,0,0.08)] hover:border-[#CAA048]/50 relative z-50 transition-all duration-300">
@@ -100,7 +112,7 @@ export default function SearchBarSection({
                 <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#CAA048] shrink-0" />
               </div>
               <input
-                id="hero-search-input"
+                id={`${idPrefix}hero-search-input`}
                 type="text"
                 placeholder="ابحث بالحي، اسم المشروع، أو المعالم..."
                 value={searchQuery}
@@ -151,25 +163,29 @@ export default function SearchBarSection({
           </div>
         </div>
 
-        {/* Collapsible Advanced Filters Card (Absolute Overlay - Opens Upwards) */}
+        {/* Collapsible Advanced Filters Card (Absolute Overlay) */}
         <AnimatePresence>
           {showMobileFilters && (
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              initial={isDocked ? { opacity: 0, y: 10, scale: 0.98 } : { opacity: 0, y: -10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              exit={isDocked ? { opacity: 0, y: 10, scale: 0.98 } : { opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full absolute left-0 right-0 bottom-full mb-3 z-50 max-h-[72vh] overflow-y-auto rounded-3xl"
+              className={
+                isDocked
+                  ? "w-full absolute left-0 right-0 bottom-full mb-3 z-50 max-h-[72vh] overflow-y-auto rounded-3xl"
+                  : "w-full absolute left-0 right-0 top-full mt-3 z-50 overflow-visible"
+              }
             >
               <div className="p-5 sm:p-7 bg-white/98 backdrop-blur-2xl border border-gray-200/90 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.18)] flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                   {/* City */}
                   <div className="space-y-1.5">
-                    <label htmlFor="filter-city" className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
+                    <label htmlFor={`${idPrefix}filter-city`} className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
                       <MapPin className="w-3.5 h-3.5 text-[#CAA048]" /> المدينة
                     </label>
                     <CustomSelect
-                      id="filter-city"
+                      id={`${idPrefix}filter-city`}
                       title="تصفية بالمدينة"
                       options={CITY_OPTIONS}
                       value={selectedCity}
@@ -179,11 +195,11 @@ export default function SearchBarSection({
 
                   {/* Type */}
                   <div className="space-y-1.5">
-                    <label htmlFor="filter-type" className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
+                    <label htmlFor={`${idPrefix}filter-type`} className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
                       <Building className="w-3.5 h-3.5 text-[#CAA048]" /> نوع العقار
                     </label>
                     <CustomSelect
-                      id="filter-type"
+                      id={`${idPrefix}filter-type`}
                       title="تصفية بنوع العقار"
                       options={TYPE_OPTIONS}
                       value={selectedType}
@@ -193,11 +209,11 @@ export default function SearchBarSection({
 
                   {/* Rooms */}
                   <div className="space-y-1.5">
-                    <label htmlFor="filter-rooms" className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
+                    <label htmlFor={`${idPrefix}filter-rooms`} className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
                       <Layers className="w-3.5 h-3.5 text-[#CAA048]" /> عدد الغرف
                     </label>
                     <CustomSelect
-                      id="filter-rooms"
+                      id={`${idPrefix}filter-rooms`}
                       title="تصفية بعدد الغرف"
                       options={ROOMS_OPTIONS}
                       value={selectedRooms}
@@ -207,11 +223,11 @@ export default function SearchBarSection({
 
                   {/* Max Price */}
                   <div className="space-y-1.5">
-                    <label htmlFor="filter-price" className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
+                    <label htmlFor={`${idPrefix}filter-price`} className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1 font-cairo">
                       <DollarSign className="w-3.5 h-3.5 text-[#CAA048]" /> السعر الأقصى
                     </label>
                     <CustomSelect
-                      id="filter-price"
+                      id={`${idPrefix}filter-price`}
                       title="تصفية بالحد الأقصى للسعر"
                       options={PRICE_OPTIONS}
                       value={maxPrice}

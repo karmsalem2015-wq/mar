@@ -93,10 +93,12 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-bg-midnight text-text-primary font-tajawal" dir="rtl">
-      {/* 1. Hero Section with Integrated Search Bar */}
+      {/* 1. Hero Section (with Mobile-only docked search bar inside) */}
       <HeroSection
         searchBar={
           <SearchBarSection
+            mode="docked"
+            idPrefix="mobile-"
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             selectedCity={selectedCity}
@@ -112,15 +114,34 @@ export default function HomePage() {
         }
       />
 
-      {/* 2. Cities Destinations Grid */}
-      <div id="content-start" className="relative w-full bg-[#FAF8F5] scroll-mt-24">
-        <CitiesSection
-          selectedCity={selectedCity}
-          setSelectedCity={setSelectedCity}
-          properties={dbProperties}
-          isLoading={isLoading}
-        />
+      {/* 2. Desktop Search Bar Section: Original flow, position, height & timing at the end of the tour */}
+      <div id="content-start" className="scroll-mt-24">
+        <div className="hidden md:block">
+          <SearchBarSection
+            mode="flow"
+            idPrefix="desktop-"
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            selectedRooms={selectedRooms}
+            setSelectedRooms={setSelectedRooms}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            handleSearch={handleSearch}
+          />
+        </div>
       </div>
+
+      {/* 3. Cities Destinations Grid */}
+      <CitiesSection
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
+        properties={dbProperties}
+        isLoading={isLoading}
+      />
 
       {/* 3. Latest Offers & Property Listings */}
       <PropertyListingsSection

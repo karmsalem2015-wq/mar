@@ -60,7 +60,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
   ];
 
   return (
-    <div className="w-full bg-[#FAF8F5] pt-14 sm:pt-20 lg:pt-24 pb-16">
+    <div className="w-full bg-[#FAF8F5] pt-10 md:border-t md:border-gray-200/80 md:pt-36 lg:pt-40 pb-16">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"
