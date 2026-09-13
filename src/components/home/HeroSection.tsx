@@ -171,42 +171,19 @@ export default function HeroSection() {
     const current = smoothTimeRef.current;
     const delta = target - current;
 
-    // LERP dampening: responsive 60fps interpolation for a silky luxury glide
-    if (Math.abs(delta) > 0.005) {
-      smoothTimeRef.current += delta * 0.30;
+    // LERP dampening — pure GPU-side work, NO React state updates here
+    if (Math.abs(delta) > 0.008) {
+      smoothTimeRef.current += delta * 0.10;
 
       if (!video.seeking) {
         video.currentTime = smoothTimeRef.current;
       }
-
-      // Smooth story stop sync matching the video's camera position
-      const duration = video.duration;
-      if (duration > 0) {
-        const smoothedProgress = smoothTimeRef.current / duration;
-        const nextStopIndex = getActiveHeroStop(smoothedProgress, activeStopIndexRef.current);
-        if (activeStopIndexRef.current !== nextStopIndex) {
-          activeStopIndexRef.current = nextStopIndex;
-          setActiveStopIndex(nextStopIndex);
-        }
-      }
-
       scrubRafRef.current = window.requestAnimationFrame(stepSmoothScrub);
     } else {
       smoothTimeRef.current = target;
-      if (!video.seeking && Math.abs(video.currentTime - target) > 0.015) {
+      if (!video.seeking && Math.abs(video.currentTime - target) > 0.02) {
         video.currentTime = target;
       }
-
-      const duration = video.duration;
-      if (duration > 0) {
-        const smoothedProgress = target / duration;
-        const nextStopIndex = getActiveHeroStop(smoothedProgress, activeStopIndexRef.current);
-        if (activeStopIndexRef.current !== nextStopIndex) {
-          activeStopIndexRef.current = nextStopIndex;
-          setActiveStopIndex(nextStopIndex);
-        }
-      }
-
       scrubRafRef.current = null;
     }
   }, []);
@@ -237,6 +214,13 @@ export default function HeroSection() {
     const scrollableDistance = Math.max(section.offsetHeight - window.innerHeight, 1);
     const scrollProgress = Math.min(Math.max(-rect.top / scrollableDistance, 0), 1);
 
+    // Story stop detection — runs once per scroll tick, not inside LERP loop
+    const nextStopIndex = getActiveHeroStop(scrollProgress, activeStopIndexRef.current);
+    if (activeStopIndexRef.current !== nextStopIndex) {
+      activeStopIndexRef.current = nextStopIndex;
+      setActiveStopIndex(nextStopIndex);
+    }
+
     if (progressBarRef.current) {
       progressBarRef.current.style.transform = `scaleX(${scrollProgress})`;
     }
@@ -247,11 +231,6 @@ export default function HeroSection() {
 
     const video = videoRef.current;
     if (!video || !mediaVariant || video.readyState < HTMLMediaElement.HAVE_METADATA) {
-      const nextStopIndex = getActiveHeroStop(scrollProgress, activeStopIndexRef.current);
-      if (activeStopIndexRef.current !== nextStopIndex) {
-        activeStopIndexRef.current = nextStopIndex;
-        setActiveStopIndex(nextStopIndex);
-      }
       return;
     }
 
@@ -312,7 +291,7 @@ export default function HeroSection() {
       ref={sectionRef}
       id="mar-story"
       aria-label="جولة مار العقارية"
-      className={`relative w-full bg-[#060D1A] ${shouldReduceMotion ? 'h-[100svh]' : 'h-[1250svh] md:h-[1200vh] lg:h-[1100vh]'
+      className={`relative w-full bg-[#060D1A] ${shouldReduceMotion ? 'h-[100svh]' : 'h-[900svh] md:h-[850vh] lg:h-[800vh]'
         }`}
     >
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#060D1A]">
