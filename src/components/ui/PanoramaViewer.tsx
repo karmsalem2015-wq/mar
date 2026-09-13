@@ -68,13 +68,27 @@ export default function PanoramaViewer({
       canvas.height = rect.height;
     }
 
-    // Resize listener
-    window.addEventListener('resize', resizeCanvas);
-
+    let isVisible = true;
     let animationFrameId: number;
 
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (!wasVisible && isVisible) {
+          animationFrameId = requestAnimationFrame(render);
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
     function render(timestamp: number) {
-      if (!canvas || !ctx || !img) return;
+      if (!canvas || !ctx || !img || !isVisible) return;
 
       const state = stateRef.current;
       const { imageWidth, imageHeight } = state;
@@ -149,6 +163,7 @@ export default function PanoramaViewer({
     }
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', resizeCanvas);
       cancelAnimationFrame(animationFrameId);
     };
