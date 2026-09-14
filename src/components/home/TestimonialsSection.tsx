@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Star, Quote, ChevronRight, ChevronLeft } from 'lucide-react';
+import AvatarSvg from '@/components/common/AvatarSvg';
 
 const TESTIMONIALS = [
   {
@@ -10,39 +11,47 @@ const TESTIMONIALS = [
     quote: "تجربة ممتازة في التملك مع شركة مار العقارية. الشقة واسعة والتشطيبات الترا سوبر لوكس والموقف الخاص مريح جداً.",
     author: "أبو محمد",
     project: "جدة، حي السلامة - مشروع أمل ستارز",
-    initials: "أ م",
+    gender: "male",
     rating: 5
   },
   {
     id: 2,
-    quote: "برنامج إتمام التمويلي سهل علي الكثير من العقبات في حساب القسط وحساب الدفعة الأولى، التوثيق كان سريع جداً.",
-    author: "سالم العتيبي",
-    project: "الرياض، حي الملقا - مستثمر",
-    initials: "س ع",
+    quote: "التعامل مع مار العقارية كان من أرقى التجارب. استلمت شقتي في الرياض بتشطيبات وتفاصيل تفوق التوقعات وخدمة ما بعد البيع متميزة جداً.",
+    author: "نوف الشمري",
+    project: "الرياض، حي الياسمين - مالكة شقة فاخرة",
+    gender: "female",
     rating: 5
   },
   {
     id: 3,
-    quote: "فيلا مخطط السعيد رائعة ومطابقة تماماً للمواصفات المعروضة في الموقع. التعامل راقي والضمانات شاملة.",
-    author: "خالد الحربي",
-    project: "جدة، مخطط السعيد - مالك فيلا",
-    initials: "خ خ",
+    quote: "برنامج إتمام التمويلي سهل علي الكثير من العقبات في حساب القسط وحساب الدفعة الأولى، التوثيق كان سريع جداً.",
+    author: "سالم العتيبي",
+    project: "الرياض، حي الملقا - مستثمر",
+    gender: "male",
     rating: 5
   },
   {
     id: 4,
-    quote: "دقة في المواعيد وجودة في التنفيذ تفوق التوقعات. سكنت في شقتنا الجديدة منذ 6 أشهر وكل شيء ممتاز والخدمات متكاملة.",
-    author: "عبد الرحمن السديس",
-    project: "مكة المكرمة، حي النسيم - مالك شقة",
-    initials: "ع س",
+    quote: "أقدر جداً الشفافية والاحترافية العالية. كمستثمرة، ساعدني فريق مار في اختيار أفضل الفرص العقارية ذات العائد الاستثماري المرتفع.",
+    author: "د. سارة الغامدي",
+    project: "جدة، حي الشاطئ - مستثمرة عقارية",
+    gender: "female",
     rating: 5
   },
   {
     id: 5,
+    quote: "فيلا مخطط السعيد رائعة ومطابقة تماماً للمواصفات المعروضة في الموقع. التعامل راقي والضمانات شاملة.",
+    author: "خالد الحربي",
+    project: "جدة، مخطط السعيد - مالك فيلا",
+    gender: "male",
+    rating: 5
+  },
+  {
+    id: 6,
     quote: "كمطور عقاري أقدر التفاصيل الهندسية الممتازة التي تنفذها شركة مار العقارية. تشطيبات راقية واستغلال ذكي للمساحات.",
     author: "م. سلطان المقاطي",
     project: "جدة، حي النعيم - مستثمر عقاري",
-    initials: "س م",
+    gender: "male",
     rating: 5
   }
 ];
@@ -212,8 +221,11 @@ export default function TestimonialsSection() {
                 {/* 1. Author Avatar & Name (Top) */}
                 <div className="flex flex-col items-center gap-2.5 mb-4">
                   <div className="relative">
-                    <div className="relative w-15 h-15 rounded-full bg-[#111315] border-2 border-[#CAA048]/50 flex items-center justify-center font-bold text-[#DFC07A] text-base shadow-md font-cairo">
-                      {TESTIMONIALS[currentTestimonialIndex].initials}
+                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-b from-[#1c1d22] to-[#0d0e11] border-2 border-[#CAA048]/60 flex items-center justify-center shadow-md shadow-black/20 overflow-hidden">
+                      <AvatarSvg
+                        gender={TESTIMONIALS[currentTestimonialIndex].gender as 'male' | 'female'}
+                        className="w-10 h-10"
+                      />
                     </div>
                   </div>
                   <div>
@@ -243,19 +255,21 @@ export default function TestimonialsSection() {
 
           {/* Navigation Arrows */}
           <div className="flex justify-center md:block mt-8 md:mt-0">
+            {/* زر اليمين (RTL start) بسهم لليمين */}
             <button
               type="button"
               onClick={handlePrev}
-              className="md:absolute md:top-1/2 md:-end-6 md:-translate-y-1/2 mx-2 md:mx-0 w-12 h-12 rounded-full bg-white border border-gray-200 hover:border-[#CAA048] text-gray-700 hover:text-[#CAA048] hover:bg-[#111315] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer z-10 min-w-[44px] min-h-[44px]"
+              className="md:absolute md:top-1/2 md:-start-6 md:-translate-y-1/2 mx-2 md:mx-0 w-12 h-12 rounded-full bg-white border border-gray-200 hover:border-[#CAA048] text-gray-700 hover:text-[#CAA048] hover:bg-[#111315] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer z-10 min-w-[44px] min-h-[44px]"
               aria-label="التقييم السابق"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
 
+            {/* زر اليسار (RTL end) بسهم لليسار */}
             <button
               type="button"
               onClick={handleNext}
-              className="md:absolute md:top-1/2 md:-start-6 md:-translate-y-1/2 mx-2 md:mx-0 w-12 h-12 rounded-full bg-white border border-gray-200 hover:border-[#CAA048] text-gray-700 hover:text-[#CAA048] hover:bg-[#111315] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer z-10 min-w-[44px] min-h-[44px]"
+              className="md:absolute md:top-1/2 md:-end-6 md:-translate-y-1/2 mx-2 md:mx-0 w-12 h-12 rounded-full bg-white border border-gray-200 hover:border-[#CAA048] text-gray-700 hover:text-[#CAA048] hover:bg-[#111315] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer z-10 min-w-[44px] min-h-[44px]"
               aria-label="التقييم التالي"
             >
               <ChevronLeft className="w-5 h-5" />
