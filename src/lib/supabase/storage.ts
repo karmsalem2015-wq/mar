@@ -2,6 +2,12 @@
 // Helper functions for Supabase Storage operations
 
 import { getSupabaseBrowserClient } from './client';
+import {
+  serverUploadFile,
+  serverDeleteFile,
+  serverDeleteFiles,
+  serverListFiles,
+} from '../../app/actions/storage';
 
 const BUCKETS = {
   properties: 'properties',
@@ -14,7 +20,7 @@ const BUCKETS = {
 type BucketName = typeof BUCKETS[keyof typeof BUCKETS];
 
 /**
- * Upload a file to Supabase Storage
+ * Upload a file to Supabase Storage via Server Action (bypasses RLS)
  * @returns The public URL of the uploaded file, or null on error
  */
 export async function uploadFile(
@@ -23,29 +29,19 @@ export async function uploadFile(
   file: File,
   options?: { upsert?: boolean; contentType?: string }
 ): Promise<{ url: string; path: string } | null> {
-  const supabase = getSupabaseBrowserClient();
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('bucket', bucket);
+    formData.append('path', path);
+    if (options?.contentType) formData.append('contentType', options.contentType);
+    if (options?.upsert !== undefined) formData.append('upsert', String(options.upsert));
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(path, file, {
-      cacheControl: '3600',
-      upsert: options?.upsert ?? false,
-      contentType: options?.contentType,
-    });
-
-  if (error) {
-    console.error('Storage upload error:', error.message);
+    return await serverUploadFile(formData);
+  } catch (err: any) {
+    console.error('Storage upload error:', err);
     return null;
   }
-
-  const { data: urlData } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(data.path);
-
-  return {
-    url: urlData.publicUrl,
-    path: data.path,
-  };
 }
 
 /**
@@ -75,18 +71,12 @@ export async function deleteFile(
   bucket: BucketName,
   path: string
 ): Promise<boolean> {
-  const supabase = getSupabaseBrowserClient();
-
-  const { error } = await supabase.storage
-    .from(bucket)
-    .remove([path]);
-
-  if (error) {
-    console.error('Storage delete error:', error.message);
+  try {
+    return await serverDeleteFile(bucket, path);
+  } catch (err: any) {
+    console.error('Storage delete error:', err);
     return false;
   }
-
-  return true;
 }
 
 /**
@@ -96,18 +86,12 @@ export async function deleteFiles(
   bucket: BucketName,
   paths: string[]
 ): Promise<boolean> {
-  const supabase = getSupabaseBrowserClient();
-
-  const { error } = await supabase.storage
-    .from(bucket)
-    .remove(paths);
-
-  if (error) {
-    console.error('Storage batch delete error:', error.message);
+  try {
+    return await serverDeleteFiles(bucket, paths);
+  } catch (err: any) {
+    console.error('Storage batch delete error:', err);
     return false;
   }
-
-  return true;
 }
 
 /**
@@ -117,25 +101,12 @@ export async function listFiles(
   bucket: BucketName,
   folder: string = ''
 ) {
-  const supabase = getSupabaseBrowserClient();
-
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .list(folder, {
-      limit: 100,
-      sortBy: { column: 'created_at', order: 'desc' },
-    });
-
-  if (error) {
-    console.error('Storage list error:', error.message);
+  try {
+    return await serverListFiles(bucket, folder);
+  } catch (err: any) {
+    console.error('Storage list error:', err);
     return [];
   }
-
-  return data.map((file) => ({
-    ...file,
-    url: supabase.storage.from(bucket).getPublicUrl(`${folder}/${file.name}`).data.publicUrl,
-    fullPath: folder ? `${folder}/${file.name}` : file.name,
-  }));
 }
 
 /**
