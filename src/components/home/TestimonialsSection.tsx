@@ -209,31 +209,34 @@ export default function TestimonialsSection() {
                 exit="exit"
                 className="flex flex-col items-center justify-center flex-1"
               >
-                <div className="flex gap-1 text-[#CAA048] mb-6">
+                {/* 1. Author Avatar & Name (Top) */}
+                <div className="flex flex-col items-center gap-2.5 mb-4">
+                  <div className="relative">
+                    <div className="relative w-15 h-15 rounded-full bg-[#111315] border-2 border-[#CAA048]/50 flex items-center justify-center font-bold text-[#DFC07A] text-base shadow-md font-cairo">
+                      {TESTIMONIALS[currentTestimonialIndex].initials}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-brand-black font-heading">
+                      {TESTIMONIALS[currentTestimonialIndex].author}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5 font-cairo">
+                      {TESTIMONIALS[currentTestimonialIndex].project}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. Rating Stars (Middle) */}
+                <div className="flex gap-1.5 text-[#CAA048] mb-5">
                   {[...Array(TESTIMONIALS[currentTestimonialIndex].rating)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 fill-current" />
                   ))}
                 </div>
 
-                <p className="text-base sm:text-lg md:text-xl text-brand-black leading-relaxed font-bold mb-8 max-w-2xl px-2 font-cairo">
-                  "{TESTIMONIALS[currentTestimonialIndex].quote}"
+                {/* 3. Quote Text (Bottom) */}
+                <p className="text-base sm:text-lg md:text-xl text-brand-black leading-relaxed font-bold max-w-2xl px-2 font-cairo">
+                  &ldquo;{TESTIMONIALS[currentTestimonialIndex].quote}&rdquo;
                 </p>
-
-                <div className="flex flex-col items-center gap-4 mt-2">
-                  <div className="relative">
-                    <div className="relative w-14 h-14 rounded-full bg-[#111315] border border-[#CAA048]/40 flex items-center justify-center font-bold text-[#DFC07A] text-sm shadow-sm font-cairo">
-                      {TESTIMONIALS[currentTestimonialIndex].initials}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-bold text-brand-black font-heading">
-                      {TESTIMONIALS[currentTestimonialIndex].author}
-                    </h3>
-                    <p className="text-xs text-gray-500 font-medium mt-0.5 font-cairo">
-                      {TESTIMONIALS[currentTestimonialIndex].project}
-                    </p>
-                  </div>
-                </div>
               </motion.div>
             </AnimatePresence>
           </motion.div>
