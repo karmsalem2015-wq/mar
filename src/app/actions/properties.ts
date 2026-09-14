@@ -428,7 +428,14 @@ function getUuidFromMockId(id: string): string {
     return `00000000-0000-4000-8000-${pad}`;
   }
 
-  return '00000000-0000-4000-8000-000000000000';
+  // Fallback deterministic pseudo-UUID based on string char codes
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i);
+    hash |= 0;
+  }
+  const hex = Math.abs(hash).toString(16).padStart(12, '0');
+  return `00000000-0000-4000-8000-${hex}`;
 }
 
 // Seed Database with mock data from lib/mockData.ts

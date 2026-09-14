@@ -49,6 +49,7 @@ next-env.d.ts
 # Agent & temporary files
 .antigravity
 .gemini
+scratch/
 
 # Root video exports
 /*.mp4
