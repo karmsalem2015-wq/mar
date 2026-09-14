@@ -23,12 +23,12 @@ export default function RequestPropertyBanner({ onOpenInquiry }: RequestProperty
 
   return (
     <section className="relative w-full md:h-[70vh] min-h-[580px] overflow-hidden py-20 md:py-0 bg-white flex items-center">
-      {/* Rich Architectural Deep Royal Navy Skewed Banner (Not pitch black, rich & vibrant) */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628] via-[#12253E] to-[#081220] -skew-y-2 origin-top-right z-0 border-y border-[#CAA048]/35 shadow-[0_25px_60px_rgba(10,22,40,0.45)]" />
+      {/* Sleek Architectural Deep Black Skewed Banner (matching post-scroll header) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#121212] to-[#050505] -skew-y-2 origin-top-right z-0 border-y border-[#CAA048]/30 shadow-[0_25px_60px_rgba(0,0,0,0.65)]" />
       
-      {/* Warm Ambient Gold Radial Glows for high visual depth */}
-      <div className="absolute top-1/2 end-1/4 w-[550px] h-[450px] bg-[#CAA048]/16 rounded-full blur-[110px] -translate-y-1/2 pointer-events-none z-0" />
-      <div className="absolute bottom-0 start-12 w-[320px] h-[320px] bg-[#309EED]/10 rounded-full blur-[90px] pointer-events-none z-0" />
+      {/* Warm Ambient Gold Radial Glows for high visual depth (no navy or blue) */}
+      <div className="absolute top-1/2 end-1/4 w-[550px] h-[450px] bg-[#E6A821]/12 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none z-0" />
+      <div className="absolute bottom-0 start-12 w-[320px] h-[320px] bg-[#CAA048]/10 rounded-full blur-[100px] pointer-events-none z-0" />
 
       <div className="relative w-full max-w-6xl mx-auto px-6 sm:px-8 z-10 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 lg:gap-16">
 
