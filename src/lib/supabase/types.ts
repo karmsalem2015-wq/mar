@@ -1,11 +1,30 @@
 // src/lib/supabase/types.ts
 // TypeScript types for the Supabase database schema
 
-export type PropertyType = 'apartment' | 'villa' | 'annex' | 'penthouse' | 'duplex';
-export type PropertyStatus = 'available' | 'reserved' | 'sold' | 'coming_soon';
-export type ProjectStatus = 'under_construction' | 'completed' | 'upcoming';
+export type PropertyType = 'apartment' | 'villa' | 'annex' | 'penthouse' | 'duplex' | 'roof' | 'mixed';
+export type PropertyStatus = 'unknown' | 'available' | 'reserved' | 'sold' | 'coming_soon';
+export type ProjectStatus = 'unknown' | 'under_construction' | 'completed' | 'upcoming';
+export type DriverRoomStatus = 'unknown' | 'yes' | 'no' | 'shared';
 export type SubmissionType = 'contact' | 'inquiry' | 'property_inquiry';
 export type SubmissionStatus = 'new' | 'reviewed' | 'closed';
+
+export interface DbPropertyImage {
+  id: string;
+  property_id: string;
+  storage_path: string;
+  public_url: string;
+  original_drive_file_id?: string | null;
+  original_name?: string;
+  original_mime_type?: string;
+  original_size_bytes?: number | null;
+  optimized_size_bytes?: number | null;
+  file_hash?: string | null;
+  width?: number | null;
+  height?: number | null;
+  is_cover: boolean;
+  sort_order: number;
+  created_at: string;
+}
 
 export interface DbProperty {
   id: string;
@@ -43,6 +62,27 @@ export interface DbProperty {
   featured: boolean;
   published: boolean;
   published_at: string | null;
+  // MAR Specific Fields
+  source_row?: number | null;
+  ad_barcode?: string | null;
+  license_number?: string | null;
+  source_project_name?: string | null;
+  source_category?: string | null;
+  source_price_text?: string | null;
+  source_area_text?: string | null;
+  source_sale_status?: string | null;
+  entrances?: number;
+  furnished?: boolean | null;
+  maid_room?: boolean | null;
+  driver_room_status?: DriverRoomStatus;
+  property_condition?: string;
+  private_parking?: boolean | null;
+  independent_tank?: boolean | null;
+  profile_url?: string | null;
+  three_d_url?: string | null;
+  map_url?: string | null;
+  source_files_url?: string | null;
+  source_drive_folder_id?: string | null;
   created_at: string;
   updated_at: string;
 }
