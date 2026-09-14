@@ -8,7 +8,7 @@ export const BRAND = {
     'خبرة ممتدة في البناء والتشييد، تجمع المعرفة الهندسية بالتنفيذ المتقن لصناعة عقارات جديرة بالثقة.',
   logo: '/heder-logo.png',
   headerLogo: '/heder-logo.png',
-  footerLogo: '/mar-logo-gold.png',
+  footerLogo: '/mar-logo-gold-tight.png',
   logoDark: '/heder-logo.png',
   logoWhite: '/heder-logo.png',
   logoBlue: '/heder-logo.png',

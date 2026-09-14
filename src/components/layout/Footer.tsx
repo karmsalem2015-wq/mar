@@ -121,52 +121,84 @@ export default function Footer({ settings }: FooterProps) {
 
   return (
     <footer
-      className="relative overflow-hidden bg-[#050B14] text-white border-t border-[#CAA048]/30"
+      className="relative overflow-hidden bg-[#0D0F12] text-white border-t border-white/10"
       dir="rtl"
     >
-      {/* Deep Solid Base with Architectural Lighting Gradients (No washed-out transparency) */}
-      <div 
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#081220] via-[#050A14] to-[#020408]" 
-        aria-hidden="true" 
-      />
-      <div 
-        className="pointer-events-none absolute -top-28 left-1/2 -translate-x-1/2 w-[1000px] h-[260px] bg-gradient-to-b from-[#CAA048]/12 via-[#0073B6]/6 to-transparent blur-3xl opacity-80" 
-        aria-hidden="true" 
+      {/* Dark Dashboard Charcoal & Obsidian Gradient (Zero Blue/Navy) */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#14161A] via-[#0E1013] to-[#07080A]"
+        aria-hidden="true"
       />
 
-      {/* Decorative Gold Crown Divider */}
-      <div className="relative w-full h-[1px] bg-gradient-to-r from-transparent via-[#CAA048]/60 to-transparent z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rotate-45 border border-[#CAA048] bg-[#050A14]" />
-      </div>
+      {/* Subtle Warm Luxury Gold Ambient Glow at Top */}
+      <div
+        className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[200px] bg-gradient-to-b from-[#E6A821]/8 via-[#CB841B]/2 to-transparent blur-3xl opacity-60"
+        aria-hidden="true"
+      />
+
+      {/* Clean, Simple Top Separator Line (Flat and elegant - no star or rotated box) */}
+      <div className="relative w-full h-px bg-gradient-to-r from-transparent via-[#E6A821]/30 to-transparent z-10" />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12">
-        {/* Main Architectural 4-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-10 pb-14 border-b border-white/[0.08]">
-          {/* Column 1: Brand & Identity (lg:col-span-5) */}
-          <div className="md:col-span-2 lg:col-span-5 flex flex-col justify-between">
-            <div className="flex flex-row items-center gap-2.5 sm:gap-3">
-              {/* Logo on the right (first in RTL) */}
-              <div className="shrink-0 flex items-center">
-                <BrandMark size="lg" variant="footer" />
-              </div>
-
-              {/* Texts alongside the logo (row not column) */}
-              <div className="flex flex-col justify-center min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#CAA048] shrink-0" aria-hidden="true" />
-                  <p className="text-xs sm:text-sm font-bold tracking-wide text-[#DFC07A] font-almarai">
-                    {BRAND.descriptorAr} • {BRAND.promiseAr}
+        {/* Main Architectural 4-Column Layout (Balanced & Evenly Distributed via Flexbox) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:flex-row lg:justify-between lg:items-start gap-10 lg:gap-0 pb-14 border-b border-white/[0.08]">
+          {/* Column 1: Brand, Accreditation & Social Media */}
+          <div className="w-full md:col-span-2 lg:w-[325px] xl:w-[350px] shrink-0 flex flex-col justify-between space-y-6">
+            <div>
+              {/* Logo & Descriptor / Story Text */}
+              <div className="flex flex-row items-center gap-2.5">
+                <div className="shrink-0 flex items-center">
+                  <BrandMark size="lg" variant="footer" />
+                </div>
+                <div className="flex flex-col justify-center min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#E6A821] shrink-0" aria-hidden="true" />
+                    <p className="text-xs sm:text-[13px] font-bold tracking-wide text-[#E6A821] font-almarai whitespace-nowrap">
+                      {BRAND.descriptorAr} • {BRAND.promiseAr}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-xs sm:text-[13px] leading-5 text-white/75 font-cairo line-clamp-2">
+                    {BRAND.storyAr}
                   </p>
                 </div>
-                <p className="mt-1 text-xs sm:text-sm leading-5 sm:leading-6 text-white/70 font-cairo">
-                  {BRAND.storyAr}
-                </p>
+              </div>
+
+              {/* REGA & FAL Accreditation Badges (Positioned under Logo & Text) */}
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 sm:p-4 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E6A821] font-cairo">
+                    <ShieldCheck className="size-4 text-[#E6A821]" aria-hidden="true" />
+                    <span>معتمد ومرخص رسمياً</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-white/45">الهيئة العامة للعقار</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative h-11 rounded-xl bg-white px-3 py-1 shadow-sm flex items-center justify-center transition-transform hover:scale-[1.02]">
+                    <Image
+                      src="/rega_logo.webp"
+                      alt="الهيئة العامة للعقار - REGA"
+                      fill
+                      sizes="140px"
+                      className="object-contain p-1"
+                    />
+                  </div>
+                  <div className="relative h-11 rounded-xl bg-white px-3 py-1 shadow-sm flex items-center justify-center transition-transform hover:scale-[1.02]">
+                    <Image
+                      src="/fal.webp"
+                      alt="رخصة فال العقارية - FAL"
+                      fill
+                      sizes="140px"
+                      className="object-contain p-1"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Social Capsules */}
-            <div className="mt-7 pt-4">
-              <span className="block text-xs font-semibold text-white/50 font-cairo mb-3">
+            {/* Official Social Media Pill Buttons (Positioned under the Accreditation Block) */}
+            <div className="pt-2">
+              <span className="block text-xs font-semibold text-white/60 font-cairo mb-3">
                 تابع مار العقارية على المنصات الرسمية
               </span>
               <div className="flex flex-wrap items-center gap-2.5">
@@ -178,7 +210,7 @@ export default function Footer({ settings }: FooterProps) {
                     rel="noopener noreferrer"
                     aria-label={label}
                     title={label}
-                    className="flex size-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.05] text-white/80 transition-all duration-300 hover:border-[#CAA048] hover:bg-[#CAA048]/20 hover:text-[#DFC07A] hover:-translate-y-0.5 shadow-sm"
+                    className="flex size-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.05] text-white/80 transition-all duration-200 hover:border-[#E6A821] hover:bg-[#E6A821]/15 hover:text-[#E6A821] hover:-translate-y-0.5 shadow-sm"
                   >
                     {icon}
                   </a>
@@ -187,71 +219,71 @@ export default function Footer({ settings }: FooterProps) {
             </div>
           </div>
 
-          {/* Column 2: Portfolio Links (lg:col-span-2) */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-base font-bold text-white font-heading tracking-wide">
+          {/* Column 2: Portfolio Links */}
+          <div className="w-full md:col-span-1 lg:w-auto shrink-0">
+            <h4 className="text-sm sm:text-base font-bold text-white font-heading tracking-wide">
               المحفظة العقارية
             </h4>
             <span
-              className="mt-2.5 block h-[2px] w-8 bg-gradient-to-r from-[#CAA048] to-[#DFC07A] rounded-full"
+              className="mt-2.5 block h-[2px] w-8 bg-gradient-to-r from-[#E6A821] to-[#CB841B] rounded-full"
               aria-hidden="true"
             />
-            <nav className="mt-6 flex flex-col items-start gap-3.5" aria-label="روابط المحفظة العقارية">
+            <nav className="mt-6 flex flex-col items-start gap-3" aria-label="روابط المحفظة العقارية">
               {PORTFOLIO_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="group inline-flex items-center gap-2 text-sm text-white/70 transition-colors hover:text-[#DFC07A] font-cairo"
+                  className="group inline-flex items-center gap-2 text-xs sm:text-[13px] text-white/75 transition-colors hover:text-[#E6A821] font-cairo whitespace-nowrap"
                 >
-                  <span className="h-1 w-1 rounded-full bg-[#CAA048]/50 transition-all group-hover:w-2 group-hover:bg-[#CAA048]" />
+                  <span className="h-1 w-1 rounded-full bg-[#E6A821]/60 transition-all group-hover:w-2 group-hover:bg-[#E6A821] shrink-0" />
                   <span>{link.label}</span>
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Column 3: Company & Ecosystem (lg:col-span-2) */}
-          <div className="md:col-span-1 lg:col-span-2">
-            <h4 className="text-base font-bold text-white font-heading tracking-wide">
+          {/* Column 3: Company & Ecosystem */}
+          <div className="w-full md:col-span-1 lg:w-auto shrink-0">
+            <h4 className="text-sm sm:text-base font-bold text-white font-heading tracking-wide">
               عن مار وخدماتنا
             </h4>
             <span
-              className="mt-2.5 block h-[2px] w-8 bg-gradient-to-r from-[#CAA048] to-[#DFC07A] rounded-full"
+              className="mt-2.5 block h-[2px] w-8 bg-gradient-to-r from-[#E6A821] to-[#CB841B] rounded-full"
               aria-hidden="true"
             />
-            <nav className="mt-6 flex flex-col items-start gap-3.5" aria-label="روابط الشركة والخدمات">
+            <nav className="mt-6 flex flex-col items-start gap-3" aria-label="روابط الشركة والخدمات">
               {COMPANY_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="group inline-flex items-center gap-2 text-sm text-white/70 transition-colors hover:text-[#DFC07A] font-cairo"
+                  className="group inline-flex items-center gap-2 text-xs sm:text-[13px] text-white/75 transition-colors hover:text-[#E6A821] font-cairo whitespace-nowrap"
                 >
-                  <span className="h-1 w-1 rounded-full bg-[#CAA048]/50 transition-all group-hover:w-2 group-hover:bg-[#CAA048]" />
+                  <span className="h-1 w-1 rounded-full bg-[#E6A821]/60 transition-all group-hover:w-2 group-hover:bg-[#E6A821] shrink-0" />
                   <span>{link.label}</span>
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Column 4: Headquarters & Contact (lg:col-span-3) */}
-          <div className="md:col-span-2 lg:col-span-3">
-            <h4 className="text-base font-bold text-white font-heading tracking-wide">
+          {/* Column 4: Headquarters & Contact */}
+          <div className="w-full md:col-span-2 lg:w-[260px] xl:w-[285px] shrink-0">
+            <h4 className="text-sm sm:text-base font-bold text-white font-heading tracking-wide">
               المقر الرئيسي والتواصل
             </h4>
             <span
-              className="mt-2.5 block h-[2px] w-8 bg-gradient-to-r from-[#CAA048] to-[#DFC07A] rounded-full"
+              className="mt-2.5 block h-[2px] w-8 bg-gradient-to-r from-[#E6A821] to-[#CB841B] rounded-full"
               aria-hidden="true"
             />
 
             <div className="mt-6 space-y-4 font-cairo">
               {/* Location */}
               <div className="flex items-start gap-3.5">
-                <div className="size-8.5 rounded-xl bg-[#CAA048]/10 border border-[#CAA048]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#DFC07A]">
+                <div className="size-8.5 rounded-xl bg-[#E6A821]/10 border border-[#E6A821]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#E6A821]">
                   <MapPin className="size-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <span className="block text-[11px] font-medium text-white/45">المقر الرئيسي</span>
-                  <span className="text-sm font-medium text-white/90">
+                  <span className="block text-[11px] font-medium text-white/50">المقر الرئيسي</span>
+                  <span className="text-xs sm:text-sm font-medium text-white/90">
                     {contact?.address || BRAND.contact.cityAr}
                   </span>
                 </div>
@@ -259,15 +291,15 @@ export default function Footer({ settings }: FooterProps) {
 
               {/* Direct Phone Lines */}
               <div className="flex items-start gap-3.5">
-                <div className="size-8.5 rounded-xl bg-[#CAA048]/10 border border-[#CAA048]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#DFC07A]">
+                <div className="size-8.5 rounded-xl bg-[#E6A821]/10 border border-[#E6A821]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#E6A821]">
                   <Phone className="size-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <span className="block text-[11px] font-medium text-white/45">خدمة العملاء والمبيعات</span>
-                  <div className="flex flex-wrap items-center gap-2 text-sm font-mono text-white/90" dir="ltr">
+                  <span className="block text-[11px] font-medium text-white/50">خدمة العملاء والمبيعات</span>
+                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono text-white/90" dir="ltr">
                     <a
                       href={`tel:${(contact?.unifiedNumber || BRAND.contact.primaryPhone.display).replace(/[^0-9+]/g, '')}`}
-                      className="transition-colors hover:text-[#DFC07A]"
+                      className="transition-colors hover:text-[#E6A821]"
                     >
                       {contact?.unifiedNumber || BRAND.contact.primaryPhone.display}
                     </a>
@@ -276,7 +308,7 @@ export default function Footer({ settings }: FooterProps) {
                         <span className="text-white/30">|</span>
                         <a
                           href={`tel:${(contact?.mobileNumber || BRAND.contact.secondaryPhone.display).replace(/[^0-9+]/g, '')}`}
-                          className="transition-colors hover:text-[#DFC07A]"
+                          className="transition-colors hover:text-[#E6A821]"
                         >
                           {contact?.mobileNumber || BRAND.contact.secondaryPhone.display}
                         </a>
@@ -291,13 +323,13 @@ export default function Footer({ settings }: FooterProps) {
                 href={`mailto:${contact?.companyEmail || BRAND.contact.email}`}
                 className="flex items-start gap-3.5 group"
               >
-                <div className="size-8.5 rounded-xl bg-[#CAA048]/10 border border-[#CAA048]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#DFC07A] group-hover:border-[#CAA048] transition-colors">
+                <div className="size-8.5 rounded-xl bg-[#E6A821]/10 border border-[#E6A821]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#E6A821] group-hover:border-[#E6A821] transition-colors">
                   <Mail className="size-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <span className="block text-[11px] font-medium text-white/45">البريد الإلكتروني الرسمي</span>
+                  <span className="block text-[11px] font-medium text-white/50">البريد الإلكتروني الرسمي</span>
                   <span
-                    className="text-sm font-medium text-white/90 font-mono group-hover:text-[#DFC07A] transition-colors"
+                    className="text-xs sm:text-sm font-medium text-white/90 font-mono group-hover:text-[#E6A821] transition-colors"
                     dir="ltr"
                   >
                     {contact?.companyEmail || BRAND.contact.email}
@@ -307,11 +339,11 @@ export default function Footer({ settings }: FooterProps) {
 
               {/* Working Hours */}
               <div className="flex items-start gap-3.5">
-                <div className="size-8.5 rounded-xl bg-[#CAA048]/10 border border-[#CAA048]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#DFC07A]">
+                <div className="size-8.5 rounded-xl bg-[#E6A821]/10 border border-[#E6A821]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#E6A821]">
                   <Clock className="size-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <span className="block text-[11px] font-medium text-white/45">ساعات استقبال العملاء</span>
+                  <span className="block text-[11px] font-medium text-white/50">ساعات استقبال العملاء</span>
                   <span className="text-xs text-white/80">السبت - الخميس: 9:00 ص - 9:00 م</span>
                 </div>
               </div>
@@ -319,82 +351,57 @@ export default function Footer({ settings }: FooterProps) {
           </div>
         </div>
 
-        {/* Accreditation & Government Licensing Strip (شريط الامتثال والتراخيص الرسمية) */}
-        <div className="mt-10 rounded-2xl border border-white/12 bg-white/[0.04] p-5 sm:p-7 shadow-inner">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            {/* Government Authority Logos */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <div className="relative h-12 w-28 rounded-xl bg-white px-2.5 py-1 border border-white/20 shadow-md flex items-center justify-center transition-transform hover:scale-[1.03]">
-                <Image
-                  src="/rega_logo.webp"
-                  alt="الهيئة العامة للعقار - REGA"
-                  fill
-                  sizes="112px"
-                  className="object-contain p-1.5"
-                />
-              </div>
-              <div className="relative h-12 w-24 rounded-xl bg-white px-2.5 py-1 border border-white/20 shadow-md flex items-center justify-center transition-transform hover:scale-[1.03]">
-                <Image
-                  src="/fal.webp"
-                  alt="رخصة فال العقارية - FAL"
-                  fill
-                  sizes="96px"
-                  className="object-contain p-1.5"
-                />
-              </div>
-
-              {/* Official Status Chip */}
-              <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#CAA048]/12 border border-[#CAA048]/30 text-[#DFC07A] text-xs font-bold font-cairo">
-                <ShieldCheck className="size-4" aria-hidden="true" />
-                <span>معتمد ومرخص رسمياً</span>
-              </div>
+        {/* Licensing & Compliance Box (Centered & Distinct with Enhanced Background & Visibility) */}
+        <div className="mt-10 rounded-2xl border border-white/12 bg-white/[0.04] backdrop-blur-md p-5 sm:p-6 shadow-lg">
+          <div className="max-w-3xl mx-auto text-center space-y-2.5 font-cairo">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-white/90">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-white/60">رخصة فال للوساطة والتسويق:</span>{' '}
+                <strong className="font-mono text-[#E6A821] font-bold text-sm sm:text-base tracking-wider">
+                  1200000000
+                </strong>
+              </span>
+              <span className="hidden sm:inline text-white/30">•</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-white/60">ترخيص الإعلان العقاري:</span>{' '}
+                <strong className="font-mono text-[#E6A821] font-bold text-sm sm:text-base tracking-wider">
+                  7200018942
+                </strong>
+              </span>
             </div>
-
-            {/* License Numbers & Wafi/Code Compliance */}
-            <div className="text-center lg:text-start space-y-1 text-xs text-white/65 font-cairo">
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1">
-                <span>
-                  رخصة فال للوساطة والتسويق:{' '}
-                  <strong className="font-mono text-white font-bold text-[13px]">1200000000</strong>
-                </span>
-                <span className="hidden sm:inline text-white/20">•</span>
-                <span>
-                  ترخيص الإعلان العقاري:{' '}
-                  <strong className="font-mono text-white font-bold text-[13px]">7200018942</strong>
-                </span>
-              </div>
-              <p className="text-[11px] text-white/50">
-                ملتزمون بكافة اشتراطات الكود السعودي للبناء، وتصاميم هندسية معتمدة وفق أعلى معايير الجودة والاستدامة.
-              </p>
-            </div>
+            <p className="text-xs sm:text-[13px] text-white/65 leading-relaxed">
+              ملتزمون بكافة اشتراطات الكود السعودي للبناء، وتصاميم هندسية معتمدة وفق أعلى معايير الجودة والاستدامة.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Deep Black Bottom Copyright & Legal Bar */}
-      <div className="relative z-10 border-t border-white/[0.08] bg-[#020408] py-6 px-5 sm:px-8 lg:px-12">
-        <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 text-xs font-cairo text-white/60">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-start">
+      {/* Deep Black Bottom Copyright & Legal Bar (Enhanced Visibility & High Contrast) */}
+      <div className="relative z-10 border-t border-white/10 bg-[#060709] py-6 px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-[13px] font-cairo text-white/75">
+          {/* Copyright Notice */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-center sm:text-start">
             <p>
               © {new Date().getFullYear()}{' '}
-              <strong className="text-white font-bold">{BRAND.nameAr}</strong> ({BRAND.nameEn}).
+              <strong className="text-white font-bold">{BRAND.nameAr}</strong> ({BRAND.nameEn}).{' '}
               جميع الحقوق محفوظة.
             </p>
           </div>
 
+          {/* Legal Links & Scroll to Top */}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 text-white/50 text-[11px]">
-              <span className="hover:text-white/80 transition-colors cursor-pointer">
+            <div className="flex items-center gap-3 sm:gap-4 text-xs text-white/70">
+              <Link href="/terms#privacy" className="hover:text-white transition-colors">
                 سياسة الخصوصية
-              </span>
-              <span className="size-1 rounded-full bg-white/20" aria-hidden="true" />
-              <span className="hover:text-white/80 transition-colors cursor-pointer">
+              </Link>
+              <span className="size-1 rounded-full bg-white/30" aria-hidden="true" />
+              <Link href="/terms" className="hover:text-white transition-colors">
                 الشروط والأحكام
-              </span>
-              <span className="size-1 rounded-full bg-white/20" aria-hidden="true" />
-              <span className="hover:text-white/80 transition-colors cursor-pointer">
+              </Link>
+              <span className="size-1 rounded-full bg-white/30" aria-hidden="true" />
+              <Link href="/terms#disclaimer" className="hover:text-white transition-colors">
                 إخلاء المسؤولية
-              </span>
+              </Link>
             </div>
 
             {/* Back to top button */}
@@ -402,11 +409,11 @@ export default function Footer({ settings }: FooterProps) {
               type="button"
               onClick={scrollToTop}
               aria-label="العودة إلى أعلى الصفحة"
-              className="inline-flex items-center gap-2 text-xs text-white/60 hover:text-[#DFC07A] transition-colors group cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-medium text-white/80 hover:text-[#E6A821] transition-colors group cursor-pointer"
             >
               <span className="hidden sm:inline">للأعلى</span>
-              <div className="size-7 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center group-hover:border-[#CAA048] group-hover:bg-[#CAA048]/15 text-[#DFC07A] transition-all">
-                <ArrowUp className="size-3.5 group-hover:-translate-y-0.5 transition-transform" />
+              <div className="size-8 rounded-full bg-white/[0.06] border border-white/15 flex items-center justify-center group-hover:border-[#E6A821] group-hover:bg-[#E6A821]/15 text-[#E6A821] transition-all shadow-sm">
+                <ArrowUp className="size-4 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             </button>
           </div>
