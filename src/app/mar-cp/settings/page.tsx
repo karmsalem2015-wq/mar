@@ -83,7 +83,7 @@ export default function SettingsPage() {
   const [socialWhatsapp, setSocialWhatsapp] = useState('');
 
   // Contact States
-  const [unifiedNumber, setUnifiedNumber] = useState('0560533337');
+  const [unifiedNumber, setUnifiedNumber] = useState('0568526666');
   const [mobileNumber, setMobileNumber] = useState('0568526666');
   const [companyEmail, setCompanyEmail] = useState('info@mar-ksa.com');
   const [address, setAddress] = useState('جدة، حي الصفا، شارع الأمير سلطان');
@@ -538,7 +538,7 @@ export default function SettingsPage() {
                     <input
                       id="socialWhatsappInput"
                       type="text"
-                      placeholder="+966560533337 أو رابط مباشر"
+                      placeholder="+966568526666 أو رابط مباشر"
                       value={socialWhatsapp}
                       onChange={(e) => setSocialWhatsapp(e.target.value)}
                       className="neu-input font-mono text-xs"
@@ -726,7 +726,7 @@ export default function SettingsPage() {
                     <input
                       id="unifiedNumberInput"
                       type="text"
-                      placeholder="0560533337"
+                      placeholder="0568526666"
                       value={unifiedNumber}
                       onChange={(e) => setUnifiedNumber(e.target.value)}
                       className="neu-input font-mono"

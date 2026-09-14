@@ -203,7 +203,7 @@ export default function ContactPage() {
 
             {/* Button 2: WhatsApp with official SVG */}
             <a
-              href={WHATSAPP_URL}
+              href={dynamicWhatsappUrl || WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto py-3.5 px-8 text-xs sm:text-sm font-bold bg-[#25D366] hover:bg-[#20ba5a] text-white border border-white/20 rounded-full flex items-center justify-center gap-2.5 transition-all duration-300 shadow-md hover:shadow-lg font-cairo text-center cursor-pointer"
@@ -499,7 +499,7 @@ export default function ContactPage() {
                           : 'text-gray-600 hover:text-black bg-transparent border border-transparent'
                       }`}
                     >
-                      الهاتف الرئيسي
+                      الاتصال الهاتفي المباشر
                     </button>
                     <button
                       type="button"
@@ -510,7 +510,7 @@ export default function ContactPage() {
                           : 'text-gray-600 hover:text-black bg-transparent border border-transparent'
                       }`}
                     >
-                      الهاتف الإضافي
+                      المحادثة عبر واتساب
                     </button>
                   </motion.div>
                 </div>
@@ -519,7 +519,7 @@ export default function ContactPage() {
                   <AnimatePresence mode="wait">
                     {activeBranch === 'jeddah' ? (
                       <motion.div
-                        key="jeddah-branch"
+                        key="call-channel"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
@@ -531,7 +531,7 @@ export default function ContactPage() {
                       >
                         <motion.div variants={fadeUpVariants} className="flex items-center gap-2 pb-2 border-b border-gray-100">
                           <Building className="w-5 h-5 text-[#E6A821] shrink-0" />
-                          <h4 className="font-bold text-brand-black text-base font-cairo">تواصل مع مار العقارية</h4>
+                          <h4 className="font-bold text-brand-black text-base font-cairo">الاتصال الهاتفي المباشر</h4>
                         </motion.div>
                         
                         <div className="space-y-3 text-xs sm:text-sm text-gray-600 font-cairo">
@@ -541,7 +541,7 @@ export default function ContactPage() {
                           </motion.p>
                           <motion.p variants={fadeUpVariants} className="flex items-center gap-2.5">
                             <Phone className="w-4 h-4 text-[#E6A821] shrink-0" />
-                            <span className="font-mono" dir="ltr">{unifiedDisplay}</span>
+                            <span className="font-mono text-sm font-bold text-brand-black" dir="ltr">{unifiedDisplay}</span>
                           </motion.p>
                           <motion.p variants={fadeUpVariants} className="flex items-center gap-2.5">
                             <Mail className="w-4 h-4 text-[#E6A821] shrink-0" />
@@ -549,7 +549,7 @@ export default function ContactPage() {
                           </motion.p>
                           <motion.p variants={fadeUpVariants} className="flex items-center gap-2.5">
                             <Clock className="w-4 h-4 text-[#E6A821] shrink-0" />
-                            <span>اتصل بنا أو أرسل طلبك وسيتواصل معك فريق مار.</span>
+                            <span>فريق مستشاري مار العقارية متاح للإجابة على استفساراتكم.</span>
                           </motion.p>
                         </div>
 
@@ -558,7 +558,7 @@ export default function ContactPage() {
                             href={`tel:${unifiedTel}`}
                             className="btn-mar-black py-2.5 px-6 text-xs font-bold rounded-full flex items-center gap-2 shadow-sm font-cairo text-white hover:text-[#E6A821]"
                           >
-                            <Phone className="w-3.5 h-3.5 text-[#E6A821]" /> اتصل بنا
+                            <Phone className="w-3.5 h-3.5 text-[#E6A821]" /> اتصل بنا الآن
                           </a>
                           <a
                             href={dynamicWhatsappUrl}
@@ -566,13 +566,13 @@ export default function ContactPage() {
                             rel="noopener noreferrer"
                             className="py-2.5 px-6 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full text-xs font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg font-cairo cursor-pointer"
                           >
-                            <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" /> مراسلة فورية
+                            <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" /> مراسلة عبر واتساب
                           </a>
                         </motion.div>
                       </motion.div>
                     ) : (
                       <motion.div
-                        key="riyadh-branch"
+                        key="whatsapp-channel"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
@@ -584,17 +584,17 @@ export default function ContactPage() {
                       >
                         <motion.div variants={fadeUpVariants} className="flex items-center gap-2 pb-2 border-b border-gray-100">
                           <Building className="w-5 h-5 text-[#E6A821] shrink-0" />
-                          <h4 className="font-bold text-brand-black text-base font-cairo">خدمة العملاء والمتابعة</h4>
+                          <h4 className="font-bold text-brand-black text-base font-cairo">خدمة المراسلة عبر واتساب</h4>
                         </motion.div>
                         
                         <div className="space-y-3 text-xs sm:text-sm text-gray-600 font-cairo">
                           <motion.p variants={fadeUpVariants} className="flex items-start gap-2.5">
                             <MapPin className="w-4 h-4 text-[#E6A821] shrink-0 mt-0.5" />
-                            <span>قناة اتصال إضافية لخدمة العملاء ومتابعة الاستفسارات.</span>
+                            <span>خدمة فورية لاستلام بروشورات المشاريع والمخططات الهندسية.</span>
                           </motion.p>
                           <motion.p variants={fadeUpVariants} className="flex items-center gap-2.5">
                             <Phone className="w-4 h-4 text-[#E6A821] shrink-0" />
-                            <span className="font-mono" dir="ltr">{mobileDisplay}</span>
+                            <span className="font-mono text-sm font-bold text-brand-black" dir="ltr">{unifiedDisplay}</span>
                           </motion.p>
                           <motion.p variants={fadeUpVariants} className="flex items-center gap-2.5">
                             <Mail className="w-4 h-4 text-[#E6A821] shrink-0" />
@@ -602,24 +602,24 @@ export default function ContactPage() {
                           </motion.p>
                           <motion.p variants={fadeUpVariants} className="flex items-center gap-2.5">
                             <Clock className="w-4 h-4 text-[#E6A821] shrink-0" />
-                            <span>نسعد باستقبال استفساراتكم عن المشاريع والعروض.</span>
+                            <span>متابعة وتحديث فوري للوحدات المتاحة وحجز المعاينات.</span>
                           </motion.p>
                         </div>
 
                         <motion.div variants={fadeUpVariants} className="pt-2 flex flex-wrap gap-3">
-                          <a
-                            href={`tel:${mobileTel}`}
-                            className="btn-mar-black py-2.5 px-6 text-xs font-bold rounded-full flex items-center gap-2 shadow-sm font-cairo text-white hover:text-[#E6A821]"
-                          >
-                            <Phone className="w-3.5 h-3.5 text-[#E6A821]" /> اتصل بنا
-                          </a>
                           <a
                             href={dynamicWhatsappUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="py-2.5 px-6 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-full text-xs font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg font-cairo cursor-pointer"
                           >
-                            <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" /> مراسلة فورية
+                            <WhatsAppIcon className="w-3.5 h-3.5 shrink-0" /> فتح محادثة واتساب فورية
+                          </a>
+                          <a
+                            href={`tel:${unifiedTel}`}
+                            className="btn-mar-black py-2.5 px-6 text-xs font-bold rounded-full flex items-center gap-2 shadow-sm font-cairo text-white hover:text-[#E6A821]"
+                          >
+                            <Phone className="w-3.5 h-3.5 text-[#E6A821]" /> اتصال هاتفي
                           </a>
                         </motion.div>
                       </motion.div>

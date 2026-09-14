@@ -88,7 +88,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     }
   })();
 
-  const whatsappLink = `https://wa.me/966550085811?text=${encodeURIComponent(
+  const whatsappLink = `https://wa.me/966568526666?text=${encodeURIComponent(
     `السلام عليكم، أرغب في الاستفسار عن تفاصيل مشروع: ${project.name}`
   )}`;
 

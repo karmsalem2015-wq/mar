@@ -1,5 +1,5 @@
 // Set to true to connect and fetch from Supabase; set to false to use static mockup data
-export const USE_DATABASE = false;
+export const USE_DATABASE = true;
 
 export const BRAND = {
   nameAr: 'مار العقارية',
@@ -21,8 +21,8 @@ export const BRAND = {
     cityAr: 'جدة، المملكة العربية السعودية',
     email: 'info@mar-ksa.com',
     primaryPhone: {
-      display: '0560533337',
-      tel: '+966560533337',
+      display: '0568526666',
+      tel: '+966568526666',
     },
     secondaryPhone: {
       display: '0568526666',
@@ -42,4 +42,4 @@ export const BRAND = {
 export const WHATSAPP_MESSAGE =
   'السلام عليكم، أرغب في معرفة الفرص العقارية المتاحة لدى مار العقارية.';
 
-export const WHATSAPP_URL = `https://wa.me/${BRAND.contact.primaryPhone.tel.replace('+', '')}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+export const WHATSAPP_URL = `https://wa.me/966568526666?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;

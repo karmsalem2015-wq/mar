@@ -61,10 +61,10 @@ const DEFAULT_SETTINGS: SiteSettingsData = {
     tiktok: 'https://www.tiktok.com/@mar.realestate',
     snapchat: 'https://www.snapchat.com/add/mar.realestate',
     linkedin: 'https://www.linkedin.com/company/mar-realestate/',
-    whatsapp: BRAND.contact.primaryPhone.tel || '+966560533337',
+    whatsapp: BRAND.contact.primaryPhone.tel || '+966568526666',
   },
   contact: {
-    unifiedNumber: BRAND.contact.primaryPhone.display || '0560533337',
+    unifiedNumber: BRAND.contact.primaryPhone.display || '0568526666',
     mobileNumber: BRAND.contact.secondaryPhone.display || '0568526666',
     companyEmail: BRAND.contact.email || 'info@mar-ksa.com',
     address: 'جدة، حي الصفا، شارع الأمير سلطان',

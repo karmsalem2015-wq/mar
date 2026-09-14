@@ -56,7 +56,7 @@ const DetailedProjectCard = ({ project, openInquiry, index = 0 }: { project: Pro
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price) + ' ر.س';
   };
 
-  const whatsappLink = `https://wa.me/966550085811?text=${encodeURIComponent(`السلام عليكم، أرغب في الاستفسار عن تفاصيل ${project.name}`)}`;
+  const whatsappLink = `https://wa.me/966568526666?text=${encodeURIComponent(`السلام عليكم، أرغب في الاستفسار عن تفاصيل ${project.name}`)}`;
 
   return (
     <motion.div

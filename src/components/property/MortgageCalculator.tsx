@@ -211,7 +211,7 @@ export default function MortgageCalculator({ selectedProperty, onClose }: Mortga
           {/* Apply Action Button */}
           <div className="mt-6">
             <a
-              href="https://api.whatsapp.com/send?phone=966558837846&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D9%81%D9%8A%20%D8%A7%D9%84%D8%AA%D9%82%D8%AF%D9%8A%D9%85%20%D8%B9%D9%84%D9%8A%20%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC%20%D8%A5%D8%AA%D9%85%D8%A7%D9%85%20%D9%84%D9%84%D8%AA%D9%85%D9%88%D9%8A%D9%84%D9%8A%20%D8%A8%D8%B9%D8%AF%20%D8%AD%D8%B3%D8%A7%D8%A8%20%D8%A7%D9%84%D9%82%D8%B3%D8%B7%20%D8%A7%D9%84%D8%B4%D9%87%D8%B1%D9%8A%20%D9%84%D9%84%D8%B9%D9%82%D8%A7%D8%B1."
+              href={`https://wa.me/966568526666?text=${encodeURIComponent('مرحباً، أرغب في التقديم على برنامج إتمام للتمويلي بعد حساب القسط الشهري للعقار.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-premium-gold w-full block py-3 px-4 text-xs font-bold shadow-md rounded-xl transition-all duration-200 cursor-pointer font-cairo text-center"

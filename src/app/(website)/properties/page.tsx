@@ -173,7 +173,7 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
           </button>
 
           <a
-            href={`https://wa.me/966550085811?text=${encodeURIComponent(`السلام عليكم، أريد الاستفسار عن الوحدة العقارية: ${property.title}`)}`}
+            href={`https://wa.me/966568526666?text=${encodeURIComponent(`السلام عليكم، أريد الاستفسار عن الوحدة العقارية: ${property.title}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="py-2.5 px-4 text-xs font-bold bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-xl transition-colors flex items-center justify-center gap-1.5 font-almarai shadow-sm"
@@ -183,7 +183,7 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
           </a>
 
           <a
-            href="tel:+966550085811"
+            href="tel:+966568526666"
             className="py-2.5 px-4 text-xs font-bold bg-gray-100 hover:bg-[#111315] hover:text-[#CAA048] text-brand-black border border-transparent hover:border-[#CAA048] rounded-xl transition-all flex items-center justify-center gap-1.5 font-almarai"
           >
             <Phone className="w-4 h-4 text-[#CAA048]" />

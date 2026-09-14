@@ -46,7 +46,7 @@ export default function FloatingContact({ settings }: FloatingContactProps) {
 
       {/* 2. Official Floating WhatsApp Button - Bottom Left */}
       <a
-        href={WHATSAPP_URL}
+        href={whatsappUrl || WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="group fixed bottom-6 left-6 z-[45] flex size-12 sm:size-14 items-center justify-center rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white shadow-[0_10px_25px_rgba(37,211,102,0.4)] transition-all duration-300 hover:scale-110 hover:shadow-[0_14px_35px_rgba(37,211,102,0.6)] active:scale-95"

@@ -303,17 +303,18 @@ export default function Footer({ settings }: FooterProps) {
                     >
                       {contact?.unifiedNumber || BRAND.contact.primaryPhone.display}
                     </a>
-                    {(contact?.mobileNumber || BRAND.contact.secondaryPhone.display) && (
-                      <>
-                        <span className="text-white/30">|</span>
-                        <a
-                          href={`tel:${(contact?.mobileNumber || BRAND.contact.secondaryPhone.display).replace(/[^0-9+]/g, '')}`}
-                          className="transition-colors hover:text-[#E6A821]"
-                        >
-                          {contact?.mobileNumber || BRAND.contact.secondaryPhone.display}
-                        </a>
-                      </>
-                    )}
+                    {contact?.mobileNumber &&
+                      contact.mobileNumber !== (contact.unifiedNumber || BRAND.contact.primaryPhone.display) && (
+                        <>
+                          <span className="text-white/30">|</span>
+                          <a
+                            href={`tel:${contact.mobileNumber.replace(/[^0-9+]/g, '')}`}
+                            className="transition-colors hover:text-[#E6A821]"
+                          >
+                            {contact.mobileNumber}
+                          </a>
+                        </>
+                      )}
                   </div>
                 </div>
               </div>

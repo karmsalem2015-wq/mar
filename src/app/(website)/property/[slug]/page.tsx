@@ -117,7 +117,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     }
   })();
 
-  const whatsappLink = `https://wa.me/966550085811?text=${encodeURIComponent(
+  const whatsappLink = `https://wa.me/966568526666?text=${encodeURIComponent(
     `السلام عليكم، أرغب في الاستفسار عن تفاصيل: ${property.title} (${property.pricing.price} ر.س)`
   )}`;
 
