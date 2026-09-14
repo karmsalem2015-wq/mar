@@ -222,6 +222,15 @@ export async function updateProperty(id: string, formData: any) {
 // Delete property
 export async function deleteProperty(id: string) {
   try {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      // Mock/static item not in Supabase, treat as removed
+      revalidatePath('/mar-cp/properties');
+      revalidatePath('/properties');
+      revalidatePath('/');
+      return { success: true };
+    }
+
     const supabase = (await getSupabaseServerClient()) as any;
 
     // 1. Fetch property details to retrieve asset paths before deleting
@@ -353,11 +362,10 @@ export async function getPropertiesListAdmin() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    if (data && data.length > 0) return data;
-    return PROPERTIES;
+    return data || [];
   } catch (err: any) {
-    console.warn('Database disconnected or empty; using static mock properties:', err?.message || err);
-    return PROPERTIES;
+    console.error('Database error in getPropertiesListAdmin:', err?.message || err);
+    return [];
   }
 }
 
@@ -374,11 +382,10 @@ export async function getProjectsListAdmin() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    if (data && data.length > 0) return data;
-    return PROJECTS;
+    return data || [];
   } catch (err: any) {
-    console.warn('Database disconnected or empty; using static mock projects:', err?.message || err);
-    return PROJECTS;
+    console.error('Database error in getProjectsListAdmin:', err?.message || err);
+    return [];
   }
 }
 
@@ -529,6 +536,15 @@ export async function seedDatabase() {
 // Delete project
 export async function deleteProject(id: string) {
   try {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      // Mock/static item not in Supabase, treat as removed
+      revalidatePath('/mar-cp/projects');
+      revalidatePath('/projects');
+      revalidatePath('/');
+      return { success: true };
+    }
+
     const supabase = (await getSupabaseServerClient()) as any;
     
     // 1. Fetch project details to retrieve asset paths before deleting
@@ -647,10 +663,11 @@ export async function getPropertyBySlug(slug: string) {
 
     if (error) throw error;
     if (data) return normalizeProperty(data);
+    return null;
   } catch (err: any) {
-    console.warn(`Database offline/empty for property ${slug}, using mock fallback:`, err?.message || err);
+    console.warn(`Database query for property ${slug}:`, err?.message || err);
+    return null;
   }
-  return PROPERTIES.find((p) => p.slug === decodedSlug) || null;
 }
 
 // Fetch single project details by slug
@@ -669,10 +686,11 @@ export async function getProjectBySlug(slug: string) {
 
     if (error) throw error;
     if (data) return normalizeProject(data);
+    return null;
   } catch (err: any) {
-    console.warn(`Database offline/empty for project ${slug}, using mock fallback:`, err?.message || err);
+    console.warn(`Database query for project ${slug}:`, err?.message || err);
+    return null;
   }
-  return PROJECTS.find((p) => p.slug === decodedSlug) || null;
 }
 
 // Fetch properties belonging to a specific project by project slug
@@ -690,10 +708,11 @@ export async function getPropertiesByProjectSlug(projectSlug: string) {
 
     if (error) throw error;
     if (data && data.length > 0) return data.map(normalizeProperty);
+    return [];
   } catch (err: any) {
-    console.warn(`Database offline/empty for project properties ${projectSlug}, using mock fallback:`, err?.message || err);
+    console.warn(`Database query for project properties ${projectSlug}:`, err?.message || err);
+    return [];
   }
-  return PROPERTIES.filter((p) => p.project.slug === decodedSlug);
 }
 
 // Fetch single project details by ID
