@@ -25,7 +25,7 @@ import {
   AlertCircle,
   PlusCircle,
 } from 'lucide-react';
-import { createProject, updateProject, getProjectById } from '../../app/actions/properties';
+import { createProject, updateProject, getProjectById, fetchGoogleSheetCsvData } from '../../app/actions/properties';
 import { getCloudinarySignature } from '../../app/actions/cloudinary';
 import { uploadFile, deleteFile } from '../../lib/supabase/storage';
 import { compressImageToWebP } from '../../lib/image';
@@ -317,7 +317,7 @@ const getStoragePathFromUrl = (url: string) => {
     reader.readAsBinaryString(file);
   };
 
-  // Parse Google Sheets Link
+  // Parse Google Sheets Link via Server Action (avoids CORS and CSP browser errors)
   const handleGoogleSheetsImport = async () => {
     if (!googleSheetsUrl) {
       toast.error('الرجاء إدخال رابط جدول بيانات جوجل أولاً');
@@ -326,24 +326,12 @@ const getStoragePathFromUrl = (url: string) => {
 
     setImportingSheets(true);
     try {
-      // Convert standard edit url to export url
-      // Example: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit#gid=0 -> https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/export?format=csv
-      let url = googleSheetsUrl.trim();
-      const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-      if (!match || !match[1]) {
-        throw new Error('رابط غير صالح. يرجى إدخال رابط جدول بيانات جوجل صالح ومشاركته كـ "عام (Public)".');
-      }
-      
-      const spreadsheetId = match[1];
-      const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
-
-      const response = await fetch(exportUrl);
-      if (!response.ok) {
-        throw new Error('فشل جلب الملف. يرجى التحقق من صلاحيات المشاركة (أن يكون الرابط متاحاً للجميع).');
+      const result = await fetchGoogleSheetCsvData(googleSheetsUrl);
+      if (!result.success || !result.csvData) {
+        throw new Error(result.error || 'فشل استيراد البيانات من جوجل شيتس');
       }
 
-      const csvData = await response.text();
-      const wb = XLSX.read(csvData, { type: 'string' });
+      const wb = XLSX.read(result.csvData, { type: 'string' });
       processWorkbook(wb);
     } catch (err: any) {
       console.error('Google Sheets import error:', err);

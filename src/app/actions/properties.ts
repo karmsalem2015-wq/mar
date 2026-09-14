@@ -906,3 +906,76 @@ export async function updateProject(id: string, formData: any, propertiesToInser
     return { success: false, error: err.message || 'فشل تحديث المشروع' };
   }
 }
+
+/**
+ * Server action to fetch public Google Sheets CSV data without CORS or CSP restrictions
+ */
+export async function fetchGoogleSheetCsvData(googleSheetsUrl: string): Promise<{
+  success: boolean;
+  csvData?: string;
+  error?: string;
+}> {
+  try {
+    if (!googleSheetsUrl || typeof googleSheetsUrl !== 'string') {
+      return { success: false, error: 'الرجاء إدخال رابط جدول بيانات جوجل أولاً' };
+    }
+
+    const trimmedUrl = googleSheetsUrl.trim();
+    const match = trimmedUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    if (!match || !match[1]) {
+      return {
+        success: false,
+        error: 'رابط غير صالح. يرجى إدخال رابط صالح لجدول بيانات جوجل ومشاركته كـ "عام (Public)".',
+      };
+    }
+
+    const spreadsheetId = match[1];
+    const gidMatch = trimmedUrl.match(/[#&?]gid=([0-9]+)/);
+    const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : '';
+
+    const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv${gidParam}`;
+
+    const res = await fetch(exportUrl, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/csv,text/plain,*/*',
+      },
+      redirect: 'follow',
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        return { success: false, error: 'لم يتم العثور على هذا الجدول في جوجل. تأكد من صحة الرابط.' };
+      }
+      return {
+        success: false,
+        error: 'فشل جلب الملف. يرجى التأكد من أن الرابط متاح للجميع (Anyone with the link can view).',
+      };
+    }
+
+    const contentType = res.headers.get('content-type') || '';
+    const text = await res.text();
+
+    // If Google redirected to a login page or returned HTML error
+    if (contentType.includes('text/html') || text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+      return {
+        success: false,
+        error: 'جدول جوجل هذا خاص أو مقفل. يرجى الضغط على زر "مشاركة (Share)" في Google Sheets، واختيار "أي شخص لديه الرابط يمكنه العرض (Anyone with the link can view)".',
+      };
+    }
+
+    return {
+      success: true,
+      csvData: text,
+    };
+  } catch (err: any) {
+    console.error('Error fetching Google Sheets CSV:', err);
+    return {
+      success: false,
+      error: err.message || 'حدث خطأ غير متوقع أثناء الاتصال بجداول جوجل.',
+    };
+  }
+}
+
