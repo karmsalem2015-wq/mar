@@ -1,8 +1,38 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  async redirects() {
+    return [
+      {
+        source: '/dashboard',
+        destination: '/mar-cp',
+        permanent: false,
+      },
+      {
+        source: '/admin',
+        destination: '/mar-cp',
+        permanent: false,
+      },
+      {
+        source: '/cp',
+        destination: '/mar-cp',
+        permanent: false,
+      },
+      {
+        source: '/control-panel',
+        destination: '/mar-cp',
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'egkxzaalxtcbujekevwm.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
       {
         protocol: 'https',
         hostname: 'zrbwtxufgtwtrkjvlwwi.supabase.co',
@@ -55,9 +85,9 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' data: blob: https://zrbwtxufgtwtrkjvlwwi.supabase.co https://res.cloudinary.com https://*.tile.openstreetmap.org https://unpkg.com",
+              "img-src 'self' data: blob: https://egkxzaalxtcbujekevwm.supabase.co https://zrbwtxufgtwtrkjvlwwi.supabase.co https://res.cloudinary.com https://*.tile.openstreetmap.org https://unpkg.com",
               "media-src 'self' blob: https://res.cloudinary.com",
-              "connect-src 'self' https://zrbwtxufgtwtrkjvlwwi.supabase.co https://api.cloudinary.com https://res.cloudinary.com https://nominatim.openstreetmap.org",
+              "connect-src 'self' https://egkxzaalxtcbujekevwm.supabase.co https://zrbwtxufgtwtrkjvlwwi.supabase.co https://api.cloudinary.com https://res.cloudinary.com https://nominatim.openstreetmap.org",
               "frame-src 'self' https://maps.google.com https://www.google.com https://my.matterport.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
