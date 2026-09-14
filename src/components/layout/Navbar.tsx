@@ -80,23 +80,31 @@ export default function Navbar() {
   const isSinglePage =
     pathname.startsWith('/property/') ||
     (pathname.startsWith('/projects/') && pathname !== '/projects');
-  const showDarkHeader = isPastHero || isSinglePage;
+  const showDarkHeader = isPastHero || isSinglePage || showMobileMenu;
+
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [pathname]);
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-[45] w-full font-almarai transition-all duration-500 ${showDarkHeader
-          ? 'border-b border-white/15 bg-black/78 shadow-[0_12px_40px_rgba(0,0,0,0.40)] backdrop-blur-xl'
+      className={`fixed inset-x-0 top-0 z-[45] w-full font-almarai transition-all duration-300 ${
+        showMobileMenu
+          ? 'border-b border-white/15 bg-black/95 shadow-[0_12px_40px_rgba(0,0,0,0.60)] backdrop-blur-2xl'
+          : showDarkHeader
+          ? 'border-b border-white/15 bg-black/85 shadow-[0_12px_40px_rgba(0,0,0,0.40)] backdrop-blur-xl'
           : 'border-b-transparent bg-transparent shadow-none backdrop-blur-none pointer-events-auto'
-        }`}
+      }`}
     >
-      <div className="mx-auto flex h-16 sm:h-[4.5rem] w-full max-w-[1600px] items-center justify-between px-4 sm:px-8 lg:px-12">
-        <BrandMark priority variant="white" />
+      <div className="mx-auto flex h-16 sm:h-20 w-full max-w-[1600px] items-center justify-between px-4 sm:px-8 lg:px-12">
+        <BrandMark priority variant="white" size="lg" withArabicText />
 
         <nav
-          className={`hidden items-center gap-1 rounded-2xl p-1 transition-all md:flex ${showDarkHeader
+          className={`hidden items-center gap-1 rounded-2xl p-1 transition-all md:flex ${
+            showDarkHeader
               ? 'border border-white/15 bg-black/40 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)]'
               : 'border border-white/20 bg-black/28 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.25)]'
-            }`}
+          }`}
           aria-label="التنقل الرئيسي"
         >
           {NAV_LINKS.map((link) => {
@@ -108,10 +116,11 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={isActive ? 'page' : undefined}
-                className={`relative flex min-h-10 items-center gap-2 rounded-xl px-3.5 text-xs font-semibold transition-colors lg:px-4 lg:text-sm ${isActive
+                className={`relative flex min-h-10 items-center gap-2 rounded-xl px-3.5 text-xs font-semibold transition-colors lg:px-4 lg:text-sm ${
+                  isActive
                     ? 'text-[#E6A821] font-bold'
                     : 'text-white/85 hover:text-white hover:bg-white/10'
-                  }`}
+                }`}
               >
                 {isActive && (
                   <motion.span
@@ -128,7 +137,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2.5">
-          {pathname === '/' && !showDarkHeader && (
+          {pathname === '/' && !isPastHero && !showMobileMenu && (
             <button
               type="button"
               onClick={handleSkipTour}
@@ -139,13 +148,16 @@ export default function Navbar() {
             </button>
           )}
 
-          <button
-            type="button"
-            className="btn-premium-gold min-h-10 px-4 text-[0.68rem] sm:px-6 sm:text-xs font-bold cursor-pointer"
-            onClick={openInquiry}
-          >
-            احجز استشارتك
-          </button>
+          {/* احجز استشارتك: يظهر على أجهزة الكمبيوتر والشاشات الكبيرة md فقط، ويختفي تماماً من شريط الجوال */}
+          <div className="hidden md:flex items-center">
+            <button
+              type="button"
+              className="btn-premium-gold min-h-10 px-4 text-[0.68rem] sm:px-6 sm:text-xs font-bold cursor-pointer"
+              onClick={openInquiry}
+            >
+              احجز استشارتك
+            </button>
+          </div>
 
           <button
             type="button"
@@ -168,7 +180,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            className="w-full border-t border-white/15 bg-black/85 px-4 py-3 shadow-2xl backdrop-blur-2xl md:hidden overflow-hidden"
+            className="w-full border-t border-white/15 bg-black/95 px-4 py-4 shadow-2xl backdrop-blur-2xl md:hidden overflow-hidden flex flex-col gap-2"
             aria-label="التنقل على الهاتف"
           >
             {NAV_LINKS.map((link) => {
@@ -181,16 +193,31 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setShowMobileMenu(false)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm transition-all ${isActive
+                  className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm transition-all ${
+                    isActive
                       ? 'bg-white/10 font-bold text-[#E6A821] border border-[#E6A821]/40'
                       : 'text-white/80 hover:bg-white/10 hover:text-white'
-                    }`}
+                  }`}
                 >
                   <Icon className="size-4" aria-hidden="true" />
                   {link.label}
                 </Link>
               );
             })}
+
+            {/* زر احجز استشارتك في الموبايل داخل القائمة */}
+            <div className="pt-3 mt-1 border-t border-white/10">
+              <button
+                type="button"
+                className="btn-premium-gold w-full min-h-12 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg rounded-xl"
+                onClick={() => {
+                  setShowMobileMenu(false);
+                  openInquiry();
+                }}
+              >
+                احجز استشارتك
+              </button>
+            </div>
           </motion.nav>
         )}
       </AnimatePresence>

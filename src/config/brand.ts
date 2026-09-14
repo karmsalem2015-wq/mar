@@ -1,3 +1,6 @@
+// Set to true to connect and fetch from Supabase; set to false to use static mockup data
+export const USE_DATABASE = false;
+
 export const BRAND = {
   nameAr: 'مار العقارية',
   nameEn: 'MAR Real Estate',

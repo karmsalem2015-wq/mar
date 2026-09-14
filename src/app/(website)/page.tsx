@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { PROPERTIES, PROJECTS, Property, Project } from '@/lib/mockData';
 import { getPropertiesListAdmin, getProjectsListAdmin } from '@/app/actions/properties';
+import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty, normalizeProject } from '@/lib/normalizers';
 import { useInquiryStore } from '@/store/useInquiryStore';
 
@@ -19,11 +20,12 @@ import PartnersMarquee from '@/components/home/PartnersMarquee';
 import ContactFormSection from '@/components/home/ContactFormSection';
 
 export default function HomePage() {
-  const [dbProperties, setDbProperties] = useState<Property[]>([]);
-  const [dbProjects, setDbProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES);
+  const [dbProjects, setDbProjects] = useState<Project[]>(PROJECTS);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    if (!USE_DATABASE) return;
     async function loadData() {
       try {
         const [propsData, projsData] = await Promise.all([

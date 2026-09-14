@@ -3,6 +3,9 @@ import { Property, Project } from './mockData';
 
 export function normalizeProperty(prop: any): Property {
   if (!prop) return null as any;
+  if (prop.location && prop.specs && prop.pricing && prop.media) {
+    return prop as Property;
+  }
   return {
     id: prop.id,
     slug: prop.slug,
@@ -63,6 +66,9 @@ export function normalizeProperty(prop: any): Property {
 
 export function normalizeProject(proj: any): Project {
   if (!proj) return null as any;
+  if (proj.location && proj.specs && proj.priceRange && proj.media) {
+    return proj as Project;
+  }
   return {
     id: proj.id,
     slug: proj.slug,

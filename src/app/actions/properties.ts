@@ -1,6 +1,7 @@
 // src/app/actions/properties.ts
 'use server';
 
+import { USE_DATABASE } from '../../config/brand';
 import { getSupabaseServerClient } from '../../lib/supabase/server';
 import { getSupabaseAdminClient } from '../../lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
@@ -339,8 +340,11 @@ export async function deleteProperty(id: string) {
   }
 }
 
-// Fetch all properties for admin dashboard list
+// Fetch all properties for admin dashboard and website lists
 export async function getPropertiesListAdmin() {
+  if (!USE_DATABASE) {
+    return PROPERTIES;
+  }
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -349,15 +353,19 @@ export async function getPropertiesListAdmin() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    if (data && data.length > 0) return data;
+    return PROPERTIES;
   } catch (err: any) {
-    console.error('Error fetching admin properties list:', err);
-    return [];
+    console.warn('Database disconnected or empty; using static mock properties:', err?.message || err);
+    return PROPERTIES;
   }
 }
 
-// Fetch all projects for admin dashboard list
+// Fetch all projects for admin dashboard and website lists
 export async function getProjectsListAdmin() {
+  if (!USE_DATABASE) {
+    return PROJECTS;
+  }
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -366,10 +374,11 @@ export async function getProjectsListAdmin() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    if (data && data.length > 0) return data;
+    return PROJECTS;
   } catch (err: any) {
-    console.error('Error fetching admin projects list:', err);
-    return [];
+    console.warn('Database disconnected or empty; using static mock projects:', err?.message || err);
+    return PROJECTS;
   }
 }
 
@@ -617,8 +626,11 @@ export async function deleteProject(id: string) {
 
 // Fetch single property details by slug
 export async function getPropertyBySlug(slug: string) {
+  const decodedSlug = decodeURIComponent(slug);
+  if (!USE_DATABASE) {
+    return PROPERTIES.find((p) => p.slug === decodedSlug) || null;
+  }
   try {
-    const decodedSlug = decodeURIComponent(slug);
     const supabase = getSupabaseAdminClient() as any;
     const { data, error } = await supabase
       .from('properties')
@@ -627,17 +639,20 @@ export async function getPropertyBySlug(slug: string) {
       .maybeSingle();
 
     if (error) throw error;
-    return data ? normalizeProperty(data) : null;
+    if (data) return normalizeProperty(data);
   } catch (err: any) {
-    console.error(`Error fetching property by slug ${slug}:`, err);
-    return null;
+    console.warn(`Database offline/empty for property ${slug}, using mock fallback:`, err?.message || err);
   }
+  return PROPERTIES.find((p) => p.slug === decodedSlug) || null;
 }
 
 // Fetch single project details by slug
 export async function getProjectBySlug(slug: string) {
+  const decodedSlug = decodeURIComponent(slug);
+  if (!USE_DATABASE) {
+    return PROJECTS.find((p) => p.slug === decodedSlug) || null;
+  }
   try {
-    const decodedSlug = decodeURIComponent(slug);
     const supabase = getSupabaseAdminClient() as any;
     const { data, error } = await supabase
       .from('projects')
@@ -646,17 +661,20 @@ export async function getProjectBySlug(slug: string) {
       .maybeSingle();
 
     if (error) throw error;
-    return data ? normalizeProject(data) : null;
+    if (data) return normalizeProject(data);
   } catch (err: any) {
-    console.error(`Error fetching project by slug ${slug}:`, err);
-    return null;
+    console.warn(`Database offline/empty for project ${slug}, using mock fallback:`, err?.message || err);
   }
+  return PROJECTS.find((p) => p.slug === decodedSlug) || null;
 }
 
 // Fetch properties belonging to a specific project by project slug
 export async function getPropertiesByProjectSlug(projectSlug: string) {
+  const decodedSlug = decodeURIComponent(projectSlug);
+  if (!USE_DATABASE) {
+    return PROPERTIES.filter((p) => p.project.slug === decodedSlug);
+  }
   try {
-    const decodedSlug = decodeURIComponent(projectSlug);
     const supabase = getSupabaseAdminClient() as any;
     const { data, error } = await supabase
       .from('properties')
@@ -664,11 +682,11 @@ export async function getPropertiesByProjectSlug(projectSlug: string) {
       .eq('projects.slug', decodedSlug);
 
     if (error) throw error;
-    return (data || []).map(normalizeProperty);
+    if (data && data.length > 0) return data.map(normalizeProperty);
   } catch (err: any) {
-    console.error(`Error fetching properties for project slug ${projectSlug}:`, err);
-    return [];
+    console.warn(`Database offline/empty for project properties ${projectSlug}, using mock fallback:`, err?.message || err);
   }
+  return PROPERTIES.filter((p) => p.project.slug === decodedSlug);
 }
 
 // Fetch single project details by ID

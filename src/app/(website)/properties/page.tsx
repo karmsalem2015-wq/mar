@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { PROPERTIES, Property } from '@/lib/mockData';
 import { getPropertiesListAdmin } from '@/app/actions/properties';
+import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty } from '@/lib/normalizers';
 import PropertyCard from '@/components/property/PropertyCard';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -206,6 +207,7 @@ export default function PropertiesPage() {
   const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES);
 
   useEffect(() => {
+    if (!USE_DATABASE) return;
     async function loadData() {
       try {
         const propsData = await getPropertiesListAdmin();

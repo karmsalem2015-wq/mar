@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { PROJECTS, Project } from '@/lib/mockData';
 import { getProjectsListAdmin } from '@/app/actions/properties';
+import { USE_DATABASE } from '@/config/brand';
 import { normalizeProject } from '@/lib/normalizers';
 import CustomSelect from '@/components/ui/CustomSelect';
 import RTLContinuousCarousel from '@/components/ui/RTLContinuousCarousel';
@@ -292,6 +293,7 @@ export default function ProjectsPage() {
   const [dbProjects, setDbProjects] = useState<Project[]>(PROJECTS);
 
   useEffect(() => {
+    if (!USE_DATABASE) return;
     async function loadData() {
       try {
         const projsData = await getProjectsListAdmin();

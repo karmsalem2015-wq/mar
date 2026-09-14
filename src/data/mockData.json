@@ -1,0 +1,871 @@
+{
+  "projects": [
+    {
+      "id": "proj-mar-residence",
+      "slug": "mar-residence-shati",
+      "name": "مشروع مار ريزيدنس",
+      "tagline": "أيقونة السكن العصري على واجهة البحر الأحمر بأرقى أحياء جدة",
+      "status": "under_construction",
+      "location": {
+        "city": "جدة",
+        "district": "الشاطئ",
+        "address": "طريق الكورنيش، حي الشاطئ، جدة"
+      },
+      "description": "صرح معماري استثنائي يجمع بين الفخامة المعاصرة والإطلالات المباشرة على البحر. يضم المشروع وحدات سكنية متطورة بأنظمة ذكية متكاملة، لاونج خاص للسكان، نادي صحي ومسابح إنفينيتي، ومواقف سفلية مجهزة بشواحن سيارات كهربائية.",
+      "media": {
+        "hero": "/projects/amal-stars-showcase.webp",
+        "gallery": [
+          "/properties/penthouse.webp",
+          "/properties/apartment.webp",
+          "/projects/panorama-penthouse.webp"
+        ],
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-luxury-home-interior-41582-large.mp4"]
+      },
+      "priceRange": { "min": 1450000, "max": 4200000, "currency": "SAR" },
+      "specs": {
+        "totalUnits": 48,
+        "availableUnits": 14,
+        "completionDate": "الربع الرابع 2026"
+      },
+      "featured": true,
+      "brochureUrl": ""
+    },
+    {
+      "id": "proj-mar-palace",
+      "slug": "mar-palace-rawdah",
+      "name": "مشروع قصر مار - الروضة",
+      "tagline": "فلل ودوبلكسات فاخرة بتصاميم أندلسية عصرية وسط جدة",
+      "status": "completed",
+      "location": {
+        "city": "جدة",
+        "district": "الروضة",
+        "address": "شارع الكيال، حي الروضة، جدة"
+      },
+      "description": "مجمع فلل وبنتهاوس يتميز بالخصوصية التامة والمداخل المستقلة. تشطيبات الترا سوبر ديلوكس من أرقى أنواع الرخام الإيطالي، حدائق خاصة لكل وحدة، ومصاعد هيدروليكية خاصة بكل فيلا.",
+      "media": {
+        "hero": "/projects/villa_3d_render.webp",
+        "gallery": [
+          "/properties/villa.webp",
+          "/projects/panorama-penthouse.webp",
+          "/properties/penthouse.webp"
+        ],
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-modern-apartment-interior-41584-large.mp4"]
+      },
+      "priceRange": { "min": 2100000, "max": 5800000, "currency": "SAR" },
+      "specs": {
+        "totalUnits": 22,
+        "availableUnits": 6,
+        "completionDate": "جاهز للتسليم الفوري"
+      },
+      "featured": true,
+      "brochureUrl": ""
+    },
+    {
+      "id": "proj-mar-boulevard",
+      "slug": "mar-boulevard-malqa",
+      "name": "مشروع مار بوليفارد - الملقا",
+      "tagline": "أسلوب حياة نخبوي في قلب شمال الرياض النابض بالفرص",
+      "status": "under_construction",
+      "location": {
+        "city": "الرياض",
+        "district": "الملقا",
+        "address": "طريق أنس بن مالك، حي الملقا، الرياض"
+      },
+      "description": "مشروع متكامل يجمع بين الشقق السكنية الفارهة والمرافق الترفيهية الخاصة. يتميز بموقعه الاستراتيجي بالقرب من كبرى مراكز الأعمال والوجهات الترفيهية في شمال العاصمة، مع مساحات خضراء شاسعة ومسارات للمشي.",
+      "media": {
+        "hero": "/projects/panorama-penthouse.webp",
+        "gallery": [
+          "/properties/apartment.webp",
+          "/properties/penthouse.webp",
+          "/projects/amal-stars-showcase.webp"
+        ],
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-luxury-home-interior-41582-large.mp4"]
+      },
+      "priceRange": { "min": 980000, "max": 2750000, "currency": "SAR" },
+      "specs": {
+        "totalUnits": 64,
+        "availableUnits": 19,
+        "completionDate": "الربع الثاني 2027"
+      },
+      "featured": true,
+      "brochureUrl": ""
+    },
+    {
+      "id": "proj-durrat-mar",
+      "slug": "durrat-mar-salama",
+      "name": "مشروع درة مار - السلامة",
+      "tagline": "شقق عائلية رحبة وتشطيبات متقنة تضمن راحة واستقرار عائلتك",
+      "status": "completed",
+      "location": {
+        "city": "جدة",
+        "district": "السلامة",
+        "address": "شارع صقر قريش، حي السلامة، جدة"
+      },
+      "description": "صُمم مشروع درة مار لتلبية تطلعات العائلة السعودية الباحثة عن الموقع الحيوي والمساحات الرحبة. يتميز بقربه من طريق المدينة ومراكز التسوق الكبرى، مع ضمانات إنشائية متكاملة تصل إلى 25 سنة على الهيكل الإنشائي.",
+      "media": {
+        "hero": "/properties/apartment.webp",
+        "gallery": [
+          "/properties/penthouse.webp",
+          "/projects/amal-stars-showcase.webp"
+        ],
+        "videos": []
+      },
+      "priceRange": { "min": 680000, "max": 1150000, "currency": "SAR" },
+      "specs": {
+        "totalUnits": 36,
+        "availableUnits": 8,
+        "completionDate": "جاهز للإفراغ الفوري"
+      },
+      "featured": false,
+      "brochureUrl": ""
+    },
+    {
+      "id": "proj-mar-views",
+      "slug": "mar-views-naeem",
+      "name": "مشروع مار فيوز - النعيم",
+      "tagline": "إطلالات بانورامية مفتوحة وتصاميم حديثة تلهم حياتك اليومية",
+      "status": "completed",
+      "location": {
+        "city": "جدة",
+        "district": "النعيم",
+        "address": "شارع النعيم التجاري، حي النعيم، جدة"
+      },
+      "description": "مبنى سكني ذكي يضم تشكيلة مميزة من الشقق والملاحق العلوية بروفات واسعة. يتميز بواجهات معمارية زجاجية عازلة للحرارة والصوت ومواقف سيارات خاصة لكل شقة.",
+      "media": {
+        "hero": "/properties/penthouse.webp",
+        "gallery": [
+          "/projects/villa_3d_render.webp",
+          "/properties/apartment.webp"
+        ],
+        "videos": []
+      },
+      "priceRange": { "min": 790000, "max": 1390000, "currency": "SAR" },
+      "specs": {
+        "totalUnits": 28,
+        "availableUnits": 7,
+        "completionDate": "جاهز للتسليم"
+      },
+      "featured": false,
+      "brochureUrl": ""
+    },
+    {
+      "id": "proj-mar-oasis",
+      "slug": "mar-oasis-makkah",
+      "name": "مشروع واحة مار - العوالي",
+      "tagline": "سكن راقٍ واستثمار مضمون بجوار أطهر بقاع الأرض",
+      "status": "upcoming",
+      "location": {
+        "city": "مكة المكرمة",
+        "district": "العوالي",
+        "address": "طريق إبراهيم الجفالي، حي العوالي، مكة المكرمة"
+      },
+      "description": "فرصة استثمارية وسكنية واعدة في مكة المكرمة. يتميز المشروع ببنية تحتية فائقة وتصاميم هندسية متطورة تلائم الضيافة والاستقرار العائلي الراقي مع خدمات إدارة وصيانة دورية.",
+      "media": {
+        "hero": "/projects/amal-stars-showcase.webp",
+        "gallery": [
+          "/properties/villa.webp",
+          "/properties/apartment.webp"
+        ],
+        "videos": []
+      },
+      "priceRange": { "min": 850000, "max": 1850000, "currency": "SAR" },
+      "specs": {
+        "totalUnits": 52,
+        "availableUnits": 24,
+        "completionDate": "الربع الأول 2027"
+      },
+      "featured": true,
+      "brochureUrl": ""
+    }
+  ],
+  "properties": [
+    {
+      "id": "prop-mar-penthouse-shati",
+      "slug": "royal-penthouse-mar-residence-shati",
+      "title": "بنتهاوس ملكي بإطلالة بحرية بانورامية - مار ريزيدنس",
+      "type": "penthouse",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-residence",
+        "name": "مشروع مار ريزيدنس",
+        "slug": "mar-residence-shati"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "الشاطئ",
+        "coordinates": { "lat": 21.6083, "lng": 39.1122 },
+        "address": "طريق الكورنيش، حي الشاطئ، جدة"
+      },
+      "specs": {
+        "area": 385,
+        "bedrooms": 5,
+        "bathrooms": 6,
+        "livingRooms": 2,
+        "parking": 2,
+        "floor": 12,
+        "totalFloors": 12,
+        "kitchen": true,
+        "view": "إطلالة بانورامية كاملة على البحر الأحمر",
+        "direction": "west",
+        "features": [
+          "تراس بانورامي خاص",
+          "جاكوزي خارجي",
+          "غرفة خادمة ماستر",
+          "غرفة سائق خاصة",
+          "مصعد خاص ببطاقة ذكية",
+          "نظام سمارت هوم للتحكم الكامل",
+          "موقفين سيارات مغطاة"
+        ]
+      },
+      "pricing": {
+        "price": 3850000,
+        "pricePerMeter": 10000,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 15,
+        "monthlyInstallment": 18500
+      },
+      "media": {
+        "images": [
+          "/properties/penthouse.webp",
+          "/projects/panorama-penthouse.webp",
+          "/properties/apartment.webp"
+        ],
+        "thumbnail": "/properties/penthouse.webp",
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-luxury-home-interior-41582-large.mp4"]
+      },
+      "description": "بنتهاوس استثنائي يحتل كامل الطابق العلوي من برج مار ريزيدنس. تمتع بإطلالة خلابة على البحر الأحمر، ومساحات معيشة واسعة ومفتوحة، وتشطيبات من الرخام الإسباني وأخشاب الجوز الفاخرة مع نظام تكييف مركزي متكامل.",
+      "publishedAt": "2026-08-01",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-villa-rawdah",
+      "slug": "luxury-independent-villa-mar-palace",
+      "title": "فيلا مستقلة مودرن مع مسبح خاص - قصر مار الروضة",
+      "type": "villa",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-palace",
+        "name": "مشروع قصر مار - الروضة",
+        "slug": "mar-palace-rawdah"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "الروضة",
+        "coordinates": { "lat": 21.5645, "lng": 39.1554 },
+        "address": "شارع الكيال، حي الروضة، جدة"
+      },
+      "specs": {
+        "area": 560,
+        "bedrooms": 6,
+        "bathrooms": 7,
+        "livingRooms": 3,
+        "parking": 3,
+        "floor": 1,
+        "totalFloors": 3,
+        "kitchen": true,
+        "view": "إطلالة على الحديقة والمسبح الخاص",
+        "direction": "north",
+        "features": [
+          "مسبح خاص مع نظام تدفئة",
+          "حديقة خاصة وشلال جداري",
+          "مصعد هيدروليكي داخلي",
+          "غرفة سينما منزلية",
+          "جناح نوم رئيسي ملكي مع دريسنج روم",
+          "ملحق حراسة وسائق مستقل",
+          "ضمانات 25 سنة"
+        ]
+      },
+      "pricing": {
+        "price": 5400000,
+        "pricePerMeter": 9642,
+        "currency": "SAR",
+        "isNegotiable": true,
+        "downPaymentPct": 20,
+        "monthlyInstallment": 24800
+      },
+      "media": {
+        "images": [
+          "/properties/villa.webp",
+          "/projects/villa_3d_render.webp",
+          "/properties/penthouse.webp"
+        ],
+        "thumbnail": "/properties/villa.webp",
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-modern-apartment-interior-41584-large.mp4"]
+      },
+      "description": "فيلا الأحلام في أرقى مربعات حي الروضة. تصميم معماري عصري بأسقف دبل هايت وواجهات زجاجية واسعة تطل على الحديقة الخاصة والمسبح. تتضمن مجالس ضيوف فخمة وصالات عائلية متعددة ومصعداً داخلياً متطوراً.",
+      "publishedAt": "2026-08-15",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-apt-malqa-1",
+      "slug": "luxury-apartment-4-rooms-mar-boulevard",
+      "title": "شقة ذكية 4 غرف مع شرفة واسعة - مار بوليفارد الملقا",
+      "type": "apartment",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-boulevard",
+        "name": "مشروع مار بوليفارد - الملقا",
+        "slug": "mar-boulevard-malqa"
+      },
+      "location": {
+        "city": "الرياض",
+        "district": "الملقا",
+        "coordinates": { "lat": 24.8112, "lng": 46.6128 },
+        "address": "طريق أنس بن مالك، حي الملقا، الرياض"
+      },
+      "specs": {
+        "area": 205,
+        "bedrooms": 4,
+        "bathrooms": 4,
+        "livingRooms": 1,
+        "parking": 1,
+        "floor": 3,
+        "totalFloors": 6,
+        "kitchen": true,
+        "view": "إطلالة على الممشى الداخلي والحدائق",
+        "direction": "corner",
+        "features": [
+          "شرفة خاصة بإطلالة واسعة",
+          "دخول ذكي بالأرقام والبطاقة",
+          "غرفة خادمة بدورة مياه خاصة",
+          "مطبخ أمريكي مفتوح مع جزيرة رخامية",
+          "موقف خاص بالقبو",
+          "كاميرات مراقبة وحراسة أمنية"
+        ]
+      },
+      "pricing": {
+        "price": 1680000,
+        "pricePerMeter": 8195,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 8900
+      },
+      "media": {
+        "images": [
+          "/properties/apartment.webp",
+          "/projects/amal-stars-showcase.webp",
+          "/properties/penthouse.webp"
+        ],
+        "thumbnail": "/properties/apartment.webp",
+        "videos": []
+      },
+      "description": "شقة سكنية عصرية تقع في أرقى مجمعات حي الملقا بشمال الرياض. مساحات مصممة بعناية فائقة لاستغلال كل متر بذكاء، مع غرف نوم مريحة وصالة استقبال رحبة تفتح على شرفة أنيقة.",
+      "publishedAt": "2026-08-20",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-roof-salama",
+      "slug": "duplex-annex-roof-durrat-mar",
+      "title": "روف فاخر 5 غرف مع سطح خاص - درة مار السلامة",
+      "type": "annex",
+      "status": "available",
+      "project": {
+        "id": "proj-durrat-mar",
+        "name": "مشروع درة مار - السلامة",
+        "slug": "durrat-mar-salama"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "السلامة",
+        "coordinates": { "lat": 21.5872, "lng": 39.1624 },
+        "address": "شارع صقر قريش، حي السلامة، جدة"
+      },
+      "specs": {
+        "area": 275,
+        "bedrooms": 5,
+        "bathrooms": 5,
+        "livingRooms": 2,
+        "parking": 2,
+        "floor": 6,
+        "totalFloors": 6,
+        "kitchen": true,
+        "view": "واجهة أمامية مفتوحة غير مجروحة",
+        "direction": "east",
+        "features": [
+          "سطح خاص مجهز بجلسة خارجية وشواية",
+          "مدخلين منفصلين (للضيوف والعائلة)",
+          "غرفة خادمة وغرفة سائق",
+          "خزانات مياه أرضية وعلوية مستقلة",
+          "عداد كهرباء مستقل ومصعد مباشر",
+          "عوازل حرارية ومائية معتمدة كود البناء السعودي"
+        ]
+      },
+      "pricing": {
+        "price": 1050000,
+        "pricePerMeter": 3818,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 5850
+      },
+      "media": {
+        "images": [
+          "/properties/penthouse.webp",
+          "/properties/apartment.webp"
+        ],
+        "thumbnail": "/properties/penthouse.webp",
+        "videos": []
+      },
+      "description": "روف علوي بمساحة شاسعة وسطح خاص مهيأ بالكامل للجلسات العائلية في ليالي جدة الساحرة. يضم 5 غرف واسعة وصالتين كبيرتين ومطبخاً مجهزاً، مع كامل التسهيلات والضمانات المعتمدة.",
+      "publishedAt": "2026-08-25",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-apt-salama-5",
+      "slug": "spacious-apartment-5-rooms-durrat-mar",
+      "title": "شقة أمامية فاخرة 5 غرف - درة مار السلامة",
+      "type": "apartment",
+      "status": "available",
+      "project": {
+        "id": "proj-durrat-mar",
+        "name": "مشروع درة مار - السلامة",
+        "slug": "durrat-mar-salama"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "السلامة",
+        "coordinates": { "lat": 21.5872, "lng": 39.1624 },
+        "address": "شارع صقر قريش، حي السلامة، جدة"
+      },
+      "specs": {
+        "area": 195,
+        "bedrooms": 5,
+        "bathrooms": 4,
+        "livingRooms": 1,
+        "parking": 1,
+        "floor": 2,
+        "totalFloors": 6,
+        "kitchen": true,
+        "view": "إطلالة على الشارع الرئيسي الهادئ",
+        "direction": "north",
+        "features": [
+          "مجلس ضيوف مستقل مع دورة مياه ومغاسل رخام",
+          "جناح نوم رئيسي ماستر",
+          "غرفة خادمة بدورة مياه",
+          "موقف خاص مغطى",
+          "نظام مراقبة أمنية على مدار الساعة",
+          "تمديدات غاز مركزي وشبكة ألياف بصرية"
+        ]
+      },
+      "pricing": {
+        "price": 820000,
+        "pricePerMeter": 4205,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 4450
+      },
+      "media": {
+        "images": [
+          "/properties/apartment.webp",
+          "/projects/amal-stars-showcase.webp"
+        ],
+        "thumbnail": "/properties/apartment.webp",
+        "videos": []
+      },
+      "description": "شقة سكنية متكاملة المواصفات للعائلات المتوسطة والكبيرة. توزيع معماري يراعي الخصوصية التامة مع مجلس استقبال مفصول تماماً عن قسم غرف النوم العائلية.",
+      "publishedAt": "2026-08-28",
+      "featured": false
+    },
+    {
+      "id": "prop-mar-apt-salama-4",
+      "slug": "modern-apartment-4-rooms-durrat-mar",
+      "title": "شقة 4 غرف نموذجية - درة مار السلامة",
+      "type": "apartment",
+      "status": "available",
+      "project": {
+        "id": "proj-durrat-mar",
+        "name": "مشروع درة مار - السلامة",
+        "slug": "durrat-mar-salama"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "السلامة",
+        "coordinates": { "lat": 21.5872, "lng": 39.1624 },
+        "address": "شارع صقر قريش، حي السلامة، جدة"
+      },
+      "specs": {
+        "area": 160,
+        "bedrooms": 4,
+        "bathrooms": 3,
+        "livingRooms": 1,
+        "parking": 1,
+        "floor": 4,
+        "totalFloors": 6,
+        "kitchen": true,
+        "view": "إطلالة شرقية مضيئة",
+        "direction": "east",
+        "features": [
+          "غرفة نوم ماستر بحمام خاص",
+          "صالة معيشة رحبة بإضاءة طبيعية",
+          "مطبخ مغلق واسع",
+          "موقف خاص وخزان مستقل",
+          "تشطيبات جبسية عصرية وإضاءة ليد مخفية"
+        ]
+      },
+      "pricing": {
+        "price": 690000,
+        "pricePerMeter": 4312,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 3750
+      },
+      "media": {
+        "images": [
+          "/properties/apartment.webp",
+          "/properties/penthouse.webp"
+        ],
+        "thumbnail": "/properties/apartment.webp",
+        "videos": []
+      },
+      "description": "شقة ممتازة تجمع بين السعر المناسب والجودة العالية. قريبة من المدارس والمستشفيات والمراكز الحيوية، وخيار استثماري جذاب بعائد إيجاري مجزٍ.",
+      "publishedAt": "2026-09-01",
+      "featured": false
+    },
+    {
+      "id": "prop-mar-penthouse-naeem",
+      "slug": "luxury-penthouse-mar-views-naeem",
+      "title": "بنتهاوس روف 5 غرف بتراس زجاجي - مار فيوز النعيم",
+      "type": "penthouse",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-views",
+        "name": "مشروع مار فيوز - النعيم",
+        "slug": "mar-views-naeem"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "النعيم",
+        "coordinates": { "lat": 21.6214, "lng": 39.1488 },
+        "address": "شارع النعيم التجاري، حي النعيم، جدة"
+      },
+      "specs": {
+        "area": 290,
+        "bedrooms": 5,
+        "bathrooms": 5,
+        "livingRooms": 2,
+        "parking": 2,
+        "floor": 5,
+        "totalFloors": 5,
+        "kitchen": true,
+        "view": "إطلالة بانورامية مفتوحة على شمال جدة",
+        "direction": "corner",
+        "features": [
+          "تراس زجاجي بانورامي مع برجولة خشبية",
+          "جناح رئيسي فندقي بدورة مياه جاكوزي",
+          "غرفة سائق خاصة مع الحمام",
+          "غرفة خادمة مستقلة وغرفة غسيل",
+          "سمارت كود للدخول والمراقبة",
+          "موقفين سيارات خاصة بالقبو"
+        ]
+      },
+      "pricing": {
+        "price": 1280000,
+        "pricePerMeter": 4413,
+        "currency": "SAR",
+        "isNegotiable": true,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 6900
+      },
+      "media": {
+        "images": [
+          "/properties/penthouse.webp",
+          "/projects/panorama-penthouse.webp",
+          "/properties/apartment.webp"
+        ],
+        "thumbnail": "/properties/penthouse.webp",
+        "videos": []
+      },
+      "description": "بنتهاوس مودرن بتصميم انسيابي مذهل يمنحك تجربة الحياة الفندقية يومياً. تشطيبات فاخرة وأرضيات بورسلان إسباني فاخر ونوافذ دبل جلاس عازلة للصوت والحرارة.",
+      "publishedAt": "2026-09-03",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-apt-naeem-3",
+      "slug": "prime-apartment-3-rooms-mar-views",
+      "title": "شقة ذكية 3 غرف - مار فيوز النعيم",
+      "type": "apartment",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-views",
+        "name": "مشروع مار فيوز - النعيم",
+        "slug": "mar-views-naeem"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "النعيم",
+        "coordinates": { "lat": 21.6214, "lng": 39.1488 },
+        "address": "شارع النعيم، حي النعيم، جدة"
+      },
+      "specs": {
+        "area": 145,
+        "bedrooms": 3,
+        "bathrooms": 3,
+        "livingRooms": 1,
+        "parking": 1,
+        "floor": 3,
+        "totalFloors": 5,
+        "kitchen": true,
+        "view": "إطلالة على الحديقة المقابلة",
+        "direction": "south",
+        "features": [
+          "تصميم مودرن مدمج",
+          "إضاءات ذكية متصلة بالهاتف",
+          "مطبخ أوروبي راقٍ",
+          "موقف خاص مغطى",
+          "موقع استراتيجي بجوار مول العرب"
+        ]
+      },
+      "pricing": {
+        "price": 640000,
+        "pricePerMeter": 4413,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 3480
+      },
+      "media": {
+        "images": [
+          "/properties/apartment.webp",
+          "/properties/penthouse.webp"
+        ],
+        "thumbnail": "/properties/apartment.webp",
+        "videos": []
+      },
+      "description": "شقة سريعة الاستثمار والتمليك للأسر الشابة والمستثمرين في موقع حيوي واستراتيجي بالقرب من طريق المدينة ومطار الملك عبدالعزيز الدولي.",
+      "publishedAt": "2026-09-05",
+      "featured": false
+    },
+    {
+      "id": "prop-mar-apt-oasis-makkah",
+      "slug": "premium-apartment-4-rooms-mar-oasis-makkah",
+      "title": "شقة استثمارية 4 غرف - واحة مار العوالي بمكة",
+      "type": "apartment",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-oasis",
+        "name": "مشروع واحة مار - العوالي",
+        "slug": "mar-oasis-makkah"
+      },
+      "location": {
+        "city": "مكة المكرمة",
+        "district": "العوالي",
+        "coordinates": { "lat": 21.3541, "lng": 39.8972 },
+        "address": "طريق إبراهيم الجفالي، حي العوالي، مكة المكرمة"
+      },
+      "specs": {
+        "area": 180,
+        "bedrooms": 4,
+        "bathrooms": 4,
+        "livingRooms": 1,
+        "parking": 1,
+        "floor": 2,
+        "totalFloors": 6,
+        "kitchen": true,
+        "view": "إطلالة جبلية خلابة وهادئة",
+        "direction": "west",
+        "features": [
+          "قرب مباشر من الحرم المكي الشريف",
+          "خدمات إدارة وتأجير موسمي متكاملة",
+          "مداخل مكيفة وأمن على مدار الساعة",
+          "تشطيبات الترا لوكس عصرية",
+          "خزانات مياه مستقلة بسعات عالية"
+        ]
+      },
+      "pricing": {
+        "price": 990000,
+        "pricePerMeter": 5500,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 15,
+        "monthlyInstallment": 5200
+      },
+      "media": {
+        "images": [
+          "/projects/amal-stars-showcase.webp",
+          "/properties/apartment.webp",
+          "/properties/penthouse.webp"
+        ],
+        "thumbnail": "/projects/amal-stars-showcase.webp",
+        "videos": []
+      },
+      "description": "فرصة امتلاك عقار متميز في مكة المكرمة بحي العوالي الراقي. تجمع الوحدة بين راحة السكن العائلي وإمكانية تحقيق عوائد استثمارية موسمية ممتازة أثناء مواسم الحج والعمرة.",
+      "publishedAt": "2026-09-07",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-duplex-rawdah",
+      "slug": "luxury-duplex-mar-palace-rawdah",
+      "title": "دوبلكس فاخر دورين بمدخل مستقل - قصر مار الروضة",
+      "type": "duplex",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-palace",
+        "name": "مشروع قصر مار - الروضة",
+        "slug": "mar-palace-rawdah"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "الروضة",
+        "coordinates": { "lat": 21.5645, "lng": 39.1554 },
+        "address": "شارع الكيال، حي الروضة، جدة"
+      },
+      "specs": {
+        "area": 340,
+        "bedrooms": 5,
+        "bathrooms": 5,
+        "livingRooms": 2,
+        "parking": 2,
+        "floor": 1,
+        "totalFloors": 2,
+        "kitchen": true,
+        "view": "إطلالة أمامية على الحديقة الخاصة",
+        "direction": "corner",
+        "features": [
+          "مدخل مستقل مباشر من الشارع",
+          "حديقة خاصة وحوش واسع",
+          "سلم داخلي من الرخام الإيطالي الفاخر",
+          "غرفة خادمة وغرفة غسيل وغرفة سائق",
+          "تكييف دكت سبليت مركزي لجميع الأدوار",
+          "موقفين سيارات خاصة مجهزة بمظلات فاخرة"
+        ]
+      },
+      "pricing": {
+        "price": 2850000,
+        "pricePerMeter": 8382,
+        "currency": "SAR",
+        "isNegotiable": true,
+        "downPaymentPct": 15,
+        "monthlyInstallment": 14200
+      },
+      "media": {
+        "images": [
+          "/properties/villa.webp",
+          "/properties/penthouse.webp",
+          "/projects/villa_3d_render.webp"
+        ],
+        "thumbnail": "/properties/villa.webp",
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-modern-apartment-interior-41584-large.mp4"]
+      },
+      "description": "دوبلكس راقٍ يوفر لك شعور الفيلا المستقلة مع خصوصية متكاملة في قلب حي الروضة بجدة. الدور الأرضي مخصص للاستقبال والضيافة، والدور العلوي يضم أجنحة النوم الفارهة والمعيشة الخاصة.",
+      "publishedAt": "2026-09-08",
+      "featured": true
+    },
+    {
+      "id": "prop-mar-apt-shati-3",
+      "slug": "sea-view-apartment-3-rooms-mar-residence",
+      "title": "شقة بحرية 3 غرف بإطلالة جانبية - مار ريزيدنس الشاطئ",
+      "type": "apartment",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-residence",
+        "name": "مشروع مار ريزيدنس",
+        "slug": "mar-residence-shati"
+      },
+      "location": {
+        "city": "جدة",
+        "district": "الشاطئ",
+        "coordinates": { "lat": 21.6083, "lng": 39.1122 },
+        "address": "طريق الكورنيش، حي الشاطئ، جدة"
+      },
+      "specs": {
+        "area": 175,
+        "bedrooms": 3,
+        "bathrooms": 3,
+        "livingRooms": 1,
+        "parking": 1,
+        "floor": 7,
+        "totalFloors": 12,
+        "kitchen": true,
+        "view": "إطلالة جانبية مفتوحة على البحر",
+        "direction": "west",
+        "features": [
+          "شرفة زجاجية مطلة على نسيم البحر",
+          "أنظمة عزل حراري وصوتي ألماني",
+          "اشتراك مجاني بالنادي الصحي واللاونج",
+          "حراسة أمنية واستقبال فندقي",
+          "موقف خاص تحت الأرض"
+        ]
+      },
+      "pricing": {
+        "price": 1850000,
+        "pricePerMeter": 10571,
+        "currency": "SAR",
+        "isNegotiable": false,
+        "downPaymentPct": 10,
+        "monthlyInstallment": 9800
+      },
+      "media": {
+        "images": [
+          "/projects/amal-stars-showcase.webp",
+          "/properties/apartment.webp"
+        ],
+        "thumbnail": "/projects/amal-stars-showcase.webp",
+        "videos": []
+      },
+      "description": "تجربة سكنية فاخرة تناسب عشاق الإطلالات البحرية والحياة الحيوية بجوار واجهة جدة البحرية والمطاعم العالمية.",
+      "publishedAt": "2026-09-10",
+      "featured": false
+    },
+    {
+      "id": "prop-mar-apt-malqa-penthouse",
+      "slug": "panoramic-penthouse-mar-boulevard-malqa",
+      "title": "بنتهاوس فاخر 5 غرف بإطلالة على أبراج الرياض - مار بوليفارد",
+      "type": "penthouse",
+      "status": "available",
+      "project": {
+        "id": "proj-mar-boulevard",
+        "name": "مشروع مار بوليفارد - الملقا",
+        "slug": "mar-boulevard-malqa"
+      },
+      "location": {
+        "city": "الرياض",
+        "district": "الملقا",
+        "coordinates": { "lat": 24.8112, "lng": 46.6128 },
+        "address": "طريق أنس بن مالك، حي الملقا، الرياض"
+      },
+      "specs": {
+        "area": 310,
+        "bedrooms": 5,
+        "bathrooms": 5,
+        "livingRooms": 2,
+        "parking": 2,
+        "floor": 6,
+        "totalFloors": 6,
+        "kitchen": true,
+        "view": "إطلالة بانورامية ساحرة على شمال العاصمة",
+        "direction": "north",
+        "features": [
+          "سطح بانورامي خاص مع حديقة سماوية",
+          "دخول ذكي متصل بالأقمار والإنترنت",
+          "أرضيات خشبية باركيه طبيعي مع رخام",
+          "غرفة خادمة ماستر وغرفة سائق",
+          "موقفين سيارات خاصة مغطاة"
+        ]
+      },
+      "pricing": {
+        "price": 2750000,
+        "pricePerMeter": 8870,
+        "currency": "SAR",
+        "isNegotiable": true,
+        "downPaymentPct": 15,
+        "monthlyInstallment": 13900
+      },
+      "media": {
+        "images": [
+          "/projects/panorama-penthouse.webp",
+          "/properties/penthouse.webp",
+          "/properties/apartment.webp"
+        ],
+        "thumbnail": "/projects/panorama-penthouse.webp",
+        "videos": ["https://assets.mixkit.co/videos/preview/mixkit-luxury-home-interior-41582-large.mp4"]
+      },
+      "description": "قمة الرفاهية في شمال الرياض. بنتهاوس بتصميم عصري جريء ومساحات مفتوحة رحبة تمنحك إطلالة خلابة على أفق مدينة الرياض ليلاً ونهاراً.",
+      "publishedAt": "2026-09-12",
+      "featured": true
+    }
+  ]
+}

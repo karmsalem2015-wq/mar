@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdminBreadcrumb from '../../../components/admin/layout/AdminBreadcrumb';
+import AdminSelect from '../../../components/admin/AdminSelect';
 import {
   Plus,
   Search,
@@ -14,6 +15,11 @@ import {
   Star,
   FolderKanban,
   Loader2,
+  LayoutGrid,
+  List,
+  Building2,
+  Calendar,
+  MapPin,
 } from 'lucide-react';
 import { getProjectsListAdmin, deleteProject } from '@/app/actions/properties';
 
@@ -27,6 +33,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -49,21 +57,30 @@ export default function ProjectsPage() {
   };
 
   const filteredProjects = projects.filter((proj) => {
-    if (!searchQuery) return true;
     const nameVal = proj.name || '';
     const cityVal = proj.city || proj.location?.city || '';
-    return nameVal.includes(searchQuery) || cityVal.includes(searchQuery);
+    const districtVal = proj.district || proj.location?.district || '';
+    
+    const matchesSearch = !searchQuery ||
+      nameVal.includes(searchQuery) ||
+      cityVal.includes(searchQuery) ||
+      districtVal.includes(searchQuery);
+
+    const matchesStatus = statusFilter === 'all' || proj.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
   return (
     <div>
       <AdminBreadcrumb items={[{ label: 'المشاريع' }]} />
 
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-[var(--neu-text-heading)]">إدارة المشاريع</h2>
           <p className="text-sm text-[var(--neu-text-muted)] mt-1">
-            {projects.length} مشروع مسجّل
+            {projects.length} مشروع مسجّل في النظام
           </p>
         </div>
         <Link href="/mar-cp/projects/new" className="neu-btn neu-btn-primary">
@@ -72,115 +89,379 @@ export default function ProjectsPage() {
         </Link>
       </div>
 
-      {/* Search */}
+      {/* Filters Bar & View Switcher */}
       <div className="neu-card mb-6">
-        <div className="relative">
-          <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--neu-text-muted)]" />
-          <input
-            type="text"
-            placeholder="ابحث بالاسم أو المدينة..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="neu-input neu-input-search"
-          />
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--neu-text-muted)]" />
+            <input
+              type="text"
+              placeholder="ابحث باسم المشروع، المدينة، أو الحي..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="neu-input neu-input-search"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Status Filter */}
+            <AdminSelect
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: 'all', label: 'كل الحالات' },
+                { value: 'under_construction', label: 'تحت الإنشاء' },
+                { value: 'completed', label: 'مكتمل' },
+                { value: 'upcoming', label: 'قادم' },
+              ]}
+              className="w-full sm:w-44"
+              placeholder="تصفية حسب الحالة"
+            />
+
+            {/* View Mode Toggle: Table / Cards */}
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--neu-depressed)] border border-[var(--neu-border)] shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'table'
+                    ? 'bg-[var(--neu-gold)] text-black shadow-sm'
+                    : 'text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-heading)]'
+                }`}
+                title="عرض الجدول"
+                aria-label="عرض الجدول"
+              >
+                <List className="w-3.5 h-3.5" />
+                <span>جدول</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-[var(--neu-gold)] text-black shadow-sm'
+                    : 'text-[var(--neu-text-secondary)] hover:text-[var(--neu-text-heading)]'
+                }`}
+                title="عرض الكروت"
+                aria-label="عرض الكروت"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>كروت</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Projects Grid */}
+      {/* Content Area */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-center neu-card">
           <Loader2 className="w-10 h-10 text-[var(--neu-gold)] animate-spin mb-3" />
-          <p className="text-sm text-[var(--neu-text-secondary)]">جاري تحميل المشاريع من قاعدة البيانات...</p>
+          <p className="text-sm text-[var(--neu-text-secondary)]">جاري تحميل المشاريع...</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {filteredProjects.map((proj) => {
-              const heroSrc = proj.hero_image || proj.media?.hero || '/projects/placeholder.webp';
-              const cityVal = proj.city || proj.location?.city || '';
-              const districtVal = proj.district || proj.location?.district || '';
-              const availUnits = proj.available_units !== undefined ? proj.available_units : proj.specs?.availableUnits;
-              const totalUnits = proj.total_units !== undefined ? proj.total_units : proj.specs?.totalUnits;
-              const minPrice = proj.price_min !== undefined ? proj.price_min : proj.priceRange?.min;
+          {viewMode === 'table' ? (
+            <div>
+              {/* Desktop Table View */}
+              <div className="neu-table-wrapper overflow-x-auto hidden md:block">
+                <table className="neu-table">
+                  <thead>
+                    <tr>
+                      <th>المشروع</th>
+                      <th>الحالة</th>
+                      <th className="hidden lg:table-cell">المدينة والحي</th>
+                      <th className="hidden sm:table-cell">نطاق الأسعار</th>
+                      <th className="hidden xl:table-cell">الوحدات</th>
+                      <th className="hidden xl:table-cell">تاريخ التسليم</th>
+                      <th>إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProjects.map((proj) => {
+                      const heroSrc = proj.hero_image || proj.media?.hero || '/projects/placeholder.webp';
+                      const cityVal = proj.city || proj.location?.city || '';
+                      const districtVal = proj.district || proj.location?.district || '';
+                      const availUnits = proj.available_units !== undefined ? proj.available_units : proj.specs?.availableUnits;
+                      const totalUnits = proj.total_units !== undefined ? proj.total_units : proj.specs?.totalUnits;
+                      const minPrice = proj.price_min !== undefined ? proj.price_min : proj.priceRange?.min;
+                      const maxPrice = proj.price_max !== undefined ? proj.price_max : proj.priceRange?.max;
+                      const completionDate = proj.completion_date || proj.specs?.completionDate || 'غير محدد';
 
-              return (
-                <div key={proj.id} className="neu-card neu-card-interactive overflow-hidden p-0">
-                  {/* Image */}
-                  <div className="p-3 pb-0">
-                    <div className="relative h-48 bg-[var(--neu-depressed)] rounded-2xl overflow-hidden">
-                      <Image
-                        src={heroSrc}
-                        alt={proj.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute top-3 right-3">
-                        <span className={`neu-badge ${STATUS_LABELS[proj.status]?.class || ''}`}>
-                          {STATUS_LABELS[proj.status]?.label || proj.status}
-                        </span>
-                      </div>
-                      {proj.featured && (
-                        <div className="absolute top-3 left-3">
-                          <Star className="w-5 h-5 text-[var(--neu-gold)] fill-[var(--neu-gold)]" />
+                      return (
+                        <tr key={proj.id}>
+                          <td>
+                            <div className="flex items-center gap-3">
+                              <div className="w-14 h-14 rounded-xl overflow-hidden bg-[var(--neu-depressed)] shrink-0 relative border border-white/5">
+                                <Image
+                                  src={heroSrc}
+                                  alt={proj.name}
+                                  fill
+                                  className="object-cover"
+                                  sizes="56px"
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-[var(--neu-text-heading)] truncate max-w-[200px]">
+                                  {proj.name}
+                                </p>
+                                <p className="text-xs text-[var(--neu-text-muted)] mt-0.5 truncate max-w-[220px]">
+                                  {proj.tagline || `${cityVal}، ${districtVal}`}
+                                </p>
+                              </div>
+                              {proj.featured && (
+                                <Star className="w-4 h-4 text-[var(--neu-gold)] fill-[var(--neu-gold)] shrink-0" />
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`neu-badge ${STATUS_LABELS[proj.status]?.class || ''}`}>
+                              {STATUS_LABELS[proj.status]?.label || proj.status}
+                            </span>
+                          </td>
+                          <td className="hidden lg:table-cell">
+                            <span className="text-sm text-[var(--neu-text-secondary)]">
+                              {cityVal}، {districtVal}
+                            </span>
+                          </td>
+                          <td className="hidden sm:table-cell">
+                            <span className="font-semibold text-[var(--neu-gold)]">
+                              {minPrice ? minPrice.toLocaleString('en-US') : '0'}
+                              {maxPrice && maxPrice > minPrice ? ` - ${maxPrice.toLocaleString('en-US')}` : ''}
+                            </span>
+                            <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
+                          </td>
+                          <td className="hidden xl:table-cell">
+                            <span className="text-sm font-semibold text-[var(--neu-text-heading)] font-mono">
+                              {availUnits !== undefined ? `${availUnits} من ${totalUnits || '-'}` : (totalUnits || '-')}
+                            </span>
+                          </td>
+                          <td className="hidden xl:table-cell">
+                            <span className="text-xs text-[var(--neu-text-secondary)]">
+                              {completionDate}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="flex items-center gap-1">
+                              <Link
+                                href={`/projects/${proj.slug}`}
+                                target="_blank"
+                                className="neu-btn neu-btn-ghost neu-btn-sm"
+                                title="معاينة"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Link>
+                              <Link
+                                href={`/mar-cp/projects/${proj.id}`}
+                                className="neu-btn neu-btn-ghost neu-btn-sm"
+                                title="تعديل"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </Link>
+                              <button
+                                onClick={() => handleDelete(proj.id, proj.name)}
+                                className="neu-btn neu-btn-ghost neu-btn-sm text-[var(--neu-danger)] hover:!text-[var(--neu-danger)]"
+                                title="حذف"
+                                aria-label={`حذف مشروع ${proj.name}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards List View (when in table mode on mobile) */}
+              <div className="grid grid-cols-1 gap-4 md:hidden">
+                {filteredProjects.map((proj) => {
+                  const heroSrc = proj.hero_image || proj.media?.hero || '/projects/placeholder.webp';
+                  const cityVal = proj.city || proj.location?.city || '';
+                  const districtVal = proj.district || proj.location?.district || '';
+                  const availUnits = proj.available_units !== undefined ? proj.available_units : proj.specs?.availableUnits;
+                  const totalUnits = proj.total_units !== undefined ? proj.total_units : proj.specs?.totalUnits;
+                  const minPrice = proj.price_min !== undefined ? proj.price_min : proj.priceRange?.min;
+                  const maxPrice = proj.price_max !== undefined ? proj.price_max : proj.priceRange?.max;
+                  const completionDate = proj.completion_date || proj.specs?.completionDate || 'غير محدد';
+
+                  return (
+                    <div key={proj.id} className="neu-card flex flex-col gap-4 p-4 relative overflow-hidden">
+                      <div className="flex gap-3.5 items-start">
+                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[var(--neu-depressed)] shrink-0 relative border border-white/10">
+                          <Image
+                            src={heroSrc}
+                            alt={proj.name}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
                         </div>
-                      )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                            <span className={`neu-badge text-[10px] py-0.5 px-2 ${STATUS_LABELS[proj.status]?.class || ''}`}>
+                              {STATUS_LABELS[proj.status]?.label || proj.status}
+                            </span>
+                            {proj.featured && (
+                              <Star className="w-3.5 h-3.5 text-[var(--neu-gold)] fill-[var(--neu-gold)] shrink-0" />
+                            )}
+                          </div>
+                          <h4 className="font-bold text-sm text-[var(--neu-text-heading)] line-clamp-1">
+                            {proj.name}
+                          </h4>
+                          <p className="text-xs text-[var(--neu-text-muted)] mt-1 flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-[var(--neu-gold)]" />
+                            <span>{cityVal}، {districtVal}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 py-2.5 border-y border-white/5 text-xs">
+                        <div>
+                          <span className="text-[10px] text-[var(--neu-text-muted)] block">الوحدات</span>
+                          <span className="font-semibold text-[var(--neu-text-heading)] font-mono">
+                            {availUnits !== undefined ? `${availUnits} من ${totalUnits || '-'}` : (totalUnits || '-')}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-[var(--neu-text-muted)] block">الأسعار تبدأ من</span>
+                          <span className="font-bold text-[var(--neu-gold)]">
+                            {minPrice ? minPrice.toLocaleString('en-US') : '0'} ر.س
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-[var(--neu-text-muted)] block">التسليم</span>
+                          <span className="text-xs text-[var(--neu-text-secondary)]">
+                            {completionDate}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <Link
+                          href={`/projects/${proj.slug}`}
+                          target="_blank"
+                          className="neu-btn neu-btn-ghost neu-btn-sm flex-1"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          معاينة
+                        </Link>
+                        <Link
+                          href={`/mar-cp/projects/${proj.id}`}
+                          className="neu-btn neu-btn-secondary neu-btn-sm flex-1"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          تعديل
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(proj.id, proj.name)}
+                          className="neu-btn neu-btn-danger neu-btn-sm"
+                          title="حذف"
+                          aria-label={`حذف مشروع ${proj.name}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* Cards Grid View */
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filteredProjects.map((proj) => {
+                const heroSrc = proj.hero_image || proj.media?.hero || '/projects/placeholder.webp';
+                const cityVal = proj.city || proj.location?.city || '';
+                const districtVal = proj.district || proj.location?.district || '';
+                const availUnits = proj.available_units !== undefined ? proj.available_units : proj.specs?.availableUnits;
+                const totalUnits = proj.total_units !== undefined ? proj.total_units : proj.specs?.totalUnits;
+                const minPrice = proj.price_min !== undefined ? proj.price_min : proj.priceRange?.min;
+                const maxPrice = proj.price_max !== undefined ? proj.price_max : proj.priceRange?.max;
+
+                return (
+                  <div key={proj.id} className="neu-card neu-card-interactive overflow-hidden p-0">
+                    {/* Image */}
+                    <div className="p-3 pb-0">
+                      <div className="relative h-48 bg-[var(--neu-depressed)] rounded-2xl overflow-hidden">
+                        <Image
+                          src={heroSrc}
+                          alt={proj.name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute top-3 right-3">
+                          <span className={`neu-badge ${STATUS_LABELS[proj.status]?.class || ''}`}>
+                            {STATUS_LABELS[proj.status]?.label || proj.status}
+                          </span>
+                        </div>
+                        {proj.featured && (
+                          <div className="absolute top-3 left-3">
+                            <Star className="w-5 h-5 text-[var(--neu-gold)] fill-[var(--neu-gold)]" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-5">
+                      <h3 className="text-lg font-bold text-[var(--neu-text-heading)] mb-1">{proj.name}</h3>
+                      <p className="text-sm text-[var(--neu-text-muted)] mb-3">
+                        {cityVal}، {districtVal}
+                      </p>
+
+                      <div className="flex items-center justify-between text-sm mb-4">
+                        <div>
+                          <span className="text-[var(--neu-text-muted)]">الوحدات: </span>
+                          <span className="font-semibold text-[var(--neu-text-heading)] font-mono">
+                            {availUnits}/{totalUnits}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[var(--neu-gold)] font-bold">
+                            {minPrice ? minPrice.toLocaleString('en-US') : '0'}
+                            {maxPrice && maxPrice > minPrice ? ` - ${maxPrice.toLocaleString('en-US')}` : ''}
+                          </span>
+                          <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/projects/${proj.slug}`}
+                          target="_blank"
+                          className="neu-btn neu-btn-ghost neu-btn-sm flex-1"
+                        >
+                          <Eye className="w-4 h-4" />
+                          معاينة
+                        </Link>
+                        <Link
+                          href={`/mar-cp/projects/${proj.id}`}
+                          className="neu-btn neu-btn-secondary neu-btn-sm flex-1"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          تعديل
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(proj.id, proj.name)}
+                          className="neu-btn neu-btn-danger neu-btn-sm"
+                          title="حذف"
+                          aria-label={`حذف مشروع ${proj.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Content */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-[var(--neu-text-heading)] mb-1">{proj.name}</h3>
-                    <p className="text-sm text-[var(--neu-text-muted)] mb-3">
-                      {cityVal}، {districtVal}
-                    </p>
-
-                    <div className="flex items-center justify-between text-sm mb-4">
-                      <div>
-                        <span className="text-[var(--neu-text-muted)]">الوحدات: </span>
-                        <span className="font-semibold text-[var(--neu-text-heading)]">
-                          {availUnits}/{totalUnits}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[var(--neu-gold)] font-bold">
-                          {minPrice ? minPrice.toLocaleString('en-US') : '0'}
-                        </span>
-                        <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/projects/${proj.slug}`}
-                        target="_blank"
-                        className="neu-btn neu-btn-ghost neu-btn-sm flex-1"
-                      >
-                        <Eye className="w-4 h-4" />
-                        معاينة
-                      </Link>
-                      <Link
-                        href={`/mar-cp/projects/${proj.id}`}
-                        className="neu-btn neu-btn-secondary neu-btn-sm flex-1"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                        تعديل
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(proj.id, proj.name)}
-                        className="neu-btn neu-btn-danger neu-btn-sm"
-                        title="حذف"
-                        aria-label={`حذف مشروع ${proj.name}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {filteredProjects.length === 0 && (
             <div className="neu-card flex flex-col items-center justify-center py-16 text-center">
@@ -190,6 +471,7 @@ export default function ProjectsPage() {
           )}
         </>
       )}
+
       {/* Delete Confirmation Modal */}
       {projectToDelete && (
         <div

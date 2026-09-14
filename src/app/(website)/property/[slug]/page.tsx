@@ -455,14 +455,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
 // Generate static params for prerendering dynamic page routes
 export async function generateStaticParams() {
-  try {
-    const supabase = getSupabaseAdminClient();
-    const { data } = await supabase.from('properties').select('slug');
-    return ((data || []) as any[]).map((p) => ({
-      slug: p.slug,
-    }));
-  } catch (e) {
-    console.error("Error generating static params for properties:", e);
-    return [];
-  }
+  return PROPERTIES.map((p) => ({
+    slug: p.slug,
+  }));
 }
