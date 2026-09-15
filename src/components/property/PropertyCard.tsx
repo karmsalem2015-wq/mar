@@ -38,6 +38,7 @@ const itemVariants = {
 export default function PropertyCard({ property, index = 0 }: PropertyCardProps) {
   // Format currency with English numerals
   const formatPrice = (price: number) => {
+    if (!price || price <= 0) return 'السعر غير محدد';
     return new Intl.NumberFormat('en-US', {
       maximumFractionDigits: 0,
     }).format(price) + ' ر.س';
@@ -90,9 +91,16 @@ export default function PropertyCard({ property, index = 0 }: PropertyCardProps)
           </span>
         );
       default:
-        return null;
+        return (
+          <span className="px-3 py-1 text-[10px] font-extrabold text-white bg-gray-600 border border-gray-600 rounded-full shadow-sm">
+            غير محدد
+          </span>
+        );
     }
   };
+
+  const hasRealImage = Boolean(property.media.thumbnail || property.media.gallery?.[0]);
+  const displayImage = property.media.thumbnail || property.media.gallery?.[0] || getPropertyImage(property.type);
 
   return (
     <motion.div
@@ -116,6 +124,12 @@ export default function PropertyCard({ property, index = 0 }: PropertyCardProps)
           {renderStatusBadge(property.status)}
         </div>
 
+        {!hasRealImage && (
+          <div className="absolute top-4 end-4 z-20">
+            <span className="px-2.5 py-1 text-[10px] font-bold text-white bg-black/75 backdrop-blur-md rounded-full font-cairo">صورة توضيحية</span>
+          </div>
+        )}
+
         {/* Type tag overlay */}
         <div className="absolute bottom-4 start-4 z-20">
           <span className="px-2.5 py-1 text-[10px] font-bold text-white bg-black/75 backdrop-blur-md rounded-md uppercase font-cairo">
@@ -125,7 +139,7 @@ export default function PropertyCard({ property, index = 0 }: PropertyCardProps)
 
         {/* Image with slow zoom effect on hover */}
         <Image
-          src={getPropertyImage(property.type)}
+          src={displayImage}
           alt={property.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
