@@ -263,6 +263,8 @@ interface PropertyListingsSectionProps {
   maxPrice: string;
   setMaxPrice: (price: string) => void;
   isLoading?: boolean;
+  isLoadingRemaining?: boolean;
+  loadedPropertyCount?: number;
 }
 
 export default function PropertyListingsSection({
@@ -276,6 +278,8 @@ export default function PropertyListingsSection({
   maxPrice,
   setMaxPrice,
   isLoading = false,
+  isLoadingRemaining = false,
+  loadedPropertyCount = 0,
 }: PropertyListingsSectionProps) {
   const shouldReduceMotion = useReducedMotion();
   const [showLocalFilters, setShowLocalFilters] = useState<boolean>(false);
@@ -511,6 +515,13 @@ export default function PropertyListingsSection({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {isLoadingRemaining && !isLoading && (
+          <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-[#CAA048]/25 bg-[#CAA048]/[0.06] px-4 py-3 text-xs sm:text-sm font-cairo text-gray-600" role="status" aria-live="polite">
+            <span>تم عرض أول <strong className="font-mono text-brand-black">{loadedPropertyCount}</strong> وحدة — جاري تحميل باقي الوحدات في الخلفية…</span>
+            <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-[#CAA048]/30 border-t-[#CAA048]" aria-hidden="true" />
+          </div>
+        )}
 
         {isLoading ? (
           <div className="space-y-12">
