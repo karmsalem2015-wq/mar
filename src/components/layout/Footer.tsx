@@ -286,12 +286,12 @@ export default function Footer({ settings }: FooterProps) {
               </div>
 
               {/* Direct Phone Lines */}
-              <div className="flex items-start gap-3.5">
-                <div className="size-8.5 rounded-xl bg-[#E6A821]/10 border border-[#E6A821]/25 flex items-center justify-center shrink-0 mt-0.5 text-[#E6A821]">
+              <div className="flex items-center gap-2.5">
+                <div className="size-8.5 rounded-xl bg-[#E6A821]/10 border border-[#E6A821]/25 flex items-center justify-center shrink-0 text-[#E6A821]">
                   <Phone className="size-4" aria-hidden="true" />
                 </div>
-                <div>
-                  <span className="block text-[11px] font-medium text-white/50">خدمة العملاء والمبيعات</span>
+                <div className="min-w-0">
+                  <span className="block text-[11px] leading-tight font-medium text-white/50 mb-0.5">خدمة العملاء والمبيعات</span>
                   <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono text-white/90" dir="ltr">
                     <a
                       href={`tel:${(contact?.unifiedNumber || BRAND.contact.primaryPhone.display).replace(/[^0-9+]/g, '')}`}
