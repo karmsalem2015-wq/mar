@@ -28,10 +28,6 @@ const PORTFOLIO_LINKS = [
 // Company & Ecosystem Links
 const COMPANY_LINKS = [
   { href: '/about', label: 'عن مار ومسيرة الريادة' },
-  { href: '/#virtual-tour', label: 'الجولة الافتراضية 360°' },
-  { href: '/properties#calculator', label: 'حاسبة التمويل العقاري' },
-  { href: '/#request-property', label: 'خدمة اطلب عقارك الخاصة' },
-  { href: '/about#partners', label: 'شركاء التطوير والإنجاز' },
   { href: '/contact', label: 'تواصل مع مستشارينا' },
 ] as const;
 
