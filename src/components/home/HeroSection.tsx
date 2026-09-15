@@ -310,7 +310,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
 
       // Time-based easing behaves consistently on 60/90/120Hz screens.
       // A short touch filter absorbs event bursts without replacing native scrolling.
-      const factor = 1 - Math.exp(-(isMobile ? 20 : 26) * dt);
+      const factor = 1 - Math.exp(-(isMobile ? 16 : 22) * dt);
       smoothFrameRef.current = Math.abs(delta) > 0.01
         ? current + delta * factor
         : target;
@@ -376,8 +376,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     let priorityLimit = 8;
     let largestFrameBytes = 0;
     let ready = false;
-    const concurrency = variant === 'mobile' ? 4 : 6;
-    const byteBudget = (variant === 'mobile' ? 96 : 160) * 1024 * 1024;
+    const concurrency = variant === 'mobile' ? 6 : 8;
+    const byteBudget = (variant === 'mobile' ? 112 : 192) * 1024 * 1024;
     const pending = new Map<number, () => void>();
     const attempts = new Map<number, number>();
     const retryAfter = new Map<number, number>();
@@ -423,7 +423,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       attempts.set(index, (attempts.get(index) || 0) + 1);
       const img = new window.Image();
       let finished = false;
-      const timeout = setTimeout(() => finish(false), 12000);
+      const timeout = setTimeout(() => finish(false), 8000);
       const finish = (success: boolean) => {
         if (finished) return;
         finished = true;
@@ -478,10 +478,12 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       };
       add(current);
       add(target);
-      for (let offset = 1; offset <= 24; offset++) {
+      for (let offset = 1; offset <= 36; offset++) {
+        // Interleave the camera path around both the displayed and target frame.
+        // A wider forward window prevents fast wheel/touch bursts from outrunning decode.
         add(current + offset * direction);
         add(target + offset * direction);
-        if (offset <= 8) add(current - offset * direction);
+        if (offset <= 10) add(current - offset * direction);
       }
       priority = [...order].slice(0, priorityLimit);
       pump();
