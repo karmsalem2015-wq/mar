@@ -133,6 +133,7 @@ export default function PropertyForm({ initialData, propertyId }: PropertyFormPr
   const [status, setStatus] = useState(initialData?.status || 'available');
   const [projectId, setProjectId] = useState(initialData?.project_id || urlProjectId);
   const [description, setDescription] = useState(initialData?.description || '');
+  const [advertisingLicenseNumber, setAdvertisingLicenseNumber] = useState(initialData?.advertising_license_number || '');
   const [featured, setFeatured] = useState(initialData?.featured || false);
   const [published, setPublished] = useState(initialData?.published || false);
 
@@ -512,6 +513,7 @@ const getStoragePathFromUrl = (url: string) => {
       status,
       projectId,
       description,
+      advertisingLicenseNumber,
       featured,
       published,
       price,
@@ -1112,6 +1114,20 @@ const getStoragePathFromUrl = (url: string) => {
             <div className="space-y-6">
 
               {/* Main image & Floor plan row */}
+              <div className="mb-6">
+                <label className="neu-label">ترخيص الإعلان العقاري <span className="text-[var(--neu-text-muted)] font-normal">(اختياري)</span></label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={advertisingLicenseNumber}
+                  onChange={(e) => setAdvertisingLicenseNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="مثال: 7200018942"
+                  className="neu-input"
+                  dir="ltr"
+                />
+                <p className="mt-1.5 text-[10px] text-[var(--neu-text-muted)]">يظهر في صفحة العقار فقط عند إدخال رقم الترخيص.</p>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* Thumbnail field */}
