@@ -27,7 +27,14 @@ import {
   Info,
   Sparkles,
   Map,
-  CheckCircle
+  CheckCircle,
+  FileBadge,
+  UserRound,
+  Database,
+  Warehouse,
+  WashingMachine,
+  DoorOpen,
+  Trees
 } from 'lucide-react';
 
 interface PageProps {
@@ -116,6 +123,18 @@ export default async function PropertyDetailPage({ params }: PageProps) {
       default: return property.specs.direction;
     }
   })();
+
+  const getFeatureIcon = (feature: string) => {
+    const value = feature.trim().toLowerCase();
+    if (value.includes('خادم') || value.includes('عاملة')) return UserRound;
+    if (value.includes('موقف') || value.includes('سيارة') || value.includes('كراج')) return Car;
+    if (value.includes('خزان') || value.includes('مياه')) return Database;
+    if (value.includes('مستودع') || value.includes('مخزن')) return Warehouse;
+    if (value.includes('غسيل')) return WashingMachine;
+    if (value.includes('مدخل') || value.includes('باب')) return DoorOpen;
+    if (value.includes('حديق') || value.includes('سطح')) return Trees;
+    return Sparkles;
+  };
 
   const whatsappLink = `https://wa.me/966568526666?text=${encodeURIComponent(
     `السلام عليكم، أرغب في الاستفسار عن تفاصيل: ${property.title} (${property.pricing.price} ر.س)`
@@ -355,12 +374,24 @@ export default async function PropertyDetailPage({ params }: PageProps) {
         </section>
 
         {/* 6. Description (Full Width) */}
-        <section className="bg-white border border-gray-200/90 hover:border-[#CAA048] rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all duration-300">
-          <h2 className="text-base sm:text-lg font-bold text-brand-black mb-4 font-cairo">الوصف التفصيلي</h2>
-          <p className="text-sm text-gray-700 leading-relaxed font-cairo whitespace-pre-line">
-            {property.description}
-          </p>
-        </section>
+        {property.description?.trim() && (
+          <section className="bg-white border border-gray-200/90 hover:border-[#CAA048] rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all duration-300">
+            <h2 className="text-base sm:text-lg font-bold text-brand-black mb-4 font-cairo">الوصف التفصيلي</h2>
+            <p className="text-sm text-gray-700 leading-relaxed font-cairo whitespace-pre-line">
+              {property.description}
+            </p>
+          </section>
+        )}
+
+        {(property as any).advertisingLicenseNumber && (
+          <section className="bg-white border border-gray-200/90 rounded-2xl px-5 py-4 shadow-sm flex items-center gap-3">
+            <FileBadge className="w-5 h-5 text-[#CAA048] shrink-0" />
+            <div className="font-cairo">
+              <span className="block text-[10px] text-gray-500 mb-0.5">ترخيص الإعلان العقاري</span>
+              <span className="text-sm font-bold text-brand-black font-mono" dir="ltr">{(property as any).advertisingLicenseNumber}</span>
+            </div>
+          </section>
+        )}
 
         {/* 6.5. Floor Plan (if available) */}
         {property.media.floorPlan && (
@@ -396,12 +427,17 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </h2>
 
                 <div className="grid grid-cols-1 gap-3">
-                  {property.specs.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 transition-colors">
-                      <CheckCircle className="w-4 h-4 text-[#CAA048] shrink-0" />
-                      <span className="text-xs font-bold text-brand-black font-cairo">{feat}</span>
-                    </div>
-                  ))}
+                  {property.specs.features.map((feat, idx) => {
+                    const FeatureIcon = getFeatureIcon(feat);
+                    return (
+                      <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 transition-colors">
+                        <span className="w-8 h-8 rounded-lg bg-white border border-[#CAA048]/25 flex items-center justify-center shrink-0">
+                          <FeatureIcon className="w-4 h-4 text-[#CAA048]" strokeWidth={1.8} aria-hidden="true" />
+                        </span>
+                        <span className="text-xs font-bold text-brand-black font-cairo">{feat}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>
