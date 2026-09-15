@@ -178,7 +178,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             </h1>
             <div className="flex items-center gap-1.5 mt-2 text-xs sm:text-sm text-gray-500 font-cairo">
               <MapPin className="w-4 h-4 text-[#CAA048] shrink-0" />
-              <span>{property.location.address}</span>
+              <span>
+                {[property.location.district, property.location.city].filter(Boolean).join('، ') || property.location.address || 'الموقع غير محدد'}
+              </span>
             </div>
           </div>
 
