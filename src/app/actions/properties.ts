@@ -135,6 +135,7 @@ export async function createProperty(formData: any) {
       down_payment_pct: formData.downPaymentPct !== undefined && formData.downPaymentPct !== '' ? parseInt(formData.downPaymentPct) : null,
       monthly_installment: formData.monthlyInstallment !== undefined && formData.monthlyInstallment !== '' ? parseInt(formData.monthlyInstallment) : null,
       description: formData.description || '',
+      advertising_license_number: formData.advertisingLicenseNumber?.trim() || null,
       thumbnail: formData.thumbnail || '',
       images: formData.images || [],
       videos: formData.videos || [],
