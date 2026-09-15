@@ -377,7 +377,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     let largestFrameBytes = 0;
     let ready = false;
     const concurrency = variant === 'mobile' ? 4 : 6;
-    const byteBudget = (variant === 'mobile' ? 96 : 160) * 1024 * 1024;
+    const byteBudget = (variant === 'mobile' ? 112 : 176) * 1024 * 1024;
     const pending = new Map<number, () => void>();
     const attempts = new Map<number, number>();
     const retryAfter = new Map<number, number>();
@@ -478,10 +478,13 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       };
       add(current);
       add(target);
-      for (let offset = 1; offset <= 24; offset++) {
+      // Keep a balanced decoded neighborhood around both current and target.
+      // This makes direction reversals immediately reusable instead of waiting on fresh decodes.
+      for (let offset = 1; offset <= 20; offset++) {
         add(current + offset * direction);
         add(target + offset * direction);
-        if (offset <= 8) add(current - offset * direction);
+        add(current - offset * direction);
+        add(target - offset * direction);
       }
       priority = [...order].slice(0, priorityLimit);
       pump();
