@@ -190,7 +190,7 @@ function FeaturedPropertyCard({ property }: { property: Property }) {
 
 function SimplifiedPropertyCard({ property }: { property: Property }) {
   return (
-    <div className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-gray-200/90 transition-all duration-500 hover:border-[#CAA048] hover:shadow-xl hover:-translate-y-1 w-[280px] sm:w-[285px] md:w-[310px] shrink-0">
+    <div className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-gray-200/90 transition-all duration-500 hover:border-[#CAA048] hover:shadow-xl hover:-translate-y-1 w-[82vw] max-w-[320px] sm:w-[285px] md:w-[310px] shrink-0">
       <div className="absolute top-0 start-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#CAA048] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20"></div>
 
       <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
@@ -206,6 +206,11 @@ function SimplifiedPropertyCard({ property }: { property: Property }) {
           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-white bg-[#111315] border border-[#CAA048]/60 rounded-md font-cairo shadow-sm">
             <span className="size-1 rounded-full bg-[#CAA048]" />
             {property.type === 'annex' ? 'ملحق' : property.type === 'villa' ? 'فيلا' : property.type === 'penthouse' ? 'روف' : 'شقة'}
+          </span>
+        </div>
+        <div className="absolute top-3 start-3 z-20">
+          <span className={`px-2.5 py-1 text-xs font-bold text-white rounded-md font-cairo shadow-sm ${property.status === 'sold' ? 'bg-status-sold' : property.status === 'reserved' ? 'bg-status-reserved' : 'bg-status-available'}`}>
+            {property.status === 'sold' ? 'مباع' : property.status === 'reserved' ? 'محجوز' : 'متاح'}
           </span>
         </div>
       </div>
@@ -370,18 +375,18 @@ export default function PropertyListingsSection({
         </div>
 
         {/* 3. Toolbar: Switcher, Filter Toggle & Counter */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 pt-2 border-b border-gray-100 mb-8">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-4 pb-6 pt-2 border-b border-gray-100 mb-8">
           <div className="text-xs sm:text-sm text-gray-600 font-cairo">
             تم العثور على <strong className="text-brand-black font-bold font-cairo text-sm sm:text-base">{properties.length}</strong> وحدة مطروحة
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="grid grid-cols-[1fr_auto] sm:flex items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
             {/* View Switcher */}
-            <div className="flex items-center bg-gray-100 border border-gray-200 rounded-xl p-1 shrink-0">
+            <div className="grid grid-cols-2 bg-gray-100 border border-gray-200 rounded-xl p-1 min-w-0 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setPropertiesViewMode('grid')}
-                className={`px-3.5 py-2 rounded-lg transition-all duration-300 cursor-pointer text-xs sm:text-sm font-bold font-almarai min-h-[40px] flex items-center ${propertiesViewMode === 'grid'
+                className={`px-2.5 sm:px-3.5 py-2 rounded-lg transition-all duration-300 cursor-pointer text-xs sm:text-sm font-bold font-almarai min-h-[40px] flex items-center justify-center whitespace-nowrap ${propertiesViewMode === 'grid'
                     ? 'bg-[#111315] text-white border border-[#CAA048]/60 shadow-sm'
                     : 'text-gray-600 hover:text-brand-black'
                   }`}
@@ -391,7 +396,7 @@ export default function PropertyListingsSection({
               <button
                 type="button"
                 onClick={() => setPropertiesViewMode('table')}
-                className={`px-3.5 py-2 rounded-lg transition-all duration-300 cursor-pointer text-xs sm:text-sm font-bold font-almarai min-h-[40px] flex items-center ${propertiesViewMode === 'table'
+                className={`px-2.5 sm:px-3.5 py-2 rounded-lg transition-all duration-300 cursor-pointer text-xs sm:text-sm font-bold font-almarai min-h-[40px] flex items-center justify-center whitespace-nowrap ${propertiesViewMode === 'table'
                     ? 'bg-[#111315] text-white border border-[#CAA048]/60 shadow-sm'
                     : 'text-gray-600 hover:text-brand-black'
                   }`}
@@ -404,7 +409,7 @@ export default function PropertyListingsSection({
             <button
               type="button"
               onClick={() => setShowLocalFilters(!showLocalFilters)}
-              className={`flex items-center justify-center p-2.5 rounded-xl border transition-all duration-300 cursor-pointer shrink-0 min-w-[42px] min-h-[42px] ${showLocalFilters
+              className={`flex items-center justify-center p-2.5 rounded-xl border transition-all duration-300 cursor-pointer shrink-0 min-w-[44px] min-h-[44px] ${showLocalFilters
                   ? 'bg-[#111315] text-[#CAA048] border-[#CAA048] shadow-md scale-95'
                   : 'bg-white text-gray-700 border-gray-200 hover:border-[#CAA048] hover:text-[#CAA048] shadow-sm'
                 }`}
