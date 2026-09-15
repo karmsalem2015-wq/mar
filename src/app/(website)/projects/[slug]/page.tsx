@@ -179,7 +179,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               <h2 className="text-xl sm:text-2xl font-black text-[#CAA048] font-cairo leading-tight">
                 <span className="font-cairo text-xs block text-gray-500 font-normal mb-1">تبدأ من:</span>
                 <span className="font-mono text-3xl font-black">{formatPrice(minimumPrice)}</span>
-                {project.priceRange.max > project.priceRange.min && (
+                {project.priceRange.max > minimumPrice && (
                   <>
                     <span className="mx-2 text-gray-400 text-sm font-normal">إلى</span>
                     <span className="font-mono text-3xl font-black block mt-1">{formatPrice(project.priceRange.max)}</span>
@@ -230,10 +230,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               ></iframe>
 
               {/* Overlay Badge */}
-              <div className="absolute bottom-3 end-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-gray-200 text-[10px] text-gray-800 flex items-center gap-1.5 pointer-events-none shadow-sm font-cairo">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#CAA048]" />
-                <span className="font-bold">ضمانات تشطيب كاملة متوافقة كلياً</span>
-              </div>
+              
             </div>
           </section>
 
@@ -257,18 +254,16 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">الوحدات المتاحة</span>
               <span className="text-sm font-bold text-[#CAA048] font-cairo">{availableUnits} وحدة</span>
             </div>
-            {project.specs.completionDate?.trim() && (
-              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
-                <Calendar className="w-6 h-6 text-[#CAA048] mb-2" />
-                <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">تاريخ الاستلام</span>
-                <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.completionDate}</span>
-              </div>
-            )}
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
+              <Calendar className="w-6 h-6 text-[#CAA048] mb-2" />
+              <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">تاريخ الاستلام</span>
+              <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.completionDate?.trim() || 'قريباً'}</span>
+            </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
               <Tag className="w-6 h-6 text-[#CAA048] mb-2" />
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">الحد الأدنى للسعر</span>
               <span className="text-xs font-bold text-[#CAA048] font-mono">
-                {formatPrice(project.priceRange.min)}
+                {formatPrice(minimumPrice)}
               </span>
             </div>
           </div>
@@ -296,9 +291,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
             <div>
               <h2 className="text-lg sm:text-2xl font-bold text-brand-black font-cairo">
-                وحدات سكنية متاحة في <span className="text-[#CAA048]">{project.name}</span>
+                وحدات المشروع في <span className="text-[#CAA048]">{project.name}</span>
               </h2>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-cairo">تصفح الشقق والملحقات المتوفرة للبيع الفوري في هذا المجمع</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-cairo">تصفح الوحدات المرتبطة بهذا المشروع وحالتها الحالية</p>
             </div>
 
             <Link
