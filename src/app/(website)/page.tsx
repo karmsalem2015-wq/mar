@@ -29,12 +29,15 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!USE_DATABASE) return;
+    let cancelled = false;
+    let started = false;
     async function loadData() {
       try {
         const [propsData, projsData] = await Promise.all([
           getPropertiesListAdmin(),
           getProjectsListAdmin()
         ]);
+        if (cancelled) return;
         if (propsData && propsData.length > 0) {
           const normalizedProperties = propsData.map(normalizeProperty);
           const firstBatch = normalizedProperties.slice(0, INITIAL_HOME_BATCH);
@@ -73,7 +76,32 @@ export default function HomePage() {
         setIsLoading(false);
       }
     }
-    loadData();
+    const startDataLoad = () => {
+      if (started || cancelled) return;
+      started = true;
+      loadData();
+    };
+
+    // Keep the hero's frame decoding and scroll scrub isolated from Supabase/data work.
+    // Start fetching once the user reaches the end of the hero, with a safety fallback.
+    const contentStart = document.getElementById('content-start');
+    let observer: IntersectionObserver | undefined;
+    if (contentStart && 'IntersectionObserver' in window) {
+      observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          startDataLoad();
+          observer?.disconnect();
+        }
+      }, { rootMargin: '300px 0px' });
+      observer.observe(contentStart);
+    }
+
+    const fallbackTimer = window.setTimeout(startDataLoad, 12000);
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+      window.clearTimeout(fallbackTimer);
+    };
   }, []);
 
   // Filter States
