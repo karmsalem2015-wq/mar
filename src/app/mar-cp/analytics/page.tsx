@@ -34,51 +34,45 @@ import {
 // ---- Mock Data ----
 
 const MONTHLY_TRAFFIC = [
-  { day: '1', views: 120, visitors: 85 },
-  { day: '3', views: 180, visitors: 110 },
-  { day: '5', views: 210, visitors: 140 },
-  { day: '7', views: 350, visitors: 210 },
-  { day: '9', views: 290, visitors: 180 },
-  { day: '11', views: 410, visitors: 250 },
-  { day: '13', views: 380, visitors: 230 },
-  { day: '15', views: 520, visitors: 310 },
-  { day: '17', views: 480, visitors: 290 },
-  { day: '19', views: 550, visitors: 340 },
-  { day: '21', views: 610, visitors: 380 },
-  { day: '23', views: 580, visitors: 360 },
-  { day: '25', views: 670, visitors: 410 },
-  { day: '27', views: 720, visitors: 450 },
-  { day: '29', views: 690, visitors: 430 },
-  { day: '30', views: 740, visitors: 460 },
+  { day: '1', views: 0, visitors: 0 },
+  { day: '3', views: 0, visitors: 0 },
+  { day: '5', views: 0, visitors: 0 },
+  { day: '7', views: 0, visitors: 0 },
+  { day: '9', views: 0, visitors: 0 },
+  { day: '11', views: 0, visitors: 0 },
+  { day: '13', views: 0, visitors: 0 },
+  { day: '15', views: 0, visitors: 0 },
+  { day: '17', views: 0, visitors: 0 },
+  { day: '19', views: 0, visitors: 0 },
+  { day: '21', views: 0, visitors: 0 },
+  { day: '23', views: 0, visitors: 0 },
+  { day: '25', views: 0, visitors: 0 },
+  { day: '27', views: 0, visitors: 0 },
+  { day: '29', views: 0, visitors: 0 },
+  { day: '30', views: 0, visitors: 0 },
 ];
 
-const TOP_PROPERTIES = [
-  { name: 'بنتهاوس أمل ستارز', views: 1240 },
-  { name: 'فيلا أبو هايل الشمالية', views: 980 },
-  { name: 'فيلا مخطط سعيد', views: 870 },
-  { name: 'شقة سلامة 114', views: 650 },
-  { name: 'ملحق ريناد غاليري', views: 520 },
-];
+const TOP_PROPERTIES: { name: string; views: number }[] = [];
 
 const TRAFFIC_SOURCES = [
-  { name: 'بحث جوجل', value: 42, color: '#E6A821' },
-  { name: 'زيارة مباشرة', value: 28, color: '#EA580C' },
-  { name: 'سوشال ميديا', value: 18, color: '#10B981' },
-  { name: 'إحالات', value: 12, color: '#F59E0B' },
+  { name: 'بحث جوجل', value: 0, color: '#E6A821' },
+  { name: 'زيارة مباشرة', value: 0, color: '#EA580C' },
+  { name: 'سوشال ميديا', value: 0, color: '#10B981' },
+  { name: 'إحالات', value: 0, color: '#F59E0B' },
 ];
 
 const TOP_PAGES = [
-  { page: 'الصفحة الرئيسية', path: '/', views: 3200, bounce: '32%' },
-  { page: 'جميع العقارات', path: '/properties', views: 1850, bounce: '28%' },
-  { page: 'مشروع أمل ستارز', path: '/projects/amal-stars', views: 1420, bounce: '22%' },
-  { page: 'صفحة التواصل', path: '/contact', views: 890, bounce: '45%' },
-  { page: 'من نحن', path: '/about', views: 670, bounce: '38%' },
+  { page: 'الصفحة الرئيسية', path: '/', views: 0, bounce: '0%' },
+  { page: 'جميع العقارات', path: '/properties', views: 0, bounce: '0%' },
+  { page: 'مشروع أمل ستارز', path: '/projects/amal-stars', views: 0, bounce: '0%' },
+  { page: 'صفحة التواصل', path: '/contact', views: 0, bounce: '0%' },
+  { page: 'من نحن', path: '/about', views: 0, bounce: '0%' },
 ];
 
 const DEVICE_STATS = [
-  { device: 'الجوال', icon: Smartphone, percentage: 68, color: 'var(--neu-gold)' },
-  { device: 'الكمبيوتر', icon: Monitor, percentage: 27, color: '#EA580C' },
-  { device: 'التابلت', icon: Globe, percentage: 5, color: '#10B981' },
+  { device: 'الجوال', icon: Smartphone, percentage: 0, color: 'var(--neu-gold)' },
+  { device: 'الكمبيوتر', icon: Monitor, percentage: 0, color: '#EA580C' },
+  { device: 'التابلت', icon: Globe, percentage: 0, color: '#10B981' },
 ];
 
 // Tooltip style shared across charts
@@ -96,30 +90,30 @@ export default function AnalyticsPage() {
   const stats = [
     {
       label: 'إجمالي الزيارات',
-      value: '12,450',
-      change: '+18%',
+      value: '0',
+      change: '0%',
       trend: 'up' as const,
       icon: Eye,
     },
     {
       label: 'الزوار الفريدون',
-      value: '7,830',
-      change: '+12%',
+      value: '0',
+      change: '0%',
       trend: 'up' as const,
       icon: Users,
     },
     {
       label: 'معدل التحويل',
-      value: '3.2%',
-      change: '+0.5%',
+      value: '0%',
+      change: '0%',
       trend: 'up' as const,
       icon: MousePointerClick,
     },
     {
       label: 'متوسط مدة الجلسة',
-      value: '2:45',
-      change: '-8s',
-      trend: 'down' as const,
+      value: '0:00',
+      change: '0s',
+      trend: 'up' as const,
       icon: Clock,
     },
   ];
@@ -302,7 +296,7 @@ export default function AnalyticsPage() {
           <div className="mt-6 p-3 rounded-xl neu-inset-sm">
             <p className="text-xs text-[var(--neu-text-muted)] leading-relaxed text-center">
               <Smartphone className="w-3.5 h-3.5 inline-block me-1 text-[var(--neu-gold)]" />
-              غالبية الزوار يستخدمون الجوال — تأكد من تحسين تجربة المستخدم على الموبايل
+              لا تتوفر بيانات أجهزة حقيقية حتى الآن
             </p>
           </div>
         </div>
