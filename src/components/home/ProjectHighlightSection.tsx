@@ -19,7 +19,7 @@ const deliveryLabel = (project: Project) => project.specs.completionDate?.trim()
 const statusLabel = (status: Project['status']) =>
   status === 'completed' ? 'مكتمل' :
   status === 'under_construction' ? 'تحت الإنشاء' :
-  status === 'coming_soon' ? 'قريباً' : 'غير محدد';
+  status === 'upcoming' ? 'قريباً' : 'غير محدد';
 
 function FeaturedProjectCard({ project }: { project: Project }) {
   return (
