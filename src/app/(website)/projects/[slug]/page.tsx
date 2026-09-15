@@ -3,12 +3,10 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import type { Property } from '@/lib/mockData';
-import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getProjectBySlug, getPropertiesByProjectSlug } from '@/app/actions/properties';
 import MediaGallery from '@/components/ui/MediaGallery';
 import { ProjectSidebarInquiry } from '@/components/property/ProjectActions';
@@ -21,10 +19,8 @@ import {
   Download,
   ChevronLeft,
   Sparkles,
-  ShieldCheck,
   Info,
   Tag,
-  ArrowLeft,
   Map
 } from 'lucide-react';
 
@@ -60,15 +56,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   const minimumPrice = realPrices.length > 0 ? Math.min(...realPrices) : 0;
 
   // Project Gallery images list - falls back to interior assets if none exist
-  const galleryImages =
-    project.media.gallery && project.media.gallery.length > 0
-      ? [project.media.hero, ...project.media.gallery]
-      : [
-        project.media.hero || '/properties/apartment.webp',
-        '/properties/villa.webp',
-        '/properties/penthouse.webp',
-        '/properties/apartment.webp'
-      ];
+  const hasRealProjectImages = Boolean(project.media.hero || project.media.gallery?.length);
+  const galleryImages = hasRealProjectImages
+    ? [project.media.hero, ...(project.media.gallery || [])].filter(Boolean)
+    : ['/properties/apartment.webp'];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price) + ' ر.س';
@@ -162,7 +153,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         </section>
 
         {/* 3. Media Gallery (Full Width) */}
-        <div className="w-full">
+        <div className="w-full relative">
+          {!hasRealProjectImages && (
+            <span className="absolute top-3 start-3 z-20 rounded-full bg-black/75 px-3 py-1 text-[11px] font-cairo text-white">صورة توضيحية</span>
+          )}
           <MediaGallery images={galleryImages} videos={project.media.videos} title={project.name} />
         </div>
 
@@ -188,16 +182,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 )}
               </h2>
 
-              <div className="grid grid-cols-2 gap-3 border-t border-gray-100 pt-5 mt-4 text-xs text-gray-600 font-cairo">
-                <div>
-                  <span className="text-[10px] text-gray-500 block mb-0.5">نوع الاستثمار</span>
-                  <span className="font-bold text-brand-black">تملك سكني فاخر</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-gray-500 block mb-0.5">الدفعة الأولى</span>
-                  <span className="font-bold text-emerald-600">متاحة وميسرة</span>
-                </div>
-              </div>
+
             </section>
 
             {/* Quick Contact Box */}
@@ -310,8 +295,8 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           ) : (
             <div className="p-12 rounded-3xl bg-gray-50 border border-gray-200/90 hover:border-[#CAA048] text-center flex flex-col items-center justify-center max-w-2xl mx-auto font-cairo transition-all">
               <Info className="w-10 h-10 text-[#CAA048] mb-3" />
-              <h3 className="text-base font-bold text-brand-black mb-1">لا توجد وحدات سكنية معروضة حالياً</h3>
-              <p className="text-xs text-gray-500">تم بيع كافة وحدات هذا المشروع بالكامل أو يرجى التواصل معنا للاستعلام عن توافر وحدات أوف-بلان غير معلنة.</p>
+              <h3 className="text-base font-bold text-brand-black mb-1">لا توجد وحدات مرتبطة بهذا المشروع حالياً</h3>
+              <p className="text-xs text-gray-500">يمكن التواصل معنا للاستعلام عن تفاصيل المشروع والتوافر الحالي.</p>
             </div>
           )}
         </section>
