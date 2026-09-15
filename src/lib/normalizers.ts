@@ -60,7 +60,8 @@ export function normalizeProperty(prop: any): Property {
     },
     description: prop.description || '',
     publishedAt: prop.published_at || '',
-    featured: prop.featured || false
+    featured: prop.featured || false,
+    advertisingLicenseNumber: prop.advertising_license_number || ''
   };
 }
 
