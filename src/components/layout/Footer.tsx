@@ -359,16 +359,10 @@ export default function Footer({ settings }: FooterProps) {
               <span className="inline-flex items-center gap-1.5">
                 <span className="text-white/60">رخصة فال للوساطة والتسويق:</span>{' '}
                 <strong className="font-mono text-[#E6A821] font-bold text-sm sm:text-base tracking-wider">
-                  1200000000
+                  1200003346
                 </strong>
               </span>
-              <span className="hidden sm:inline text-white/30">•</span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="text-white/60">ترخيص الإعلان العقاري:</span>{' '}
-                <strong className="font-mono text-[#E6A821] font-bold text-sm sm:text-base tracking-wider">
-                  7200018942
-                </strong>
-              </span>
+
             </div>
             <p className="text-xs sm:text-[13px] text-white/65 leading-relaxed">
               ملتزمون بكافة اشتراطات الكود السعودي للبناء، وتصاميم هندسية معتمدة وفق أعلى معايير الجودة والاستدامة.
