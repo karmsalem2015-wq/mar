@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { PROPERTIES, PROJECTS, Property, Project } from '@/lib/mockData';
+import type { Property, Project } from '@/lib/mockData';
 import { getPropertiesListAdmin, getProjectsListAdmin } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty, normalizeProject } from '@/lib/normalizers';
@@ -21,11 +21,11 @@ import ContactFormSection from '@/components/home/ContactFormSection';
 
 export default function HomePage() {
   const INITIAL_HOME_BATCH = 50;
-  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES.slice(0, INITIAL_HOME_BATCH));
-  const [dbProjects, setDbProjects] = useState<Project[]>(PROJECTS);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [dbProperties, setDbProperties] = useState<Property[]>([]);
+  const [dbProjects, setDbProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(USE_DATABASE);
   const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState<boolean>(USE_DATABASE);
-  const [loadedPropertyCount, setLoadedPropertyCount] = useState<number>(Math.min(PROPERTIES.length, INITIAL_HOME_BATCH));
+  const [loadedPropertyCount, setLoadedPropertyCount] = useState<number>(0);
 
   useEffect(() => {
     if (!USE_DATABASE) return;
@@ -54,21 +54,21 @@ export default function HomePage() {
             globalThis.setTimeout(appendRemainingProperties, 80);
           }
         } else {
-          setDbProperties(PROPERTIES.slice(0, INITIAL_HOME_BATCH));
-          setLoadedPropertyCount(Math.min(PROPERTIES.length, INITIAL_HOME_BATCH));
+          setDbProperties([]);
+          setLoadedPropertyCount(0);
           setIsLoadingRemainingProperties(false);
         }
         if (projsData && projsData.length > 0) {
           setDbProjects(projsData.map(normalizeProject));
         } else {
-          setDbProjects(PROJECTS);
+          setDbProjects([]);
         }
       } catch (e) {
         console.error("Error loading home page database data:", e);
-        setDbProperties(PROPERTIES.slice(0, INITIAL_HOME_BATCH));
-        setLoadedPropertyCount(Math.min(PROPERTIES.length, INITIAL_HOME_BATCH));
+        setDbProperties([]);
+        setLoadedPropertyCount(0);
         setIsLoadingRemainingProperties(false);
-        setDbProjects(PROJECTS);
+        setDbProjects([]);
       } finally {
         setIsLoading(false);
       }
