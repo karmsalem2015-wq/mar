@@ -7,7 +7,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { PROJECTS } from '@/lib/mockData';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getProjectBySlug, getPropertiesByProjectSlug } from '@/app/actions/properties';
 import MediaGallery from '@/components/ui/MediaGallery';
@@ -254,11 +253,13 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">الوحدات المتاحة</span>
               <span className="text-sm font-bold text-[#CAA048] font-cairo">{project.specs.availableUnits} شقة</span>
             </div>
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
-              <Calendar className="w-6 h-6 text-[#CAA048] mb-2" />
-              <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">تاريخ الاستلام</span>
-              <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.completionDate}</span>
-            </div>
+            {project.specs.completionDate?.trim() && (
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
+                <Calendar className="w-6 h-6 text-[#CAA048] mb-2" />
+                <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">تاريخ الاستلام</span>
+                <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.completionDate}</span>
+              </div>
+            )}
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
               <Tag className="w-6 h-6 text-[#CAA048] mb-2" />
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">الحد الأدنى للسعر</span>
@@ -273,30 +274,16 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
 
           {/* Description Section */}
-          <div className="lg:col-span-2 h-full">
-            <section className="bg-white border border-gray-200/90 hover:border-[#CAA048] rounded-3xl p-6 sm:p-8 shadow-xl h-full transition-all duration-300">
-              <h2 className="text-base sm:text-lg font-bold text-brand-black mb-4 font-cairo">عن المشروع</h2>
-              <p className="text-sm text-gray-700 leading-relaxed font-cairo whitespace-pre-line">
-                {project.description}
-              </p>
-            </section>
-          </div>
-
-          {/* Side Column: Warranties and info */}
-          <section className="bg-white border border-gray-200/90 hover:border-[#CAA048] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between h-full transition-all duration-300">
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold text-brand-black font-cairo flex items-center gap-1.5 mb-6">
-                <ShieldCheck className="w-5 h-5 text-[#CAA048] shrink-0" />
-                <span>امتيازات وضمانات المطور</span>
-              </h3>
-              <ul className="space-y-3.5 text-xs text-gray-600 list-disc list-inside ps-2 font-cairo">
-                <li>هيكل إنشائي خرساني بضمانات تصل إلى 15 سنة.</li>
-                <li>كود أمني ذكي للمجمع بالكامل على مدار 24 ساعة.</li>
-                <li>توزيع حدائق ومسطحات خضراء داخلية بالمشروع.</li>
-                <li>مواقف سيارات خاصة وسفلية آمنة ومظللة.</li>
-              </ul>
+          {project.description?.trim() && (
+            <div className="lg:col-span-2 h-full">
+              <section className="bg-white border border-gray-200/90 hover:border-[#CAA048] rounded-3xl p-6 sm:p-8 shadow-xl h-full transition-all duration-300">
+                <h2 className="text-base sm:text-lg font-bold text-brand-black mb-4 font-cairo">عن المشروع</h2>
+                <p className="text-sm text-gray-700 leading-relaxed font-cairo whitespace-pre-line">{project.description}</p>
+              </section>
             </div>
-          </section>
+          )}
+
+
 
         </div>
 
@@ -336,7 +323,5 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
 // Generate static params for prerendering dynamic project routes
 export async function generateStaticParams() {
-  return PROJECTS.map((p) => ({
-    slug: p.slug,
-  }));
+  return [];
 }
