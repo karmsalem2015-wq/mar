@@ -16,23 +16,26 @@ export default function AdminLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
-  // Load and apply initial theme
+  // Load and apply initial theme synchronously
   useEffect(() => {
-    const saved = localStorage.getItem('mar-admin-theme') as 'light' | 'dark';
-    if (saved) {
+    try {
+      const saved = (localStorage.getItem('mar-admin-theme') as 'light' | 'dark') || 'dark';
       setTheme(saved);
       document.documentElement.setAttribute('data-theme', saved);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
+    } catch {
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
   }, []);
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
-    localStorage.setItem('mar-admin-theme', next);
+    try {
+      localStorage.setItem('mar-admin-theme', next);
+      document.cookie = `mar-admin-theme=${next}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {}
     document.documentElement.setAttribute('data-theme', next);
   };
 
@@ -62,7 +65,13 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="admin-layout">
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(function(){try{var t=localStorage.getItem('mar-admin-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+        }}
+      />
+      <div className="admin-layout">
       <AdminSidebar
         collapsed={sidebarCollapsed}
         mobileOpen={mobileOpen}
@@ -82,5 +91,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
-  );
+  </>
+);
 }

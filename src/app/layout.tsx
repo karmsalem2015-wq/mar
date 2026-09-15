@@ -64,6 +64,13 @@ export default function RootLayout({
       dir="rtl"
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=window.location.pathname;if(p.indexOf('/mar-cp')===0){var t=localStorage.getItem('mar-admin-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${almarai.variable} ${alexandria.variable} ${cairo.variable} ${tajawal.variable} ${latinDisplay.variable} bg-white font-tajawal text-brand-black antialiased`}>
         <SmoothScrollProvider>
           {children}

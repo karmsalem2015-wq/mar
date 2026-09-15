@@ -18,30 +18,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isDev = process.env.NODE_ENV === 'development';
-  const devSession = request.cookies.get('mar_dev_session')?.value;
-  const isExplicitLogout = request.cookies.get('mar_logged_out')?.value === 'true';
 
-  // 1. If dev session cookie is present, allow access immediately
-  if (devSession === 'true') {
-    return NextResponse.next({
-      request: { headers: request.headers },
-    });
-  }
-
-  // 2. In development mode: auto-grant access if the user hasn't explicitly logged out
-  if (isDev && !isExplicitLogout) {
-    const response = NextResponse.next({
-      request: { headers: request.headers },
-    });
-    response.cookies.set('mar_dev_session', 'true', {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      sameSite: 'lax',
-    });
-    return response;
-  }
 
   let response = NextResponse.next({
     request: { headers: request.headers },
@@ -57,16 +34,6 @@ export async function proxy(request: NextRequest) {
 
   // If Supabase is not configured yet
   if (!isConfigured) {
-    // In dev, allow access with dev session
-    if (isDev) {
-      response.cookies.set('mar_dev_session', 'true', {
-        path: '/',
-        httpOnly: false,
-        maxAge: 60 * 60 * 24 * 30,
-        sameSite: 'lax',
-      });
-      return response;
-    }
 
     return new NextResponse(
       `

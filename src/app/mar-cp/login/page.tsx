@@ -27,67 +27,39 @@ function LoginFormContent() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Check fixed / developer dummy credentials (works without database)
-    const isMockEmail =
-      cleanEmail === 'admin@mar-ksa.com' ||
-      cleanEmail === 'admin@mar.sa' ||
-      cleanEmail === 'admin@example.com' ||
-      cleanEmail === 'admin';
-    const isMockPassword =
-      cleanPassword === 'admin' ||
-      cleanPassword === 'admin123' ||
-      cleanPassword === '123456' ||
-      cleanPassword === 'admin@123';
-
-    if (isMockEmail && isMockPassword) {
-      document.cookie = 'mar_dev_session=true; path=/; max-age=2592000; SameSite=Lax';
-      document.cookie = 'mar_logged_out=; path=/; max-age=0; SameSite=Lax';
-      localStorage.setItem('mar_admin_user', JSON.stringify({
-        email: cleanEmail === 'admin' ? 'admin@mar-ksa.com' : cleanEmail,
-        role: 'super_admin',
-        name: 'مدير النظام (حساب تجريبي)'
-      }));
-      router.push(redirect);
-      router.refresh();
-      return;
-    }
-
-    // 2. Try real Supabase auth if configured
+    // Authenticate via Supabase Auth
     try {
       const supabase = getSupabaseBrowserClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password: cleanPassword,
       });
 
-      if (authError) {
-        setError('بيانات الدخول غير صحيحة. يمكنك الدخول بحساب التطوير المباشر: admin@mar-ksa.com / admin123');
+      if (authError || !data?.user) {
+        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
         setLoading(false);
         return;
       }
 
-      document.cookie = 'mar_dev_session=true; path=/; max-age=2592000; SameSite=Lax';
+      // Store authenticated user metadata for dashboard use
+      const meta = data.user.user_metadata || {};
+      localStorage.setItem('mar_admin_user', JSON.stringify({
+        id: data.user.id,
+        email: data.user.email,
+        role: meta.role || 'super_admin',
+        name: meta.name || 'مدير النظام'
+      }));
+
+      // Clear any previous logout marker
       document.cookie = 'mar_logged_out=; path=/; max-age=0; SameSite=Lax';
-      router.push(redirect);
-      router.refresh();
-    } catch {
-      setError('تعذر الاتصال بقاعدة البيانات. يمكنك الدخول بحساب التطوير المباشر: admin@mar-ksa.com / admin123');
+
+      // Full navigation ensures fresh session cookies are sent to server
+      window.location.href = redirect;
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('تعذر تسجيل الدخول. يرجى التحقق من اتصال الإنترنت والمحاولة لاحقاً.');
       setLoading(false);
     }
-  };
-
-  const handleQuickDevLogin = () => {
-    setEmail('admin@mar-ksa.com');
-    setPassword('admin123');
-    document.cookie = 'mar_dev_session=true; path=/; max-age=2592000; SameSite=Lax';
-    document.cookie = 'mar_logged_out=; path=/; max-age=0; SameSite=Lax';
-    localStorage.setItem('mar_admin_user', JSON.stringify({
-      email: 'admin@mar-ksa.com',
-      role: 'super_admin',
-      name: 'مدير النظام'
-    }));
-    router.push(redirect);
-    router.refresh();
   };
 
   return (
@@ -183,21 +155,6 @@ function LoginFormContent() {
             <span>تسجيل الدخول</span>
           )}
         </button>
-
-        {/* Quick Dev Login Button */}
-        <button
-          type="button"
-          onClick={handleQuickDevLogin}
-          className="w-full mt-3 py-2.5 px-4 rounded-xl border border-[#C9A96E]/40 bg-[#C9A96E]/10 hover:bg-[#C9A96E]/20 text-[#C9A96E] font-bold text-xs flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-sm"
-        >
-          <span>⚡ دخول سريع مباشر (وضع التطوير والمعاينة)</span>
-        </button>
-
-        {/* Helper Box */}
-        <div className="p-3 rounded-xl bg-black/20 border border-white/5 text-center text-xs text-[var(--neu-text-muted)] space-y-1">
-          <p className="font-semibold text-[var(--neu-text-secondary)]">بيانات الدخول التجريبية السريعة:</p>
-          <p dir="ltr" className="font-mono text-[11px] text-[#C9A96E]">admin@mar-ksa.com / admin123</p>
-        </div>
       </form>
 
       {/* Footer */}
