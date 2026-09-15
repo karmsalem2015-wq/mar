@@ -35,21 +35,21 @@ import {
 } from 'recharts';
 import { getSubmissionsList, getDashboardStats, Submission } from '@/app/actions/submissions';
 
-const MOCK_ANALYTICS_DATA = [
-  { name: 'السبت', views: 320, submissions: 4 },
-  { name: 'الأحد', views: 450, submissions: 8 },
-  { name: 'الإثنين', views: 410, submissions: 5 },
-  { name: 'الثلاثاء', views: 520, submissions: 12 },
-  { name: 'الأربعاء', views: 610, submissions: 15 },
-  { name: 'الخميس', views: 580, submissions: 9 },
-  { name: 'الجمعة', views: 480, submissions: 6 },
+const ANALYTICS_DATA = [
+  { name: 'السبت', views: 0, submissions: 0 },
+  { name: 'الأحد', views: 0, submissions: 0 },
+  { name: 'الإثنين', views: 0, submissions: 0 },
+  { name: 'الثلاثاء', views: 0, submissions: 0 },
+  { name: 'الأربعاء', views: 0, submissions: 0 },
+  { name: 'الخميس', views: 0, submissions: 0 },
+  { name: 'الجمعة', views: 0, submissions: 0 },
 ];
 
-const MOCK_PROPERTY_PERFORMANCE = [
-  { name: 'شقق', 'الوحدات المعروضة': 12, 'تم بيعها': 8 },
-  { name: 'فيلات', 'الوحدات المعروضة': 6, 'تم بيعها': 3 },
-  { name: 'ملاحق', 'الوحدات المعروضة': 4, 'تم بيعها': 2 },
-  { name: 'بنتهاوس', 'الوحدات المعروضة': 3, 'تم بيعها': 1 },
+const PROPERTY_PERFORMANCE = [
+  { name: 'شقق', 'الوحدات المعروضة': 0, 'تم بيعها': 0 },
+  { name: 'فيلات', 'الوحدات المعروضة': 0, 'تم بيعها': 0 },
+  { name: 'ملاحق', 'الوحدات المعروضة': 0, 'تم بيعها': 0 },
+  { name: 'بنتهاوس', 'الوحدات المعروضة': 0, 'تم بيعها': 0 },
 ];
 
 const STATUS_MAP = {
@@ -69,9 +69,9 @@ export default function DashboardPage() {
     properties: 0,
     projects: 0,
     newSubmissions: 0,
-    totalViews: 2450,
-    soldUnits: 42,
-    activeClients: 128
+    totalViews: 0,
+    soldUnits: 0,
+    activeClients: 0
   });
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,11 +110,11 @@ export default function DashboardPage() {
   const recentSubmissions = submissions.slice(0, 4);
 
   const stats = [
-    { label: 'إجمالي العقارات', value: statsData.properties, icon: Building2, color: 'gold', change: '+3 هذا الشهر' },
-    { label: 'المشاريع النشطة', value: statsData.projects, icon: FolderKanban, color: 'info', change: '2 قيد الإنشاء' },
+    { label: 'إجمالي العقارات', value: statsData.properties, icon: Building2, color: 'gold', change: '0 هذا الشهر' },
+    { label: 'المشاريع النشطة', value: statsData.projects, icon: FolderKanban, color: 'info', change: '0 قيد الإنشاء' },
     { label: 'استفسارات جديدة', value: statsData.newSubmissions, icon: MessageSquareText, color: 'danger', change: 'بحاجة للمراجعة' },
-    { label: 'مشاهدات الموقع', value: statsData.totalViews, icon: Eye, color: 'success', change: '+12% عن الشهر السابق' },
-    { label: 'وحدات مُباعة', value: statsData.soldUnits, icon: TrendingUp, color: 'warning', change: 'من إجمالي 225' },
+    { label: 'مشاهدات الموقع', value: statsData.totalViews, icon: Eye, color: 'success', change: '0% عن الشهر السابق' },
+    { label: 'وحدات مُباعة', value: statsData.soldUnits, icon: TrendingUp, color: 'warning', change: 'من إجمالي 0' },
     { label: 'عملاء نشطين', value: statsData.activeClients, icon: Users, color: 'info', change: 'مسجلون بالنظام' },
   ];
 
@@ -217,7 +217,7 @@ export default function DashboardPage() {
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={MOCK_ANALYTICS_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={ANALYTICS_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#D99512" stopOpacity={0.25} />
@@ -256,7 +256,7 @@ export default function DashboardPage() {
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MOCK_PROPERTY_PERFORMANCE} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={PROPERTY_PERFORMANCE} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                 <XAxis dataKey="name" tick={{ fill: 'var(--neu-text-muted)', fontSize: 11 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fill: 'var(--neu-text-muted)', fontSize: 11 }} tickLine={false} axisLine={false} />
