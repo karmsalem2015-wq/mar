@@ -54,8 +54,8 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
   };
 
   const fallbackImage = property.type === 'villa' ? '/properties/villa.webp' : ['penthouse', 'annex', 'duplex'].includes(property.type) ? '/properties/penthouse.webp' : '/properties/apartment.webp';
-  const hasRealImage = Boolean(property.media.thumbnail || property.media.gallery?.[0]);
-  const displayImage = property.media.thumbnail || property.media.gallery?.[0] || fallbackImage;
+  const hasRealImage = Boolean(property.media.thumbnail || property.media.images?.[0]);
+  const displayImage = property.media.thumbnail || property.media.images?.[0] || fallbackImage;
 
   const formatArea = (area: number) => {
     return `${new Intl.NumberFormat('en-US').format(area)} م²`;
