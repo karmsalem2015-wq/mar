@@ -49,8 +49,13 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
   else if (property.type === 'duplex') typeLabel = 'دوبلكس';
 
   const formatPrice = (price: number) => {
+    if (!price || price <= 0) return 'السعر غير محدد';
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price) + ' ر.س';
   };
+
+  const fallbackImage = property.type === 'villa' ? '/properties/villa.webp' : ['penthouse', 'annex', 'duplex'].includes(property.type) ? '/properties/penthouse.webp' : '/properties/apartment.webp';
+  const hasRealImage = Boolean(property.media.thumbnail || property.media.gallery?.[0]);
+  const displayImage = property.media.thumbnail || property.media.gallery?.[0] || fallbackImage;
 
   const formatArea = (area: number) => {
     return `${new Intl.NumberFormat('en-US').format(area)} م²`;
@@ -67,7 +72,7 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
       {/* Image Block */}
       <div className="relative w-full lg:w-[35%] aspect-[16/10] lg:aspect-auto min-h-[240px] overflow-hidden bg-gray-100">
         <Image
-          src={property.media.thumbnail || '/properties/apartment.webp'}
+          src={displayImage}
           alt={property.title}
           fill
           sizes="(max-width: 1024px) 100vw, 35vw"
@@ -75,9 +80,14 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
         />
         <div className="absolute top-4 start-4 z-20">
           <span className="px-3 py-1 text-[10px] font-bold text-white bg-status-available rounded-full shadow-sm font-cairo">
-            {property.status === 'available' ? 'متاح للبيع' : property.status === 'sold' ? 'مباع' : property.status === 'reserved' ? 'محجوز' : 'قريباً'}
+            {property.status === 'available' ? 'متاح للبيع' : property.status === 'sold' ? 'مباع' : property.status === 'reserved' ? 'محجوز' : property.status === 'coming_soon' ? 'قريباً' : 'غير محدد'}
           </span>
         </div>
+        {!hasRealImage && (
+          <div className="absolute top-4 end-4 z-20">
+            <span className="px-2.5 py-1 text-[10px] font-bold text-white bg-black/75 backdrop-blur-md rounded-full font-cairo">صورة توضيحية</span>
+          </div>
+        )}
       </div>
 
       {/* Info Block */}
