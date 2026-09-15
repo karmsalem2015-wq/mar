@@ -99,8 +99,8 @@ export default function PropertyCard({ property, index = 0 }: PropertyCardProps)
     }
   };
 
-  const hasRealImage = Boolean(property.media.thumbnail || property.media.gallery?.[0]);
-  const displayImage = property.media.thumbnail || property.media.gallery?.[0] || getPropertyImage(property.type);
+  const hasRealImage = Boolean(property.media.thumbnail || property.media.images?.[0]);
+  const displayImage = property.media.thumbnail || property.media.images?.[0] || getPropertyImage(property.type);
 
   return (
     <motion.div
