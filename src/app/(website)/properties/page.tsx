@@ -227,10 +227,11 @@ export default function PropertiesPage() {
             setLoadedPropertyCount(normalized.length);
             setIsLoadingRemaining(false);
           };
-          if ('requestIdleCallback' in window) {
-            window.requestIdleCallback(appendRemaining, { timeout: 1200 });
+          const idleCallback = window.requestIdleCallback;
+          if (typeof idleCallback === 'function') {
+            idleCallback(appendRemaining, { timeout: 1200 });
           } else {
-            window.setTimeout(appendRemaining, 80);
+            globalThis.setTimeout(appendRemaining, 80);
           }
         } else {
           setIsLoadingRemaining(false);
