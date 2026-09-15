@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import type { Property } from '@/lib/mockData';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getProjectBySlug, getPropertiesByProjectSlug } from '@/app/actions/properties';
 import MediaGallery from '@/components/ui/MediaGallery';
@@ -52,7 +53,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   }
 
   // Filter properties belonging to this project
-  const associatedProperties = await getPropertiesByProjectSlug(project.slug);
+  const associatedProperties: Property[] = await getPropertiesByProjectSlug(project.slug);
   const totalUnits = associatedProperties.length;
   const availableUnits = associatedProperties.filter((unit) => unit.status === 'available').length;
   const realPrices = associatedProperties.map((unit) => unit.pricing?.price || 0).filter((price) => price > 0);
