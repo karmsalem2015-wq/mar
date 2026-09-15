@@ -5,7 +5,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { PROPERTIES, Property } from '@/lib/mockData';
+import type { Property } from '@/lib/mockData';
 import { getPropertiesListAdmin } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty } from '@/lib/normalizers';
@@ -205,9 +205,9 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
 
 export default function PropertiesPage() {
   const INITIAL_PROPERTY_BATCH = 50;
-  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES.slice(0, INITIAL_PROPERTY_BATCH));
+  const [dbProperties, setDbProperties] = useState<Property[]>([]);
   const [isLoadingRemaining, setIsLoadingRemaining] = useState(USE_DATABASE);
-  const [loadedPropertyCount, setLoadedPropertyCount] = useState(Math.min(PROPERTIES.length, INITIAL_PROPERTY_BATCH));
+  const [loadedPropertyCount, setLoadedPropertyCount] = useState(0);
 
   useEffect(() => {
     if (!USE_DATABASE) return;
