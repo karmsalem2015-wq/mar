@@ -20,9 +20,12 @@ import PartnersMarquee from '@/components/home/PartnersMarquee';
 import ContactFormSection from '@/components/home/ContactFormSection';
 
 export default function HomePage() {
-  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES);
+  const INITIAL_HOME_BATCH = 50;
+  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES.slice(0, INITIAL_HOME_BATCH));
   const [dbProjects, setDbProjects] = useState<Project[]>(PROJECTS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState<boolean>(USE_DATABASE);
+  const [loadedPropertyCount, setLoadedPropertyCount] = useState<number>(Math.min(PROPERTIES.length, INITIAL_HOME_BATCH));
 
   useEffect(() => {
     if (!USE_DATABASE) return;
@@ -33,9 +36,27 @@ export default function HomePage() {
           getProjectsListAdmin()
         ]);
         if (propsData && propsData.length > 0) {
-          setDbProperties(propsData.map(normalizeProperty));
+          const normalizedProperties = propsData.map(normalizeProperty);
+          const firstBatch = normalizedProperties.slice(0, INITIAL_HOME_BATCH);
+          setDbProperties(firstBatch);
+          setLoadedPropertyCount(firstBatch.length);
+
+          const appendRemainingProperties = () => {
+            setDbProperties(normalizedProperties);
+            setLoadedPropertyCount(normalizedProperties.length);
+            setIsLoadingRemainingProperties(false);
+          };
+
+          const idleCallback = window.requestIdleCallback;
+          if (typeof idleCallback === 'function') {
+            idleCallback(appendRemainingProperties, { timeout: 1200 });
+          } else {
+            globalThis.setTimeout(appendRemainingProperties, 80);
+          }
         } else {
-          setDbProperties(PROPERTIES);
+          setDbProperties(PROPERTIES.slice(0, INITIAL_HOME_BATCH));
+          setLoadedPropertyCount(Math.min(PROPERTIES.length, INITIAL_HOME_BATCH));
+          setIsLoadingRemainingProperties(false);
         }
         if (projsData && projsData.length > 0) {
           setDbProjects(projsData.map(normalizeProject));
@@ -44,7 +65,9 @@ export default function HomePage() {
         }
       } catch (e) {
         console.error("Error loading home page database data:", e);
-        setDbProperties(PROPERTIES);
+        setDbProperties(PROPERTIES.slice(0, INITIAL_HOME_BATCH));
+        setLoadedPropertyCount(Math.min(PROPERTIES.length, INITIAL_HOME_BATCH));
+        setIsLoadingRemainingProperties(false);
         setDbProjects(PROJECTS);
       } finally {
         setIsLoading(false);
@@ -157,6 +180,8 @@ export default function HomePage() {
         maxPrice={maxPrice}
         setMaxPrice={setMaxPrice}
         isLoading={isLoading}
+        isLoadingRemaining={isLoadingRemainingProperties}
+        loadedPropertyCount={loadedPropertyCount}
       />
 
       {/* 5. Request Property Custom Banner */}
