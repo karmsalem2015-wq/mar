@@ -53,6 +53,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
   // Filter properties belonging to this project
   const associatedProperties = await getPropertiesByProjectSlug(project.slug);
+  const totalUnits = associatedProperties.length;
+  const availableUnits = associatedProperties.filter((unit) => unit.status === 'available').length;
+  const realPrices = associatedProperties.map((unit) => unit.pricing?.price || 0).filter((price) => price > 0);
+  const minimumPrice = realPrices.length > 0 ? Math.min(...realPrices) : 0;
 
   // Project Gallery images list - falls back to interior assets if none exist
   const galleryImages =
@@ -174,7 +178,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               <span className="text-xs text-gray-500 block mb-1 font-cairo">نطاق أسعار وحدات المشروع السكنية</span>
               <h2 className="text-xl sm:text-2xl font-black text-[#CAA048] font-cairo leading-tight">
                 <span className="font-cairo text-xs block text-gray-500 font-normal mb-1">تبدأ من:</span>
-                <span className="font-mono text-3xl font-black">{formatPrice(project.priceRange.min)}</span>
+                <span className="font-mono text-3xl font-black">{formatPrice(minimumPrice)}</span>
                 {project.priceRange.max > project.priceRange.min && (
                   <>
                     <span className="mx-2 text-gray-400 text-sm font-normal">إلى</span>
@@ -246,12 +250,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
               <Building2 className="w-6 h-6 text-[#CAA048] mb-2" />
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">إجمالي الوحدات</span>
-              <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.totalUnits} شقة</span>
+              <span className="text-sm font-bold text-brand-black font-cairo">{totalUnits} وحدة</span>
             </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
               <LayoutGrid className="w-6 h-6 text-[#CAA048] mb-2" />
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">الوحدات المتاحة</span>
-              <span className="text-sm font-bold text-[#CAA048] font-cairo">{project.specs.availableUnits} شقة</span>
+              <span className="text-sm font-bold text-[#CAA048] font-cairo">{availableUnits} وحدة</span>
             </div>
             {project.specs.completionDate?.trim() && (
               <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
