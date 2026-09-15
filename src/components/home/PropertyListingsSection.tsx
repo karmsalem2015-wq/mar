@@ -236,7 +236,12 @@ function SimplifiedPropertyCard({ property }: { property: Property }) {
       </div>
 
       <div className="p-4 sm:p-5 flex flex-col flex-1 text-start">
-        <h4 className="text-sm sm:text-base font-bold text-brand-black line-clamp-2 min-h-[2.75rem] mb-2 group-hover:text-[#CAA048] transition-colors duration-300 font-heading leading-relaxed">
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-500 mb-2 font-cairo min-w-0">
+          <span className="size-1.5 rounded-full bg-[#CAA048] shrink-0" />
+          <span className="truncate">{property.project.name}</span>
+        </div>
+
+        <h4 className="text-sm sm:text-base font-bold text-brand-black min-h-[3.25rem] mb-2 group-hover:text-[#CAA048] transition-colors duration-300 font-heading leading-relaxed line-clamp-2">
           {property.title}
         </h4>
 
