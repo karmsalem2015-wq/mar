@@ -292,10 +292,10 @@ export default function Footer({ settings }: FooterProps) {
                 </div>
                 <div className="min-w-0">
                   <span className="block text-[11px] leading-tight font-medium text-white/50 mb-0.5">خدمة العملاء والمبيعات</span>
-                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono text-white/90" dir="ltr">
+                  <div className="flex flex-wrap items-center justify-end gap-2 text-xs sm:text-sm font-mono text-white/90">
                     <a
                       href={`tel:${(contact?.unifiedNumber || BRAND.contact.primaryPhone.display).replace(/[^0-9+]/g, '')}`}
-                      className="transition-colors hover:text-[#E6A821]"
+                      className="transition-colors hover:text-[#E6A821]" dir="ltr"
                     >
                       {contact?.unifiedNumber || BRAND.contact.primaryPhone.display}
                     </a>
