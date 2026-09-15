@@ -5,7 +5,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { PROJECTS, Project } from '@/lib/mockData';
+import type { Project } from '@/lib/mockData';
 import { getProjectsListAdmin } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProject } from '@/lib/normalizers';
@@ -290,7 +290,7 @@ const ProjectCard = ({ project, openInquiry, index = 0 }: { project: Project; op
 };
 
 export default function ProjectsPage() {
-  const [dbProjects, setDbProjects] = useState<Project[]>(PROJECTS);
+  const [dbProjects, setDbProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     if (!USE_DATABASE) return;
