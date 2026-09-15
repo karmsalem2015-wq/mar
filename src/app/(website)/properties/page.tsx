@@ -75,7 +75,7 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
         />
         <div className="absolute top-4 start-4 z-20">
           <span className="px-3 py-1 text-[10px] font-bold text-white bg-status-available rounded-full shadow-sm font-cairo">
-            {property.status === 'available' ? 'متاح للبيع' : 'محجوز'}
+            {property.status === 'available' ? 'متاح للبيع' : property.status === 'sold' ? 'مباع' : property.status === 'reserved' ? 'محجوز' : 'قريباً'}
           </span>
         </div>
       </div>
@@ -163,11 +163,11 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-100 mt-auto">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 pt-4 border-t border-gray-100 mt-auto">
           <button
             type="button"
             onClick={openInquiry}
-            className="py-2.5 px-6 text-xs font-bold btn-mar-black rounded-xl flex items-center justify-center gap-1.5 cursor-pointer font-almarai transition-all shadow-sm"
+            className="w-full sm:w-auto py-2.5 px-4 sm:px-6 text-xs font-bold btn-mar-black rounded-xl flex items-center justify-center gap-1.5 cursor-pointer font-almarai transition-all shadow-sm"
           >
             <span>طلب معاينة خاصة</span>
           </button>
@@ -192,7 +192,7 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
 
           <Link
             href={`/property/${property.slug}`}
-            className="ms-auto py-2 px-3 text-xs font-bold text-gray-500 hover:text-[#CAA048] transition-colors flex items-center gap-1 font-almarai"
+            className="col-span-2 sm:col-span-1 sm:ms-auto w-full sm:w-auto py-2.5 px-3 text-xs font-bold text-gray-500 hover:text-[#CAA048] transition-colors flex items-center justify-center gap-1 font-almarai"
           >
             <span>عرض التفاصيل</span>
             <ChevronLeft className="w-4 h-4" />
@@ -204,7 +204,10 @@ const DetailedPropertyCard = ({ property, openInquiry, index = 0 }: { property: 
 };
 
 export default function PropertiesPage() {
-  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES);
+  const INITIAL_PROPERTY_BATCH = 50;
+  const [dbProperties, setDbProperties] = useState<Property[]>(PROPERTIES.slice(0, INITIAL_PROPERTY_BATCH));
+  const [isLoadingRemaining, setIsLoadingRemaining] = useState(USE_DATABASE);
+  const [loadedPropertyCount, setLoadedPropertyCount] = useState(Math.min(PROPERTIES.length, INITIAL_PROPERTY_BATCH));
 
   useEffect(() => {
     if (!USE_DATABASE) return;
@@ -212,10 +215,29 @@ export default function PropertiesPage() {
       try {
         const propsData = await getPropertiesListAdmin();
         if (propsData && propsData.length > 0) {
-          setDbProperties(propsData.map(normalizeProperty));
+          const normalized = propsData.map(normalizeProperty);
+          const firstBatch = normalized.slice(0, INITIAL_PROPERTY_BATCH);
+          setDbProperties(firstBatch);
+          setLoadedPropertyCount(firstBatch.length);
+
+          // Paint the first 50 immediately, then append the remaining units
+          // during idle time so the listings become interactive without waiting.
+          const appendRemaining = () => {
+            setDbProperties(normalized);
+            setLoadedPropertyCount(normalized.length);
+            setIsLoadingRemaining(false);
+          };
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(appendRemaining, { timeout: 1200 });
+          } else {
+            window.setTimeout(appendRemaining, 80);
+          }
+        } else {
+          setIsLoadingRemaining(false);
         }
       } catch (e) {
         console.error("Error loading properties page data:", e);
+        setIsLoadingRemaining(false);
       }
     }
     loadData();
@@ -635,7 +657,7 @@ export default function PropertiesPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: shouldReduceMotion ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-white border border-gray-200/90 rounded-3xl p-6 sm:p-8 shadow-sm mb-10 transition-all duration-300"
+          className="w-full bg-white border border-gray-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-sm mb-10 transition-all duration-300"
         >
           <div className="flex flex-col gap-6">
 
@@ -795,8 +817,8 @@ export default function PropertiesPage() {
             </AnimatePresence>
 
             {/* Actions and active filter state indicators */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-gray-100 pt-4 mt-2">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-4 border-t border-gray-100 pt-4 mt-2">
+              <div className="grid grid-cols-1 min-[390px]:grid-cols-2 sm:flex items-stretch sm:items-center gap-3">
                 {/* Advanced filter toggle button */}
                 <button
                   type="button"
