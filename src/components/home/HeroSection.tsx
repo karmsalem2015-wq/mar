@@ -198,6 +198,19 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       const img = cache.get(index);
       if (img) return { index, img };
     }
+    // If the exact path frame is not decoded yet, use the nearest decoded
+    // neighbour around the target rather than freezing on a distant old frame.
+    // Never look far enough to create a visible scene jump.
+    for (let radius = 1; radius <= 4; radius++) {
+      const backward = targetIndex - radius;
+      const forward = targetIndex + radius;
+      const preferred = direction > 0 ? backward : forward;
+      const alternate = direction > 0 ? forward : backward;
+      const preferredImg = cache.get(preferred);
+      if (preferredImg) return { index: preferred, img: preferredImg };
+      const alternateImg = cache.get(alternate);
+      if (alternateImg) return { index: alternate, img: alternateImg };
+    }
     const img = cache.get(previous);
     return img ? { index: previous, img } : null;
   }, []);
@@ -389,7 +402,11 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         let victim = -1;
         let distance = -1;
         for (const index of cache.keys()) {
-          if (index === lastDrawnFrameRef.current || index === Math.round(smoothFrameRef.current)) continue;
+          if (
+            index === lastDrawnFrameRef.current ||
+            Math.abs(index - Math.round(smoothFrameRef.current)) <= 12 ||
+            Math.abs(index - Math.round(targetFrameRef.current)) <= 12
+          ) continue;
           const rank = priority.indexOf(index);
           const nextDistance = rank >= 0 ? rank : total + Math.abs(index - smoothFrameRef.current);
           if (nextDistance > distance) { victim = index; distance = nextDistance; }
