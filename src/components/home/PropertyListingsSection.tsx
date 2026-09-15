@@ -4,7 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { MapPin, Building, Building2, DollarSign, Layers, Bed, Bath, Ruler, ArrowLeft, X, LayoutGrid, Home, TrendingUp } from 'lucide-react';
+import { MapPin, Building, Building2, DollarSign, Layers, Bed, Bath, Ruler, ArrowLeft, X, LayoutGrid, Home, TrendingUp, Car, UserRound, Database, Warehouse, WashingMachine, DoorOpen, Trees, Sparkles } from 'lucide-react';
 import { Property } from '@/lib/mockData';
 import CustomSelect from '@/components/ui/CustomSelect';
 import RTLContinuousCarousel from '@/components/ui/RTLContinuousCarousel';
@@ -55,6 +55,28 @@ const formatPrice = (price: number) => {
 const formatArea = (area: number) => {
   return `${new Intl.NumberFormat('en-US').format(area)} م²`;
 };
+
+const getFeatureIcon = (feature: string) => {
+  const value = feature.trim().toLowerCase();
+  if (value.includes('خادم') || value.includes('عاملة')) return UserRound;
+  if (value.includes('موقف') || value.includes('سيارة') || value.includes('كراج')) return Car;
+  if (value.includes('خزان') || value.includes('مياه')) return Database;
+  if (value.includes('مستودع') || value.includes('مخزن')) return Warehouse;
+  if (value.includes('غسيل')) return WashingMachine;
+  if (value.includes('مدخل') || value.includes('باب')) return DoorOpen;
+  if (value.includes('حديق') || value.includes('سطح')) return Trees;
+  return Sparkles;
+};
+
+function FeatureChip({ feature }: { feature: string }) {
+  const Icon = getFeatureIcon(feature);
+  return (
+    <span className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700 font-cairo">
+      <Icon className="size-4 shrink-0 text-[#CAA048]" strokeWidth={1.8} aria-hidden="true" />
+      <span>{feature}</span>
+    </span>
+  );
+}
 
 const getPropertyImage = (type: Property['type']) => {
   switch (type) {
@@ -113,7 +135,7 @@ function FeaturedPropertyCard({ property }: { property: Property }) {
               <span>{property.project.name}</span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-extrabold text-brand-black mb-4 leading-snug font-heading group-hover:text-[#CAA048] transition-colors duration-300">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-brand-black mb-4 leading-snug font-heading group-hover:text-[#CAA048] transition-colors duration-300 line-clamp-2">
               {property.title}
             </h3>
 
@@ -128,10 +150,8 @@ function FeaturedPropertyCard({ property }: { property: Property }) {
 
             {property.specs.features && property.specs.features.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
-                {property.specs.features.slice(0, 4).map((feat, i) => (
-                  <span key={i} className="py-1 px-3 text-xs font-semibold bg-gray-100 border border-gray-200/80 text-gray-700 rounded-lg font-cairo">
-                    {feat}
-                  </span>
+                {property.specs.features.slice(0, 6).map((feat, i) => (
+                  <FeatureChip key={i} feature={feat} />
                 ))}
               </div>
             )}
@@ -216,7 +236,7 @@ function SimplifiedPropertyCard({ property }: { property: Property }) {
       </div>
 
       <div className="p-4 sm:p-5 flex flex-col flex-1 text-start">
-        <h4 className="text-xs sm:text-sm font-bold text-brand-black line-clamp-1 mb-2 group-hover:text-[#CAA048] transition-colors duration-300 font-heading">
+        <h4 className="text-sm sm:text-base font-bold text-brand-black line-clamp-2 min-h-[2.75rem] mb-2 group-hover:text-[#CAA048] transition-colors duration-300 font-heading leading-relaxed">
           {property.title}
         </h4>
 
