@@ -62,6 +62,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     : ['/properties/apartment.webp'];
 
   const formatPrice = (price: number) => {
+    if (!price || price <= 0) return 'السعر غير محدد';
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price) + ' ر.س';
   };
 
@@ -243,7 +244,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
               <Calendar className="w-6 h-6 text-[#CAA048] mb-2" />
               <span className="text-[10px] text-gray-500 mb-0.5 font-cairo">تاريخ الاستلام</span>
-              <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.completionDate?.trim() || 'قريباً'}</span>
+              <span className="text-sm font-bold text-brand-black font-cairo">{project.specs.completionDate?.trim() || 'غير محدد'}</span>
             </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 hover:border-[#CAA048]/40 flex flex-col items-center shadow-sm transition-colors">
               <Tag className="w-6 h-6 text-[#CAA048] mb-2" />
