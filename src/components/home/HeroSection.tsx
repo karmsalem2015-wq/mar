@@ -157,6 +157,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const scrubRafRef = useRef<number | null>(null);
   const prioritizeFramesRef = useRef<((target: number, current: number, direction: number) => void) | null>(null);
   const scrollDirectionRef = useRef(1);
+  const lastScrollActivityRef = useRef(0);
+  const isHeroActiveRef = useRef(true);
 
   // Viewport & section layout stability (prevents synchronous layout thrashing)
   const stableViewportHeightRef = useRef(0);
@@ -343,6 +345,12 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       } else {
         scrubRafRef.current = null;
         lastRafTimestampRef.current = 0;
+        // Resume low-priority warming only after the camera has settled.
+        window.setTimeout(() => prioritizeFramesRef.current?.(
+          targetFrameRef.current,
+          smoothFrameRef.current,
+          scrollDirectionRef.current,
+        ), 240);
       }
     },
     [drawFrame],
@@ -410,6 +418,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       while (active < concurrency) {
         let index = priority.find(canLoad);
         if (index === undefined) {
+          // During active hero scrubbing, reserve network/decode capacity for nearby priority frames.
+          if (isHeroActiveRef.current && performance.now() - lastScrollActivityRef.current < 220) break;
           while (backgroundIndex <= total && !canLoad(backgroundIndex)) backgroundIndex++;
           if (backgroundIndex > total) break;
           index = backgroundIndex++;
@@ -543,6 +553,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     const scrollY = window.scrollY || window.pageYOffset || 0;
     const relativeScroll = Math.max(0, scrollY - (sectionTopRef.current || 0));
     const scrollProgress = Math.min(Math.max(relativeScroll / scrollableDistance, 0), 1);
+    lastScrollActivityRef.current = performance.now();
+    isHeroActiveRef.current = scrollProgress < 0.995;
 
     if (progressBarRef.current) {
       progressBarRef.current.style.transform = `scaleX(${scrollProgress})`;
