@@ -43,6 +43,7 @@ export interface Property {
     virtualTour?: string;
   };
   description: string;
+  advertisingLicenseNumber?: string;
   publishedAt: string;
   featured: boolean;
 }
