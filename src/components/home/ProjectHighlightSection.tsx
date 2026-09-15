@@ -9,8 +9,17 @@ import { Project } from '@/lib/mockData';
 import RTLContinuousCarousel from '@/components/ui/RTLContinuousCarousel';
 
 const formatPrice = (price: number) => {
+  if (!price || price <= 0) return 'السعر غير محدد';
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price) + ' ر.س';
 };
+
+const projectFallbackImage = '/projects/amal-stars-showcase.webp';
+const projectImage = (project: Project) => project.media.hero?.trim() || projectFallbackImage;
+const deliveryLabel = (project: Project) => project.specs.completionDate?.trim() || 'غير محدد';
+const statusLabel = (status: Project['status']) =>
+  status === 'completed' ? 'مكتمل' :
+  status === 'under_construction' ? 'تحت الإنشاء' :
+  status === 'coming_soon' ? 'قريباً' : 'غير محدد';
 
 function FeaturedProjectCard({ project }: { project: Project }) {
   return (
@@ -27,12 +36,12 @@ function FeaturedProjectCard({ project }: { project: Project }) {
               مشروع مميز
             </span>
             <span className="px-4 py-1.5 text-xs font-bold text-white bg-black/75 backdrop-blur-md rounded-full font-cairo">
-              {project.status === 'completed' ? 'مشروع مكتمل' : project.status === 'under_construction' ? 'تحت الإنشاء' : 'قريباً'}
+              {statusLabel(project.status)}
             </span>
           </div>
 
           <Image
-            src={project.media.hero || "/projects/amal-stars-showcase.webp"}
+            src={projectImage(project)}
             alt={project.name}
             fill
             loading="lazy"
@@ -66,7 +75,7 @@ function FeaturedProjectCard({ project }: { project: Project }) {
             <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-200/80 mb-6 text-xs text-gray-700">
               <div>
                 <span className="block text-gray-500 mb-1.5 text-xs uppercase tracking-wider font-cairo">تاريخ التسليم</span>
-                <span className="font-bold text-brand-black text-xs sm:text-sm font-cairo">{project.specs.completionDate}</span>
+                <span className="font-bold text-brand-black text-xs sm:text-sm font-cairo">{deliveryLabel(project)}</span>
               </div>
               <div>
                 <span className="block text-gray-500 mb-1.5 text-xs uppercase tracking-wider font-cairo">إجمالي الوحدات</span>
@@ -115,7 +124,7 @@ function SimplifiedProjectCard({ project }: { project: Project }) {
       <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
         <Image
-          src={project.media.hero || "/projects/amal-stars-showcase.webp"}
+          src={projectImage(project)}
           alt={project.name}
           fill
           sizes="(max-width: 768px) 200px, 290px"
@@ -124,7 +133,7 @@ function SimplifiedProjectCard({ project }: { project: Project }) {
         <div className="absolute top-3 end-3 z-20">
           <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-white bg-[#111315] border border-[#CAA048]/60 rounded-md font-cairo shadow-sm">
             <span className="size-1 rounded-full bg-[#CAA048]" />
-            {project.status === 'completed' ? 'مكتمل' : project.status === 'under_construction' ? 'تحت الإنشاء' : 'قريباً'}
+            {statusLabel(project.status)}
           </span>
         </div>
       </div>
@@ -144,7 +153,7 @@ function SimplifiedProjectCard({ project }: { project: Project }) {
         <div className="flex items-center gap-2 text-xs text-gray-600 border-t border-gray-100 pt-2 mb-4 font-cairo">
           <span className="font-semibold">{project.specs.totalUnits} وحدة</span>
           <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-          <span className="font-cairo font-medium">{project.specs.completionDate}</span>
+          <span className="font-cairo font-medium">{deliveryLabel(project)}</span>
         </div>
 
         <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
@@ -288,7 +297,7 @@ export default function ProjectHighlightSection({ projects, isLoading = false }:
                   <tr key={project.id} className="odd:bg-white even:bg-gray-50/50 hover:bg-[#CAA048]/[0.05] transition-colors duration-150 border-b border-gray-100">
                     <td className="py-3 px-5 border-x border-gray-200/60 text-start">
                       <div className="relative w-14 h-10 rounded-lg overflow-hidden border border-gray-200 shadow-sm shrink-0">
-                        <Image src={project.media.hero} alt={project.name} fill sizes="56px" className="object-cover" />
+                        <Image src={projectImage(project)} alt={project.name} fill sizes="56px" className="object-cover" />
                       </div>
                     </td>
                     <td className="py-3 px-5 font-semibold border-x border-gray-200/60 text-start whitespace-nowrap font-cairo">
@@ -307,7 +316,11 @@ export default function ProjectHighlightSection({ projects, isLoading = false }:
                       </span>
                     </td>
                     <td className="py-3 px-5 font-bold text-brand-black font-cairo border-x border-gray-200/60 text-start whitespace-nowrap">
-                      من {project.priceRange.min.toLocaleString()} إلى {project.priceRange.max.toLocaleString()} ر.س
+                      {project.priceRange.min > 0 && project.priceRange.max > 0
+                        ? `من ${project.priceRange.min.toLocaleString()} إلى ${project.priceRange.max.toLocaleString()} ر.س`
+                        : project.priceRange.min > 0
+                          ? `تبدأ من ${formatPrice(project.priceRange.min)}`
+                          : 'السعر غير محدد'}
                     </td>
                     <td className="py-3 px-5 text-center border-x border-gray-200/60">
                       <div className="flex items-center justify-center gap-2">
