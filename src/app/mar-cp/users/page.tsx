@@ -247,14 +247,14 @@ export default function UsersManagementPage() {
   );
 
   return (
-    <div>
+    <div className="w-full min-w-0 max-w-full overflow-x-hidden">
       <AdminBreadcrumb items={[{ label: 'إدارة الحسابات' }]} />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-[var(--neu-text-heading)]">الحسابات والصلاحيات</h2>
-          <p className="text-sm text-[var(--neu-text-muted)] mt-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 min-w-0">
+        <div className="w-full min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold break-words text-[var(--neu-text-heading)]">الحسابات والصلاحيات</h2>
+          <p className="text-sm text-[var(--neu-text-muted)] mt-1 max-w-full break-words">
             إدارة حسابات موظفي لوحة التحكم وتوزيع صلاحيات الاستخدام وتحديث كلمات المرور مباشرة من قاعدة البيانات.
           </p>
         </div>
@@ -272,10 +272,10 @@ export default function UsersManagementPage() {
       </div>
 
       {/* Tabs Selector */}
-      <div className="flex gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:flex gap-3 sm:gap-4 mb-6 w-full min-w-0">
         <button
           onClick={() => setActiveTab('list')}
-          className={`neu-btn flex items-center gap-2 ${
+          className={`neu-btn flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 whitespace-normal text-center ${
             activeTab === 'list' ? 'neu-btn-primary' : 'neu-btn-secondary'
           }`}
         >
@@ -312,7 +312,7 @@ export default function UsersManagementPage() {
           ) : (
             <>
               {/* Search bar */}
-              <div className="neu-card mb-6">
+              <div className="neu-card mb-6 w-full min-w-0 max-w-full">
                 <div className="relative">
                   <Users className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--neu-text-muted)]" />
                   <input
@@ -326,9 +326,9 @@ export default function UsersManagementPage() {
               </div>
 
               {/* Accounts list */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full min-w-0 max-w-full">
                 {filtered.map((acc) => (
-                  <div key={acc.id} className="neu-card relative overflow-hidden flex flex-col justify-between">
+                  <div key={acc.id} className="neu-card relative overflow-hidden flex flex-col justify-between min-w-0 max-w-full">
                     {/* Status Indicator */}
                     <div className="absolute top-4 left-4">
                       {acc.status === 'active' ? (
@@ -346,13 +346,13 @@ export default function UsersManagementPage() {
 
                     <div>
                       {/* Account Identity */}
-                      <div className="flex items-center gap-3 mb-4 mt-2">
+                      <div className="flex items-center gap-3 mb-4 mt-2 min-w-0 pe-20">
                         <div className="w-10 h-10 rounded-full bg-[var(--neu-gold)]/10 flex items-center justify-center text-[var(--neu-gold)] font-bold text-lg">
                           {acc.name.charAt(0)}
                         </div>
-                        <div>
-                          <h3 className="font-bold text-[var(--neu-text-heading)]">{acc.name}</h3>
-                          <p className="text-xs text-[var(--neu-text-muted)]" dir="ltr">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-[var(--neu-text-heading)] break-words">{acc.name}</h3>
+                          <p className="text-xs text-[var(--neu-text-muted)] truncate max-w-full" dir="ltr">
                             {acc.email}
                           </p>
                         </div>
@@ -384,10 +384,10 @@ export default function UsersManagementPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 pt-3 border-t border-white/5 mt-auto">
+                    <div className="grid grid-cols-[minmax(0,1fr)_44px_44px] items-center gap-2 pt-3 border-t border-white/5 mt-auto min-w-0">
                       <button
                         onClick={() => setEditPermissionsAccount(acc)}
-                        className="neu-btn neu-btn-secondary flex-1 py-1.5 text-xs gap-1.5"
+                        className="neu-btn neu-btn-secondary w-full min-w-0 py-1.5 px-2 text-xs gap-1.5 whitespace-normal"
                         title="تعديل الصلاحيات"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
