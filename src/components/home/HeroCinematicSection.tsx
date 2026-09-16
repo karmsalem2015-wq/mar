@@ -271,14 +271,16 @@ export default function HeroCinematicSection({
 
         if (response.body && totalBytes > 0) {
           const reader = response.body.getReader();
-          const chunks: Uint8Array[] = [];
+          const chunks: ArrayBuffer[] = [];
           let received = 0;
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             if (!value) continue;
-            chunks.push(value);
+            const chunk = new Uint8Array(value.byteLength);
+            chunk.set(value);
+            chunks.push(chunk.buffer);
             received += value.byteLength;
             const progress = Math.min(received / totalBytes, 1);
             setPreloadProgress(progress);
