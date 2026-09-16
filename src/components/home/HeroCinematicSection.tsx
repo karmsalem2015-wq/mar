@@ -23,6 +23,10 @@ import {
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px) and (orientation: landscape)';
 const PRELOAD_TIMEOUT_MS = 45000;
+const DESKTOP_FORWARD_SEEK_THRESHOLD_S = 1.4;
+const DESKTOP_REVERSE_SEEK_THRESHOLD_S = 0.12;
+const DESKTOP_FOLLOW_TOLERANCE_S = 0.045;
+const DESKTOP_SETTLE_IDLE_MS = 130;
 
 type VideoWithFrameCallback = HTMLVideoElement & {
   requestVideoFrameCallback?: (callback: (now: number) => void) => number;
@@ -161,28 +165,36 @@ export default function HeroCinematicSection({
   const smoothProgressRef = useRef(0);
   const lastScrubTimestampRef = useRef(0);
   const lastSeekRequestTimestampRef = useRef(0);
+  const lastScrollEventAtRef = useRef(0);
   const stableViewportHeightRef = useRef(0);
   const lastViewportWidthRef = useRef(0);
   const sectionHeightRef = useRef(0);
   const sectionTopRef = useRef(0);
   const objectUrlRef = useRef<string | null>(null);
   const lastDiagTargetRef = useRef(0);
+  const desktopPlayPendingRef = useRef(false);
+  const desktopPlaybackActiveRef = useRef(false);
 
-  // Only one native currentTime seek is allowed at a time. While that seek is
-  // decoding, every new scroll position simply replaces this pending target.
-  // Once the decoded frame has actually been presented, only the newest target
-  // is committed. This prevents desktop Chrome from building a long seek queue.
+  // Native seeking remains the transport for mobile and for exceptional desktop
+  // moves (reverse scroll, large jumps, final precision settle). Desktop forward
+  // motion uses ordinary sequential playback so the decoder can present frames
+  // continuously instead of repeatedly restarting around keyframes.
   const seekInFlightRef = useRef(false);
   const pendingSeekTimeRef = useRef<number | null>(null);
   const seekStartedAtRef = useRef(0);
 
   const diagRef = useRef({
-    engine: 'blob-video-coalesced',
+    engine: 'blob-video-hybrid',
+    transportMode: 'idle' as 'idle' | 'playback' | 'seek',
     samples: 0,
     seeks: 0,
     seekRequests: 0,
     completedSeeks: 0,
     coalescedSeeks: 0,
+    desktopPlayStarts: 0,
+    desktopPlayPauses: 0,
+    desktopCatchupSeeks: 0,
+    desktopReverseSeeks: 0,
     longFrames: 0,
     waitingEvents: 0,
     stalledEvents: 0,
@@ -233,6 +245,8 @@ export default function HeroCinematicSection({
     pendingSeekTimeRef.current = null;
     seekStartedAtRef.current = 0;
     lastSeekRequestTimestampRef.current = 0;
+    desktopPlayPendingRef.current = false;
+    desktopPlaybackActiveRef.current = false;
 
     if (seekPaintRafRef.current !== null) {
       window.cancelAnimationFrame(seekPaintRafRef.current);
@@ -240,6 +254,10 @@ export default function HeroCinematicSection({
     }
 
     const video = videoRef.current as VideoWithFrameCallback | null;
+    if (video) {
+      if (!video.paused) video.pause();
+      video.playbackRate = 1;
+    }
     if (
       seekFrameCallbackRef.current !== null &&
       video?.cancelVideoFrameCallback
@@ -258,6 +276,7 @@ export default function HeroCinematicSection({
       targetProgressRef.current = 0;
       smoothProgressRef.current = 0;
       lastScrubTimestampRef.current = 0;
+      lastScrollEventAtRef.current = 0;
       activeStopIndexRef.current = 0;
       isStoryCompletedRef.current = false;
       isTourLockedRef.current = false;
@@ -407,8 +426,16 @@ export default function HeroCinematicSection({
     }
 
     try {
+      if (!video.paused) {
+        video.pause();
+        diagRef.current.desktopPlayPauses += variant === 'desktop' ? 1 : 0;
+      }
+      desktopPlaybackActiveRef.current = false;
+      desktopPlayPendingRef.current = false;
+      video.playbackRate = 1;
       seekInFlightRef.current = true;
       seekStartedAtRef.current = performance.now();
+      diagRef.current.transportMode = 'seek';
       video.currentTime = desiredTime;
       diagRef.current.seeks += 1;
       diagRef.current.maxSeekGap = Math.max(diagRef.current.maxSeekGap, gap);
@@ -451,7 +478,10 @@ export default function HeroCinematicSection({
       seekPaintRafRef.current = null;
       const pending = pendingSeekTimeRef.current;
       pendingSeekTimeRef.current = null;
-      if (pending === null) return;
+      if (pending === null) {
+        diagRef.current.transportMode = 'idle';
+        return;
+      }
       commitSeek(pending);
     };
 
@@ -473,9 +503,6 @@ export default function HeroCinematicSection({
       seekStartedAtRef.current = 0;
     }
 
-    // Let the browser present the decoded frame before asking for the next seek.
-    // This is important on desktop where repeated currentTime writes previously
-    // starved frame presentation and produced visible jumps.
     flushLatestSeekAfterPaint();
   }, [flushLatestSeekAfterPaint]);
 
@@ -499,41 +526,121 @@ export default function HeroCinematicSection({
     const target = targetProgressRef.current;
     const current = smoothProgressRef.current;
     const delta = target - current;
-
-    // Mobile already proved smooth at this response. Matching desktop to it
-    // softens discrete mouse-wheel bursts before they reach the seek scheduler.
-    const response = 11.5;
+    const response = variant === 'desktop' ? 10 : 11.5;
     const factor = 1 - Math.exp(-response * dt);
     let next = Math.abs(delta) > 0.00025 ? current + delta * factor : target;
     if (Math.abs(target - next) <= 0.00025) next = target;
     next = Math.min(Math.max(next, 0), 1);
     smoothProgressRef.current = next;
 
-    // Request at most ~24 target updates/sec on desktop. The coalescer still keeps
-    // the latest target, but this avoids doing unnecessary JS work between frames.
-    const seekHz = variant === 'desktop' ? 24 : HERO_MEDIA[variant].fps;
-    const seekInterval = 1000 / seekHz;
-    if (
-      timestamp - lastSeekRequestTimestampRef.current >= seekInterval ||
-      next === target
-    ) {
-      lastSeekRequestTimestampRef.current = timestamp;
-      applyVideoTime(next, next === target);
+    const duration = Number.isFinite(video.duration) && video.duration > 0
+      ? video.duration
+      : HERO_MEDIA[variant].duration;
+    const safeDuration = Math.max(0, duration - 0.04);
+
+    if (variant === 'desktop') {
+      const desiredTime = next * safeDuration;
+      const timeGap = desiredTime - video.currentTime;
+      const absGap = Math.abs(timeGap);
+      const scrollIdleMs = timestamp - lastScrollEventAtRef.current;
+      const frameDuration = 1 / HERO_MEDIA.desktop.fps;
+
+      const pausePlayback = () => {
+        desktopPlayPendingRef.current = false;
+        desktopPlaybackActiveRef.current = false;
+        if (!video.paused) {
+          video.pause();
+          diagRef.current.desktopPlayPauses += 1;
+        }
+        if (Math.abs(video.playbackRate - 1) > 0.01) video.playbackRate = 1;
+        if (!seekInFlightRef.current) diagRef.current.transportMode = 'idle';
+      };
+
+      if (seekInFlightRef.current || video.seeking) {
+        // A rare catch-up/reverse seek is already decoding. Keep only the newest
+        // target and do not compete with the decoder by starting playback.
+        pendingSeekTimeRef.current = desiredTime;
+      } else if (timeGap < -DESKTOP_REVERSE_SEEK_THRESHOLD_S) {
+        pausePlayback();
+        diagRef.current.desktopReverseSeeks += 1;
+        applyVideoTime(next);
+      } else if (timeGap > DESKTOP_FORWARD_SEEK_THRESHOLD_S) {
+        pausePlayback();
+        diagRef.current.desktopCatchupSeeks += 1;
+        applyVideoTime(next);
+      } else if (timeGap > DESKTOP_FOLLOW_TOLERANCE_S) {
+        // Normal forward motion: let the browser decode sequentially. Playback
+        // rate rises gently with distance so the movie follows the smoothed
+        // scroll playhead without a stream of random-access seeks.
+        const playbackRate = Math.min(2.25, Math.max(0.8, 0.85 + timeGap * 1.25));
+        if (Math.abs(video.playbackRate - playbackRate) > 0.06) {
+          video.playbackRate = playbackRate;
+        }
+        diagRef.current.transportMode = 'playback';
+
+        if (video.paused && !desktopPlayPendingRef.current) {
+          desktopPlayPendingRef.current = true;
+          diagRef.current.desktopPlayStarts += 1;
+          void video.play().then(() => {
+            desktopPlayPendingRef.current = false;
+            desktopPlaybackActiveRef.current = true;
+          }).catch(() => {
+            desktopPlayPendingRef.current = false;
+            desktopPlaybackActiveRef.current = false;
+            commitSeek(desiredTime);
+          });
+        }
+      } else {
+        pausePlayback();
+
+        // Once scrolling has stopped, do at most one precision settle seek. This
+        // removes small accumulated drift without disturbing active motion.
+        if (
+          scrollIdleMs >= DESKTOP_SETTLE_IDLE_MS &&
+          absGap > frameDuration * 0.75 &&
+          !seekInFlightRef.current
+        ) {
+          applyVideoTime(next, true);
+        }
+      }
+    } else {
+      const seekInterval = 1000 / HERO_MEDIA.mobile.fps;
+      if (
+        timestamp - lastSeekRequestTimestampRef.current >= seekInterval ||
+        next === target
+      ) {
+        lastSeekRequestTimestampRef.current = timestamp;
+        applyVideoTime(next, next === target);
+      }
     }
 
-    const nextStopIndex = getActiveHeroStopByVideoProgress(next, activeStopIndexRef.current);
+    const presentedProgress = variant === 'desktop' && safeDuration > 0
+      ? Math.min(Math.max(video.currentTime / safeDuration, 0), 1)
+      : next;
+    const nextStopIndex = getActiveHeroStopByVideoProgress(presentedProgress, activeStopIndexRef.current);
     if (nextStopIndex !== activeStopIndexRef.current) {
       activeStopIndexRef.current = nextStopIndex;
       setActiveStopIndex(nextStopIndex);
     }
 
-    if (Math.abs(targetProgressRef.current - smoothProgressRef.current) > 0.00025) {
+    const progressNeedsFollow = Math.abs(targetProgressRef.current - smoothProgressRef.current) > 0.00025;
+    const desktopDesiredTime = smoothProgressRef.current * safeDuration;
+    const desktopNeedsFollow = variant === 'desktop' && (
+      Math.abs(desktopDesiredTime - video.currentTime) > DESKTOP_FOLLOW_TOLERANCE_S ||
+      !video.paused ||
+      desktopPlayPendingRef.current ||
+      seekInFlightRef.current ||
+      pendingSeekTimeRef.current !== null
+    );
+
+    if (progressNeedsFollow || desktopNeedsFollow) {
       scrubRafRef.current = window.requestAnimationFrame(stepVideoScrub);
     } else {
       scrubRafRef.current = null;
       lastScrubTimestampRef.current = 0;
+      if (variant === 'desktop') diagRef.current.transportMode = 'idle';
     }
-  }, [applyVideoTime, videoFailed]);
+  }, [applyVideoTime, commitSeek, videoFailed]);
 
   const startVideoScrub = useCallback(() => {
     if (scrubRafRef.current === null) {
@@ -610,6 +717,10 @@ export default function HeroCinematicSection({
   useEffect(() => {
     if (!mediaVariant || shouldReduceMotion) return;
 
+    const handleScroll = () => {
+      lastScrollEventAtRef.current = performance.now();
+      requestScrollSync();
+    };
     const handleResize = () => {
       const width = window.innerWidth;
       if (
@@ -638,12 +749,17 @@ export default function HeroCinematicSection({
     if (videoRef.current) resizeObserver.observe(videoRef.current);
 
     diagRef.current = {
-      engine: 'blob-video-coalesced',
+      engine: 'blob-video-hybrid',
+      transportMode: 'idle',
       samples: 0,
       seeks: 0,
       seekRequests: 0,
       completedSeeks: 0,
       coalescedSeeks: 0,
+      desktopPlayStarts: 0,
+      desktopPlayPauses: 0,
+      desktopCatchupSeeks: 0,
+      desktopReverseSeeks: 0,
       longFrames: 0,
       waitingEvents: 0,
       stalledEvents: 0,
@@ -667,6 +783,9 @@ export default function HeroCinematicSection({
           : 0,
         seekInFlight: seekInFlightRef.current,
         pendingSeek: pendingSeekTimeRef.current,
+        desktopPlaybackActive: desktopPlaybackActiveRef.current,
+        desktopPlayPending: desktopPlayPendingRef.current,
+        playbackRate: video?.playbackRate ?? 1,
         longFrameRate: diagRef.current.samples
           ? diagRef.current.longFrames / diagRef.current.samples
           : 0,
@@ -680,14 +799,14 @@ export default function HeroCinematicSection({
       };
     };
 
-    window.addEventListener('scroll', requestScrollSync, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleOrientationChange);
     document.addEventListener('visibilitychange', requestScrollSync);
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener('scroll', requestScrollSync);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleOrientationChange);
       document.removeEventListener('visibilitychange', requestScrollSync);
@@ -777,17 +896,33 @@ export default function HeroCinematicSection({
               requestScrollSync();
             }}
             onCanPlay={() => setIsVideoReady(true)}
+            onPlay={() => {
+              desktopPlaybackActiveRef.current = mediaVariantRef.current === 'desktop';
+              if (mediaVariantRef.current === 'desktop') diagRef.current.transportMode = 'playback';
+            }}
+            onPause={() => {
+              desktopPlaybackActiveRef.current = false;
+              if (!seekInFlightRef.current) diagRef.current.transportMode = 'idle';
+            }}
             onSeeking={() => {
               if (!seekInFlightRef.current) {
                 seekInFlightRef.current = true;
                 seekStartedAtRef.current = performance.now();
               }
+              diagRef.current.transportMode = 'seek';
             }}
             onSeeked={handleSeeked}
             onWaiting={() => { diagRef.current.waitingEvents += 1; }}
             onStalled={() => { diagRef.current.stalledEvents += 1; }}
+            onEnded={() => {
+              desktopPlaybackActiveRef.current = false;
+              desktopPlayPendingRef.current = false;
+              diagRef.current.transportMode = 'idle';
+            }}
             onError={() => {
               seekInFlightRef.current = false;
+              desktopPlaybackActiveRef.current = false;
+              desktopPlayPendingRef.current = false;
               setVideoFailed(true);
             }}
           />
