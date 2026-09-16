@@ -160,9 +160,9 @@ export default function PropertiesPage() {
         ) : (
           <>
             {viewMode === 'table' && (
-            <div className="relative w-[calc(100vw-3rem)] sm:w-full max-w-full overflow-x-scroll overflow-y-hidden overscroll-x-contain rounded-2xl border border-[var(--neu-border)]" style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}>
-              <table className="neu-table w-max min-w-[1100px]">
-                <thead>
+            <div className="custom-table-wrapper w-full max-h-[65vh] overflow-auto rounded-2xl border border-[var(--neu-border)] bg-[var(--neu-card)] shadow-xl scrollbar-thin" dir="rtl">
+              <table className="neu-table w-full min-w-[1100px] table-auto border-collapse" dir="rtl">
+                <thead className="sticky top-0 z-20 bg-[var(--neu-card)] shadow-sm">
                   <tr>
                     <th>العقار</th>
                     <th>النوع</th>
@@ -170,7 +170,7 @@ export default function PropertiesPage() {
                     <th>السعر</th>
                     <th>المشروع</th>
                     <th>المدينة</th>
-                    <th className="!min-w-[150px]">إجراءات</th>
+                    <th className="!min-w-[170px] text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -235,8 +235,8 @@ export default function PropertiesPage() {
                             {cityVal}، {districtVal}
                           </span>
                         </td>
-                        <td className="!min-w-[150px]">
-                          <div className="flex items-center gap-1 whitespace-nowrap">
+                        <td className="!min-w-[170px] text-center">
+                          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                             <Link
                               href={`/property/${prop.slug}`}
                               target="_blank"
