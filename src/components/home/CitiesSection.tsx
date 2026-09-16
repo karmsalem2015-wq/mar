@@ -72,7 +72,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
           }}
           className="flex flex-col items-center text-center mb-10 sm:mb-14"
         >
-          <motion.div variants={fadeUpVariants} className="mb-3 sm:mb-4">
+          <motion.div variants={fadeUpVariants} className="mb-3 sm:mb-4 pt-2">
             <span className="inline-flex items-center gap-2 py-1.5 px-4 text-xs sm:text-sm font-bold text-white bg-[#111315] border border-white/20 rounded-full font-cairo shadow-sm backdrop-blur-md">
               <Compass className="w-3.5 h-3.5 text-white shrink-0" />
               <span>وجهاتنا الرئيسية</span>
@@ -123,6 +123,8 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
                     src={city.image}
                     alt={city.alt}
                     fill
+                    priority={city.id === 'جدة' || city.id === 'الرياض'}
+                    loading={city.id === 'جدة' || city.id === 'الرياض' ? 'eager' : 'lazy'}
                     sizes="(max-width: 640px) 100vw, 33vw"
                     className="object-cover"
                   />
