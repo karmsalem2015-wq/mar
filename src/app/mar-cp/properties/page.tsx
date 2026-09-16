@@ -160,8 +160,8 @@ export default function PropertiesPage() {
         ) : (
           <>
             {viewMode === 'table' && (
-            <div className="neu-table-wrapper w-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}>
-              <table className="neu-table !w-[960px] !min-w-[960px]">
+            <div className="relative w-[calc(100vw-3rem)] sm:w-full max-w-full overflow-x-scroll overflow-y-hidden overscroll-x-contain rounded-2xl border border-[var(--neu-border)]" style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}>
+              <table className="neu-table w-max min-w-[1100px]">
                 <thead>
                   <tr>
                     <th>العقار</th>
