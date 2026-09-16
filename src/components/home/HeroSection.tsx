@@ -238,6 +238,14 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       const available = getBestAvailableImage(frameIndex);
       if (!available) return;
       const { img, index: paintedIndex } = available;
+
+      // During live scrubbing never substitute a distant decoded frame: that is the
+      // visible "jump" users perceive. A 1-frame neighbor is acceptable; otherwise
+      // hold the last painted frame while the directional queue decodes the gap.
+      if (!forceRedraw && Math.abs(paintedIndex - frameIndex) > 1) {
+        prioritizeFramesRef.current?.(frameIndex, lastDrawnFrameRef.current || frameIndex, scrollDirectionRef.current);
+        return;
+      }
       if (!forceRedraw && lastDrawnFrameRef.current === paintedIndex) return;
       if (!img.complete || img.naturalWidth === 0) return;
 
@@ -331,12 +339,22 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       // Time-based easing behaves consistently on 60/90/120Hz screens.
       // A short touch filter absorbs event bursts without replacing native scrolling.
       const factor = 1 - Math.exp(-(isMobile ? 20 : 26) * dt);
-      smoothFrameRef.current = Math.abs(delta) > 0.01
-        ? current + delta * factor
-        : target;
-      if (Math.abs(target - smoothFrameRef.current) <= 0.01) smoothFrameRef.current = target;
+      const easedStep = delta * factor;
 
-      prioritizeFramesRef.current?.(target, smoothFrameRef.current, scrollDirectionRef.current);
+      // Anti-skip frame pacing. Keep the original scroll->target mapping and easing
+      // feel, but prevent one RAF tick from visually crossing a large frame range.
+      // When far behind we allow a slightly larger catch-up step so input stays responsive.
+      const distance = Math.abs(delta);
+      const maxStep = isMobile
+        ? (distance > 18 ? 2.4 : distance > 8 ? 1.8 : 1.25)
+        : (distance > 24 ? 2.8 : distance > 10 ? 2.0 : 1.35);
+      const pacedStep = Math.max(-maxStep, Math.min(maxStep, easedStep));
+      smoothFrameRef.current = Math.abs(delta) > 0.01 ? current + pacedStep : target;
+      if (Math.abs(target - smoothFrameRef.current) <= 0.12) smoothFrameRef.current = target;
+
+      // Decode the immediate travel corridor first; the existing queue remains bounded.
+      const direction = delta === 0 ? scrollDirectionRef.current : (delta > 0 ? 1 : -1);
+      prioritizeFramesRef.current?.(target, smoothFrameRef.current, direction);
       const currentFloatFrame = Math.min(
         Math.max(smoothFrameRef.current, 1),
         totalFrames,
