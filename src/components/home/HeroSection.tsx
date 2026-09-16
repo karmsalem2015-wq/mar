@@ -156,6 +156,11 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const smoothFrameRef = useRef(1);
   const lastDrawnFrameRef = useRef(-1);
   const lastRequestedFrameRef = useRef(1);
+  const heroDiagRef = useRef({
+    samples: 0, longFrames: 0, missingFrames: 0, fallbackFrames: 0,
+    maxTargetJump: 0, maxPaintGap: 0, lastTarget: 1, lastPainted: 1,
+    maxRafMs: 0, startedAt: 0,
+  });
   const lastRafTimestampRef = useRef(0);
   const scrubRafRef = useRef<number | null>(null);
   const prioritizeFramesRef = useRef<((target: number, current: number, direction: number) => void) | null>(null);
@@ -236,8 +241,15 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       if (!forceRedraw && lastDrawnFrameRef.current === frameIndex) return;
 
       const available = getBestAvailableImage(frameIndex);
-      if (!available) return;
+      if (!available) {
+        heroDiagRef.current.missingFrames++;
+        return;
+      }
       const { img, index: paintedIndex } = available;
+      const diag = heroDiagRef.current;
+      if (paintedIndex !== frameIndex) diag.fallbackFrames++;
+      diag.maxPaintGap = Math.max(diag.maxPaintGap, Math.abs(paintedIndex - diag.lastPainted));
+      diag.lastPainted = paintedIndex;
       if (!forceRedraw && lastDrawnFrameRef.current === paintedIndex) return;
       if (!img.complete || img.naturalWidth === 0) return;
 
@@ -321,7 +333,12 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       const totalFrames = HERO_MEDIA[variant].totalFrames;
       const lastTime = lastRafTimestampRef.current;
       lastRafTimestampRef.current = timestamp;
-      const dt = lastTime === 0 ? 0.016 : Math.min((timestamp - lastTime) / 1000, 0.05);
+      const rawRafMs = lastTime === 0 ? 16 : timestamp - lastTime;
+      const dt = Math.min(rawRafMs / 1000, 0.05);
+      const diag = heroDiagRef.current;
+      diag.samples++;
+      diag.maxRafMs = Math.max(diag.maxRafMs, rawRafMs);
+      if (rawRafMs > 24) diag.longFrames++;
 
       const isMobile = variant === 'mobile';
       const target = targetFrameRef.current;
@@ -612,6 +629,9 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     if (targetFrame !== targetFrameRef.current) {
       scrollDirectionRef.current = targetFrame > targetFrameRef.current ? 1 : -1;
     }
+    const diag = heroDiagRef.current;
+    diag.maxTargetJump = Math.max(diag.maxTargetJump, Math.abs(targetFrame - diag.lastTarget));
+    diag.lastTarget = targetFrame;
     targetFrameRef.current = targetFrame;
     prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
 
@@ -694,6 +714,17 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     if (sectionRef.current) resizeObserver.observe(sectionRef.current);
     if (canvasRef.current) resizeObserver.observe(canvasRef.current);
 
+    heroDiagRef.current = {
+      samples: 0, longFrames: 0, missingFrames: 0, fallbackFrames: 0,
+      maxTargetJump: 0, maxPaintGap: 0, lastTarget: targetFrameRef.current,
+      lastPainted: lastDrawnFrameRef.current || 1, maxRafMs: 0, startedAt: performance.now(),
+    };
+    (window as typeof window & { __MAR_HERO_DIAG__?: () => unknown }).__MAR_HERO_DIAG__ = () => ({
+      ...heroDiagRef.current,
+      longFrameRate: heroDiagRef.current.samples ? heroDiagRef.current.longFrames / heroDiagRef.current.samples : 0,
+      elapsedMs: performance.now() - heroDiagRef.current.startedAt,
+    });
+
     window.addEventListener('scroll', requestScrollSync, { passive: true });
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleOrientationChange);
@@ -701,6 +732,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('scroll', requestScrollSync);
+      delete (window as typeof window & { __MAR_HERO_DIAG__?: () => unknown }).__MAR_HERO_DIAG__;
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleOrientationChange);
       if (animationFrameRef.current !== null) {
