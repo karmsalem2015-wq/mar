@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Property, Project } from '@/lib/mockData';
 import { getPropertiesListAdmin, getProjectsListAdmin } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
@@ -26,6 +26,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(USE_DATABASE);
   const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState<boolean>(USE_DATABASE);
   const [loadedPropertyCount, setLoadedPropertyCount] = useState<number>(0);
+  const remainingPropertiesRef = useRef<Property[] | null>(null);
 
   useEffect(() => {
     if (!USE_DATABASE) return;
@@ -44,18 +45,9 @@ export default function HomePage() {
           setDbProperties(firstBatch);
           setLoadedPropertyCount(firstBatch.length);
 
-          const appendRemainingProperties = () => {
-            setDbProperties(normalizedProperties);
-            setLoadedPropertyCount(normalizedProperties.length);
-            setIsLoadingRemainingProperties(false);
-          };
-
-          const idleCallback = window.requestIdleCallback;
-          if (typeof idleCallback === 'function') {
-            idleCallback(appendRemainingProperties, { timeout: 1200 });
-          } else {
-            globalThis.setTimeout(appendRemainingProperties, 80);
-          }
+          // Keep the remaining rows off the main thread while the hero may be re-entered.
+          // They are committed only when the listings section itself is about to be viewed.
+          remainingPropertiesRef.current = normalizedProperties;
         } else {
           setDbProperties([]);
           setLoadedPropertyCount(0);
@@ -102,6 +94,25 @@ export default function HomePage() {
       observer?.disconnect();
       window.clearTimeout(fallbackTimer);
     };
+  }, []);
+
+  useEffect(() => {
+    if (!USE_DATABASE) return;
+    const listings = document.getElementById('listings-section');
+    if (!listings || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      const remaining = remainingPropertiesRef.current;
+      if (remaining) {
+        setDbProperties(remaining);
+        setLoadedPropertyCount(remaining.length);
+        setIsLoadingRemainingProperties(false);
+        remainingPropertiesRef.current = null;
+      }
+      observer.disconnect();
+    }, { rootMargin: '500px 0px' });
+    observer.observe(listings);
+    return () => observer.disconnect();
   }, []);
 
   // Filter States
