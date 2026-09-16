@@ -142,6 +142,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const [mediaVariant, setMediaVariant] = useState<HeroMediaVariant | null>(null);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
   const [isStoryCompleted, setIsStoryCompleted] = useState(false);
+  const [isMobileTourSettled, setIsMobileTourSettled] = useState(false);
   const [isCanvasReady, setIsCanvasReady] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const openInquiry = useInquiryStore((state) => state.open);
@@ -620,6 +621,10 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       isStoryCompletedRef.current = true;
       setIsStoryCompleted(true);
       window.dispatchEvent(new CustomEvent('mar:tour-complete'));
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: sectionTopRef.current || 0, behavior: 'auto' });
+        setIsMobileTourSettled(true);
+      });
       targetFrameRef.current = totalFrames;
       smoothFrameRef.current = totalFrames;
       prioritizeFramesRef.current?.(totalFrames, totalFrames, 1);
@@ -711,7 +716,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       className={`relative w-full bg-[#060D1A] ${
         shouldReduceMotion
           ? 'h-[100svh]'
-          : mediaVariant === 'mobile' && isStoryCompleted
+          : mediaVariant === 'mobile' && isMobileTourSettled
             ? 'h-[100svh]'
             : 'h-[420svh] md:h-[750vh] lg:h-[850vh]'
       }`}
