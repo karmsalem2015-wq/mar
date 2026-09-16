@@ -153,6 +153,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const targetFrameRef = useRef(1);
   const smoothFrameRef = useRef(1);
   const lastDrawnFrameRef = useRef(-1);
+  const lastRequestedFrameRef = useRef(1);
   const lastRafTimestampRef = useRef(0);
   const scrubRafRef = useRef<number | null>(null);
   const prioritizeFramesRef = useRef<((target: number, current: number, direction: number) => void) | null>(null);
@@ -544,6 +545,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       targetFrameRef.current = 1;
       smoothFrameRef.current = 1;
       lastDrawnFrameRef.current = -1;
+      lastRequestedFrameRef.current = 1;
       activeStopIndexRef.current = 0;
       setActiveStopIndex(0);
       isStoryCompletedRef.current = false;
