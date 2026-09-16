@@ -45,9 +45,16 @@ export default function HomePage() {
           setDbProperties(firstBatch);
           setLoadedPropertyCount(firstBatch.length);
 
-          // Keep the remaining rows off the main thread while the hero may be re-entered.
-          // They are committed only when the listings section itself is about to be viewed.
+          // Network work is already finished here. Commit the full result shortly after
+          // the initial lightweight paint so the listings never remain stuck at 50.
           remainingPropertiesRef.current = normalizedProperties;
+          window.setTimeout(() => {
+            if (cancelled || !remainingPropertiesRef.current) return;
+            setDbProperties(remainingPropertiesRef.current);
+            setLoadedPropertyCount(remainingPropertiesRef.current.length);
+            setIsLoadingRemainingProperties(false);
+            remainingPropertiesRef.current = null;
+          }, 250);
         } else {
           setDbProperties([]);
           setLoadedPropertyCount(0);
