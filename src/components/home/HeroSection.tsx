@@ -153,6 +153,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   // Canvas animation & smoothing refs
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const targetFrameRef = useRef(1);
+  const filteredVideoProgressRef = useRef(0);
+  const lastScrollSyncTimestampRef = useRef(0);
   const smoothFrameRef = useRef(1);
   const lastDrawnFrameRef = useRef(-1);
   const lastRequestedFrameRef = useRef(1);
@@ -563,6 +565,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       mediaVariantRef.current = nextVariant;
       targetFrameRef.current = 1;
       smoothFrameRef.current = 1;
+      filteredVideoProgressRef.current = 0;
+      lastScrollSyncTimestampRef.current = 0;
       lastDrawnFrameRef.current = -1;
       lastRequestedFrameRef.current = 1;
       activeStopIndexRef.current = 0;
@@ -618,8 +622,38 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     }
 
     const totalFrames = HERO_MEDIA[variant].totalFrames;
-    const videoProgress = getHeroVideoProgress(scrollProgress);
-    
+    const rawVideoProgress = getHeroVideoProgress(scrollProgress);
+
+    // Filter the scroll signal BEFORE it becomes a frame target. Mouse-wheel events
+    // can move the page by a large amount between two RAF callbacks; mapping that
+    // raw jump directly to frames was producing ~50-frame target jumps in diagnostics.
+    // Keep the existing frame smoothing/render loop untouched.
+    const now = performance.now();
+    const lastSync = lastScrollSyncTimestampRef.current;
+    const syncDt = lastSync > 0 ? Math.min((now - lastSync) / 1000, 0.05) : 0.016;
+    lastScrollSyncTimestampRef.current = now;
+
+    const previousProgress = filteredVideoProgressRef.current;
+    const progressDelta = rawVideoProgress - previousProgress;
+    const progressFactor = 1 - Math.exp(-18 * syncDt);
+    const maxProgressStep = 7 / Math.max(totalFrames - 1, 1);
+    const easedProgressStep = progressDelta * progressFactor;
+    const boundedProgressStep = Math.max(
+      -maxProgressStep,
+      Math.min(maxProgressStep, easedProgressStep),
+    );
+    let videoProgress = Math.abs(progressDelta) > 0.00005
+      ? previousProgress + boundedProgressStep
+      : rawVideoProgress;
+
+    // Snap only when already very close; this prevents a long tail without
+    // reintroducing a visible jump.
+    if (Math.abs(rawVideoProgress - videoProgress) < 0.0008) {
+      videoProgress = rawVideoProgress;
+    }
+    filteredVideoProgressRef.current = Math.min(Math.max(videoProgress, 0), 1);
+    videoProgress = filteredVideoProgressRef.current;
+
     // Continuous floating-point target (NO integer rounding here!)
     const targetFrame = Math.min(
       Math.max(videoProgress * (totalFrames - 1) + 1, 1),
@@ -635,7 +669,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     targetFrameRef.current = targetFrame;
     prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
 
-    if (variant === 'mobile' && videoProgress >= 0.85) {
+    if (variant === 'mobile' && rawVideoProgress >= 0.85) {
       isTourLockedRef.current = true;
       isStoryCompletedRef.current = true;
       setIsStoryCompleted(true);
@@ -659,7 +693,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     // Desktop keeps reversible scrubbing, but exposes the final search composition
     // only in the settle zone near the end of the tour.
     if (variant === 'desktop') {
-      const completed = videoProgress >= 0.965;
+      const completed = rawVideoProgress >= 0.965;
       if (completed !== isStoryCompletedRef.current) {
         isStoryCompletedRef.current = completed;
         setIsStoryCompleted(completed);
