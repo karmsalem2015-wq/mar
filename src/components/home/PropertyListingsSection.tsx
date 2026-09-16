@@ -290,6 +290,8 @@ interface PropertyListingsSectionProps {
   isLoading?: boolean;
   isLoadingRemaining?: boolean;
   loadedPropertyCount?: number;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
 export default function PropertyListingsSection({
@@ -305,12 +307,15 @@ export default function PropertyListingsSection({
   isLoading = false,
   isLoadingRemaining = false,
   loadedPropertyCount = 0,
+  onLoadMore,
+  hasMore = false,
 }: PropertyListingsSectionProps) {
   const shouldReduceMotion = useReducedMotion();
   const [showLocalFilters, setShowLocalFilters] = useState<boolean>(false);
   const [isLocalFiltersOpenComplete, setIsLocalFiltersOpenComplete] = useState<boolean>(false);
   const [propertiesViewMode, setPropertiesViewMode] = useState<'grid' | 'table'>('grid');
   const propertiesTableRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const fadeUpVariants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
@@ -345,6 +350,16 @@ export default function PropertyListingsSection({
       return () => clearTimeout(timer);
     }
   }, [propertiesViewMode, properties]);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || !hasMore || !onLoadMore || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) onLoadMore();
+    }, { rootMargin: '900px 0px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, onLoadMore, properties.length]);
 
   return (
     <div className="w-full bg-white pb-16">
@@ -406,7 +421,7 @@ export default function PropertyListingsSection({
         {/* 3. Toolbar: Switcher, Filter Toggle & Counter */}
         <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-4 pb-6 pt-2 border-b border-gray-100 mb-8">
           <div className="text-xs sm:text-sm text-gray-600 font-cairo">
-            تم العثور على <strong className="text-brand-black font-bold font-cairo text-sm sm:text-base">{properties.length}</strong> وحدة مطروحة
+            تم العثور على <strong className="text-brand-black font-bold font-cairo text-sm sm:text-base">{loadedPropertyCount || properties.length}</strong> وحدة مطروحة
           </div>
 
           <div className="grid grid-cols-[1fr_auto] sm:flex items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
@@ -541,12 +556,7 @@ export default function PropertyListingsSection({
           )}
         </AnimatePresence>
 
-        {isLoadingRemaining && !isLoading && (
-          <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-[#CAA048]/25 bg-[#CAA048]/[0.06] px-4 py-3 text-xs sm:text-sm font-cairo text-gray-600" role="status" aria-live="polite">
-            <span>تم عرض أول <strong className="font-mono text-brand-black">{loadedPropertyCount}</strong> وحدة — جاري تحميل باقي الوحدات في الخلفية…</span>
-            <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-[#CAA048]/30 border-t-[#CAA048]" aria-hidden="true" />
-          </div>
-        )}
+
 
         {isLoading ? (
           <div className="space-y-12">
@@ -658,6 +668,8 @@ export default function PropertyListingsSection({
               </>
             )}
 
+            <div ref={loadMoreRef} className="h-px w-full" aria-hidden="true" />
+            {isLoadingRemaining && <div className="flex justify-center py-3" role="status" aria-label="جاري تحميل المزيد"><span className="size-5 animate-spin rounded-full border-2 border-[#CAA048]/25 border-t-[#CAA048]" /></div>}
             <div className="text-center mt-6">
               <Link
                 href="/properties"
