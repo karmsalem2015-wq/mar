@@ -165,17 +165,17 @@ export default function ProjectsPage() {
           {viewMode === 'table' ? (
             <div>
               {/* Desktop Table View */}
-              <div className="neu-table-wrapper overflow-x-auto overscroll-x-contain w-full">
-                <table className="neu-table min-w-[860px]">
+              <div className="neu-table-wrapper w-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}>
+                <table className="neu-table !w-[960px] !min-w-[960px]">
                   <thead>
                     <tr>
                       <th>المشروع</th>
                       <th>الحالة</th>
-                      <th className="hidden lg:table-cell">المدينة والحي</th>
-                      <th className="hidden sm:table-cell">نطاق الأسعار</th>
-                      <th className="hidden xl:table-cell">الوحدات</th>
-                      <th className="hidden xl:table-cell">تاريخ التسليم</th>
-                      <th>إجراءات</th>
+                      <th>المدينة والحي</th>
+                      <th>نطاق الأسعار</th>
+                      <th>الوحدات</th>
+                      <th>تاريخ التسليم</th>
+                      <th className="!min-w-[150px]">إجراءات</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -220,30 +220,30 @@ export default function ProjectsPage() {
                               {STATUS_LABELS[proj.status]?.label || proj.status}
                             </span>
                           </td>
-                          <td className="hidden lg:table-cell">
+                          <td>
                             <span className="text-sm text-[var(--neu-text-secondary)]">
                               {cityVal}، {districtVal}
                             </span>
                           </td>
-                          <td className="hidden sm:table-cell">
+                          <td>
                             <span className="font-semibold text-[var(--neu-gold)]">
                               {minPrice ? minPrice.toLocaleString('en-US') : '0'}
                               {maxPrice && maxPrice > minPrice ? ` - ${maxPrice.toLocaleString('en-US')}` : ''}
                             </span>
                             <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
                           </td>
-                          <td className="hidden xl:table-cell">
+                          <td>
                             <span className="text-sm font-semibold text-[var(--neu-text-heading)] font-mono">
                               {availUnits !== undefined ? `${availUnits} من ${totalUnits || '-'}` : (totalUnits || '-')}
                             </span>
                           </td>
-                          <td className="hidden xl:table-cell">
+                          <td>
                             <span className="text-xs text-[var(--neu-text-secondary)]">
                               {completionDate}
                             </span>
                           </td>
-                          <td>
-                            <div className="flex items-center gap-1">
+                          <td className="!min-w-[150px]">
+                          <div className="flex items-center gap-1 whitespace-nowrap">
                               <Link
                                 href={`/projects/${proj.slug}`}
                                 target="_blank"
