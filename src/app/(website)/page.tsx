@@ -110,7 +110,7 @@ export default function HomePage() {
         remainingPropertiesRef.current = null;
       }
       observer.disconnect();
-    }, { rootMargin: '500px 0px' });
+    }, { rootMargin: '1400px 0px' });
     observer.observe(listings);
     return () => observer.disconnect();
   }, []);
@@ -125,6 +125,13 @@ export default function HomePage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const remaining = remainingPropertiesRef.current;
+    if (remaining) {
+      setDbProperties(remaining);
+      setLoadedPropertyCount(remaining.length);
+      setIsLoadingRemainingProperties(false);
+      remainingPropertiesRef.current = null;
+    }
     const listingsSection = document.getElementById('listings-section');
     listingsSection?.scrollIntoView({ behavior: 'smooth' });
   };
