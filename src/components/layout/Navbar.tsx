@@ -21,6 +21,7 @@ export default function Navbar() {
   const shouldReduceMotion = useReducedMotion();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
+  const [isTourCompleted, setIsTourCompleted] = useState(false);
   const openInquiry = useInquiryStore((state) => state.open);
 
   const handleSkipTour = () => {
@@ -65,12 +66,15 @@ export default function Navbar() {
     const rafId = requestAnimationFrame(checkHeroExit);
     const timeoutId = setTimeout(checkHeroExit, 100);
 
+    const handleTourComplete = () => setIsTourCompleted(true);
+    window.addEventListener('mar:tour-complete', handleTourComplete);
     window.addEventListener('scroll', checkHeroExit, { passive: true });
     window.addEventListener('resize', checkHeroExit);
 
     return () => {
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
+      window.removeEventListener('mar:tour-complete', handleTourComplete);
       window.removeEventListener('scroll', checkHeroExit);
       window.removeEventListener('resize', checkHeroExit);
     };
@@ -84,6 +88,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setShowMobileMenu(false);
+    setIsTourCompleted(false);
   }, [pathname]);
 
   return (
@@ -137,7 +142,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2.5">
-          {pathname === '/' && !isPastHero && !showMobileMenu && (
+          {pathname === '/' && !isPastHero && !isTourCompleted && !showMobileMenu && (
             <button
               type="button"
               onClick={handleSkipTour}
