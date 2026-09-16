@@ -669,7 +669,6 @@ export default function PropertyListingsSection({
             )}
 
             <div ref={loadMoreRef} className="h-px w-full" aria-hidden="true" />
-            {isLoadingRemaining && <div className="flex justify-center py-3" role="status" aria-label="جاري تحميل المزيد"><span className="size-5 animate-spin rounded-full border-2 border-[#CAA048]/25 border-t-[#CAA048]" /></div>}
             <div className="text-center mt-6">
               <Link
                 href="/properties"
