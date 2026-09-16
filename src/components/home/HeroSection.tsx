@@ -736,9 +736,9 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
 
       const direction = event.deltaY > 0 ? 1 : -1;
       // Mouse wheels usually report ~100px notches; precision trackpads report much
-      // smaller deltas. Cap a single event to 3 frames and keep precision input near 1.
+      // smaller deltas. Use a wider 1.4–6 frame range so wheel travel feels responsive while the scrub loop still interpolates the camera.
       const magnitude = Math.abs(event.deltaY);
-      const framesPerEvent = magnitude < 24 ? 0.65 : magnitude < 80 ? 1.15 : magnitude < 180 ? 1.8 : 2.6;
+      const framesPerEvent = magnitude < 24 ? 1.4 : magnitude < 80 ? 2.6 : magnitude < 180 ? 4.2 : 6;
       const total = HERO_MEDIA.desktop.totalFrames;
       const base = desktopWheelActiveRef.current ? desktopWheelFrameRef.current : targetFrameRef.current;
       const next = Math.min(Math.max(base + direction * framesPerEvent, 1), total);
