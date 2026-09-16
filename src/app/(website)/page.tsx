@@ -69,7 +69,7 @@ export default function HomePage() {
     setIsLoadingRemainingProperties(true);
     try {
       const rows = await getHomePropertiesPage(dbProperties.length, HOME_BATCH);
-      const normalized = (rows || []).map(normalizeProperty);
+      const normalized: Property[] = (rows || []).map(normalizeProperty);
       setDbProperties(prev => {
         const ids = new Set(prev.map(p => p.id));
         return [...prev, ...normalized.filter(p => !ids.has(p.id))];
