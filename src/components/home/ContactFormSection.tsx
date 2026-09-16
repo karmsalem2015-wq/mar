@@ -113,7 +113,7 @@ export default function ContactFormSection() {
   };
 
   return (
-    <section id="contact-section" className="relative w-full overflow-hidden py-20 sm:py-24 bg-[#F7F7F7] border-y border-gray-200/80 z-10">
+    <section id="contact-section" className="relative w-full overflow-hidden py-12 sm:py-20 bg-[#F7F7F7] border-y border-gray-200/80 z-10">
       {/* Background Decorative Blob */}
       <div className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#CAA048]/5 rounded-full blur-3xl z-0 pointer-events-none"></div>
 
@@ -136,9 +136,9 @@ export default function ContactFormSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="w-full max-w-4xl mx-auto mt-10 sm:mt-12 z-10"
+          className="w-full max-w-4xl mx-auto mt-7 sm:mt-10 z-10"
         >
-          <div className="relative bg-white border border-gray-200 p-6 sm:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
+          <div className="relative bg-white border border-gray-300 p-4 sm:p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
             <div className="absolute top-0 start-10 end-10 h-[2px] bg-gradient-to-r from-transparent via-[#CAA048] to-transparent"></div>
 
             {submitSuccess ? (
@@ -151,13 +151,13 @@ export default function ContactFormSection() {
                 <button
                   type="button"
                   onClick={() => setSubmitSuccess(false)}
-                  className="mt-4 py-3 px-8 text-xs sm:text-sm font-bold btn-premium-gold rounded-full min-h-[44px] font-cairo cursor-pointer"
+                  className="mt-4 py-3 px-8 text-xs sm:text-sm font-bold btn-premium-gold rounded-full min-h-[42px] font-cairo cursor-pointer"
                 >
                   إرسال طلب آخر
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6 text-start" noValidate>
+              <form onSubmit={handleSubmit} className="space-y-4 text-start" noValidate>
                 {submitError && (
                   <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm flex items-center gap-2 font-cairo">
                     <AlertCircle className="w-5 h-5 shrink-0" />
@@ -166,10 +166,10 @@ export default function ContactFormSection() {
                 )}
 
                 {/* Group 1: Personal Info */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <h3 className="text-xs sm:text-sm font-bold text-brand-black border-s-2 border-[#CAA048] ps-2.5 font-heading">معلومات شخصية</h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-[0.65fr_1fr_1fr] gap-2 sm:gap-4">
                     <div className="space-y-1">
                       <label htmlFor="contact-title" className="block text-xs font-semibold text-gray-700 font-cairo">اللقب</label>
                       <select
@@ -177,7 +177,7 @@ export default function ContactFormSection() {
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       >
                         <option value="السيد">السيد</option>
                         <option value="السيدة">السيدة</option>
@@ -195,7 +195,7 @@ export default function ContactFormSection() {
                         placeholder="أدخل الاسم الأول"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
                       {errors.firstName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.firstName}</p>}
                     </div>
@@ -209,13 +209,13 @@ export default function ContactFormSection() {
                         placeholder="أدخل اسم العائلة"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
                       {errors.lastName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.lastName}</p>}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
                     <div className="space-y-1">
                       <label htmlFor="contact-email" className="block text-xs font-semibold text-gray-700 font-cairo">البريد الإلكتروني *</label>
                       <input
@@ -225,7 +225,7 @@ export default function ContactFormSection() {
                         placeholder="name@example.com"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
                       {errors.email && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.email}</p>}
                     </div>
@@ -240,7 +240,7 @@ export default function ContactFormSection() {
                         dir="ltr"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all text-start font-mono min-h-[44px]"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all text-start font-mono min-h-[42px]"
                       />
                       {errors.phone && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.phone}</p>}
                     </div>
@@ -251,7 +251,7 @@ export default function ContactFormSection() {
                 <div className="space-y-4 pt-2">
                   <h3 className="text-xs sm:text-sm font-bold text-brand-black border-s-2 border-[#CAA048] ps-2.5 font-heading">معلومات العقار المطلوب</h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                     <div className="space-y-1">
                       <label htmlFor="contact-property-type" className="block text-xs font-semibold text-gray-700 font-cairo">نوع العقار</label>
                       <select
@@ -259,7 +259,7 @@ export default function ContactFormSection() {
                         name="propertyType"
                         value={formData.propertyType}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       >
                         <option value="شقة">شقة سكنية</option>
                         <option value="فيلا">فيلا مستقلة</option>
@@ -280,7 +280,7 @@ export default function ContactFormSection() {
                         placeholder="جدة، الرياض، مكة"
                         value={formData.city}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
                     </div>
 
@@ -293,7 +293,7 @@ export default function ContactFormSection() {
                         placeholder="الرمز البريدي"
                         value={formData.zipCode}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all font-mono min-h-[44px]"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all font-mono min-h-[42px]"
                       />
                     </div>
                   </div>
@@ -306,7 +306,7 @@ export default function ContactFormSection() {
                         name="bedrooms"
                         value={formData.bedrooms}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       >
                         <option value="1">1 غرفة</option>
                         <option value="2">2 غرف</option>
@@ -326,7 +326,7 @@ export default function ContactFormSection() {
                         placeholder="مثال: 3"
                         value={formData.bathrooms}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
                     </div>
 
@@ -339,17 +339,17 @@ export default function ContactFormSection() {
                         placeholder="مثال: 800,000"
                         value={formData.budget}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-200 focus:border-[#CAA048] focus:bg-white rounded-xl px-4 py-3 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-2">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-4 px-6 text-xs sm:text-sm font-bold btn-premium-gold rounded-xl transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center gap-2 min-h-[44px] font-cairo"
+                    className="w-full py-3 px-6 text-xs sm:text-sm font-bold btn-premium-gold rounded-xl transition-all duration-300 shadow-md cursor-pointer flex items-center justify-center gap-2 min-h-[42px] font-cairo"
                   >
                     {isSubmitting ? (
                       <>
