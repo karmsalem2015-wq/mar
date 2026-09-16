@@ -17,6 +17,8 @@ import {
   Star,
   Building2,
   Loader2,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import { getPropertiesListAdmin, deleteProperty } from '@/app/actions/properties';
 
@@ -41,6 +43,7 @@ export default function PropertiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const [propertyToDelete, setPropertyToDelete] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -139,6 +142,11 @@ export default function PropertiesPage() {
             className="w-full md:w-40"
             placeholder="تصفية حسب النوع"
           />
+
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--neu-depressed)] border border-[var(--neu-border)] shrink-0">
+            <button type="button" onClick={() => setViewMode('table')} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold ${viewMode === 'table' ? 'bg-[var(--neu-gold)] text-black' : 'text-[var(--neu-text-secondary)]'}`} aria-label="عرض الجدول"><List className="w-3.5 h-3.5" /><span>جدول</span></button>
+            <button type="button" onClick={() => setViewMode('grid')} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold ${viewMode === 'grid' ? 'bg-[var(--neu-gold)] text-black' : 'text-[var(--neu-text-secondary)]'}`} aria-label="عرض الكروت"><LayoutGrid className="w-3.5 h-3.5" /><span>كروت</span></button>
+          </div>
         </div>
       </div>
 
@@ -151,9 +159,9 @@ export default function PropertiesPage() {
           </div>
         ) : (
           <>
-            {/* Desktop Table View */}
-            <div className="neu-table-wrapper overflow-x-auto hidden md:block">
-              <table className="neu-table">
+            {viewMode === 'table' && (
+            <div className="neu-table-wrapper overflow-x-auto overscroll-x-contain w-full">
+              <table className="neu-table min-w-[860px]">
                 <thead>
                   <tr>
                     <th>العقار</th>
@@ -260,9 +268,11 @@ export default function PropertiesPage() {
                 </tbody>
               </table>
             </div>
+            )}
 
-            {/* Mobile Cards List View */}
-            <div className="grid grid-cols-1 gap-4 md:hidden">
+            {/* Cards List View */}
+            {viewMode === 'grid' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredProperties.map((prop) => {
                 const bedroomsVal = prop.bedrooms !== undefined ? prop.bedrooms : prop.specs?.bedrooms;
                 const bathroomsVal = prop.bathrooms !== undefined ? prop.bathrooms : prop.specs?.bathrooms;
@@ -367,6 +377,7 @@ export default function PropertiesPage() {
                 );
               })}
             </div>
+            )}
 
             {filteredProperties.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
