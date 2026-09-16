@@ -170,7 +170,8 @@ export default function HomePage() {
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         properties={dbProperties}
-        isLoading={isLoading}
+        cityCounts={cityPropertyCounts}
+        isLoading={false}
       />
 
       {/* 3. Latest Offers & Property Listings */}
@@ -186,7 +187,7 @@ export default function HomePage() {
         setMaxPrice={setMaxPrice}
         isLoading={isLoading}
         isLoadingRemaining={isLoadingRemainingProperties}
-        loadedPropertyCount={totalPropertyCount}
+        loadedPropertyCount={dbProperties.length}
         onLoadMore={loadMoreProperties}
         hasMore={dbProperties.length < totalPropertyCount}
       />
