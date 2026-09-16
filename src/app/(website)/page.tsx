@@ -83,7 +83,7 @@ export default function HomePage() {
     };
 
     // Keep the hero's frame decoding and scroll scrub isolated from Supabase/data work.
-    // Prefetch shortly before the hero ends so data is ready when the content becomes visible.
+    // Diagnostic test: do not fetch until content-start actually enters the viewport, isolating hero performance from database work.
     const contentStart = document.getElementById('content-start');
     let observer: IntersectionObserver | undefined;
     if (contentStart && 'IntersectionObserver' in window) {
@@ -92,11 +92,11 @@ export default function HomePage() {
           startDataLoad();
           observer?.disconnect();
         }
-      }, { rootMargin: '1200px 0px' });
+      }, { rootMargin: '0px 0px' });
       observer.observe(contentStart);
     }
 
-    const fallbackTimer = window.setTimeout(startDataLoad, 9000);
+    const fallbackTimer = window.setTimeout(startDataLoad, 30000);
     return () => {
       cancelled = true;
       observer?.disconnect();
