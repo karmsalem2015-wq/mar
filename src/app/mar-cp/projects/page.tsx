@@ -165,8 +165,8 @@ export default function ProjectsPage() {
           {viewMode === 'table' ? (
             <div>
               {/* Desktop Table View */}
-              <div className="neu-table-wrapper overflow-x-auto hidden md:block">
-                <table className="neu-table">
+              <div className="neu-table-wrapper overflow-x-auto overscroll-x-contain w-full">
+                <table className="neu-table min-w-[860px]">
                   <thead>
                     <tr>
                       <th>المشروع</th>
@@ -276,99 +276,6 @@ export default function ProjectsPage() {
                 </table>
               </div>
 
-              {/* Mobile Cards List View (when in table mode on mobile) */}
-              <div className="grid grid-cols-1 gap-4 md:hidden">
-                {filteredProjects.map((proj) => {
-                  const heroSrc = proj.hero_image || proj.media?.hero || '/projects/placeholder.webp';
-                  const cityVal = proj.city || proj.location?.city || '';
-                  const districtVal = proj.district || proj.location?.district || '';
-                  const availUnits = proj.available_units !== undefined ? proj.available_units : proj.specs?.availableUnits;
-                  const totalUnits = proj.total_units !== undefined ? proj.total_units : proj.specs?.totalUnits;
-                  const minPrice = proj.price_min !== undefined ? proj.price_min : proj.priceRange?.min;
-                  const maxPrice = proj.price_max !== undefined ? proj.price_max : proj.priceRange?.max;
-                  const completionDate = proj.completion_date || proj.specs?.completionDate || 'غير محدد';
-
-                  return (
-                    <div key={proj.id} className="neu-card flex flex-col gap-4 p-4 relative overflow-hidden">
-                      <div className="flex gap-3.5 items-start">
-                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[var(--neu-depressed)] shrink-0 relative border border-white/10">
-                          <Image
-                            src={heroSrc}
-                            alt={proj.name}
-                            fill
-                            className="object-cover"
-                            sizes="80px"
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                            <span className={`neu-badge text-[10px] py-0.5 px-2 ${STATUS_LABELS[proj.status]?.class || ''}`}>
-                              {STATUS_LABELS[proj.status]?.label || proj.status}
-                            </span>
-                            {proj.featured && (
-                              <Star className="w-3.5 h-3.5 text-[var(--neu-gold)] fill-[var(--neu-gold)] shrink-0" />
-                            )}
-                          </div>
-                          <h4 className="font-bold text-sm text-[var(--neu-text-heading)] line-clamp-1">
-                            {proj.name}
-                          </h4>
-                          <p className="text-xs text-[var(--neu-text-muted)] mt-1 flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-[var(--neu-gold)]" />
-                            <span>{cityVal}، {districtVal}</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 py-2.5 border-y border-white/5 text-xs">
-                        <div>
-                          <span className="text-[10px] text-[var(--neu-text-muted)] block">الوحدات</span>
-                          <span className="font-semibold text-[var(--neu-text-heading)] font-mono">
-                            {availUnits !== undefined ? `${availUnits} من ${totalUnits || '-'}` : (totalUnits || '-')}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-[var(--neu-text-muted)] block">الأسعار تبدأ من</span>
-                          <span className="font-bold text-[var(--neu-gold)]">
-                            {minPrice ? minPrice.toLocaleString('en-US') : '0'} ر.س
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-[var(--neu-text-muted)] block">التسليم</span>
-                          <span className="text-xs text-[var(--neu-text-secondary)]">
-                            {completionDate}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-1">
-                        <Link
-                          href={`/projects/${proj.slug}`}
-                          target="_blank"
-                          className="neu-btn neu-btn-ghost neu-btn-sm flex-1"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          معاينة
-                        </Link>
-                        <Link
-                          href={`/mar-cp/projects/${proj.id}`}
-                          className="neu-btn neu-btn-secondary neu-btn-sm flex-1"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                          تعديل
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(proj.id, proj.name)}
-                          className="neu-btn neu-btn-danger neu-btn-sm"
-                          title="حذف"
-                          aria-label={`حذف مشروع ${proj.name}`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           ) : (
             /* Cards Grid View */
