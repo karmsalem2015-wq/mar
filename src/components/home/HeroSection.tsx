@@ -223,7 +223,17 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       if (!canvas || !variant) return;
 
       const total = HERO_MEDIA[variant].totalFrames;
-      const frameIndex = Math.min(Math.max(Math.round(floatFrame), 1), total);
+      const rawFrameIndex = Math.min(Math.max(Math.round(floatFrame), 1), total);
+      const previousRequested = lastRequestedFrameRef.current;
+      const direction = scrollDirectionRef.current;
+      // Pace large target jumps so a bursty scroll event cannot visually skip a
+      // long run of frames in one paint. Normal small movements remain 1:1.
+      const maxVisualStep = variant === 'mobile' ? 3 : 4;
+      const delta = rawFrameIndex - previousRequested;
+      const frameIndex = Math.abs(delta) > maxVisualStep
+        ? previousRequested + Math.sign(delta || direction) * maxVisualStep
+        : rawFrameIndex;
+      lastRequestedFrameRef.current = frameIndex;
 
       // Skip painting if this exact integer frame is already painted on screen
       if (!forceRedraw && lastDrawnFrameRef.current === frameIndex) return;
