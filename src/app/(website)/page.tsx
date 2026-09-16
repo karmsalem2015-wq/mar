@@ -7,7 +7,7 @@ import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty, normalizeProject } from '@/lib/normalizers';
 import { useInquiryStore } from '@/store/useInquiryStore';
 
-import HeroSection from '@/components/home/HeroBlobPreloadSection';
+import HeroSection from '@/components/home/HeroCinematicSection';
 import SearchBarSection from '@/components/home/SearchBarSection';
 import CitiesSection from '@/components/home/CitiesSection';
 import PropertyListingsSection from '@/components/home/PropertyListingsSection';
