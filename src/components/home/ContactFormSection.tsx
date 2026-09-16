@@ -9,8 +9,7 @@ import { CheckCircle, AlertCircle, Loader2, Headphones, ChevronDown, UserRound, 
 
 const contactSchema = z.object({
   title: z.string().min(1, 'الرجاء اختيار اللقب'),
-  firstName: z.string().min(2, 'الاسم الأول يجب أن يكون حرفين على الأقل'),
-  lastName: z.string().min(2, 'اسم العائلة يجب أن يكون حرفين على الأقل'),
+  fullName: z.string().min(5, 'الرجاء إدخال الاسم الثلاثي'),
   email: z.string().email('عنوان البريد الإلكتروني غير صحيح'),
   phone: z.string().min(8, 'رقم التليفون يجب أن يكون 8 أرقام على الأقل'),
   propertyType: z.string().min(1, 'الرجاء اختيار نوع العقار أو المشروع'),
@@ -50,8 +49,7 @@ export default function ContactFormSection() {
   const shouldReduceMotion = useReducedMotion();
   const [formData, setFormData] = useState<ContactFormData>({
     title: 'السيد',
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     phone: '',
     propertyType: 'شقة',
@@ -101,7 +99,7 @@ export default function ContactFormSection() {
 
     try {
       const data = validation.data;
-      const fullName = `${data.title} ${data.firstName} ${data.lastName}`.trim();
+      const fullName = `${data.title} ${data.fullName}`.trim();
       const messageNotes = `نوع العقار: ${data.propertyType} | المدينة: ${data.city || 'غير محدد'} | الغرف: ${data.bedrooms || 'غير محدد'} | الحمامات: ${data.bathrooms || 'غير محدد'} | الميزانية: ${data.budget || 'غير محدد'}`;
 
       const res = await createSubmission({
@@ -119,8 +117,7 @@ export default function ContactFormSection() {
         setSubmitSuccess(true);
         setFormData({
           title: 'السيد',
-          firstName: '',
-          lastName: '',
+          fullName: '',
           email: '',
           phone: '',
           propertyType: 'شقة',
@@ -196,73 +193,32 @@ export default function ContactFormSection() {
                 <div className="space-y-3">
                   <h3 className="text-xs sm:text-sm font-bold text-brand-black border-s-2 border-[#CAA048] ps-2.5 font-heading">معلومات شخصية</h3>
 
-                  <div className="grid grid-cols-[0.65fr_1fr_1fr] gap-2 sm:gap-4">
+                  <div className="grid grid-cols-[0.72fr_2fr] gap-2 sm:gap-4" dir="rtl">
                     <div className="space-y-1">
-                      <label htmlFor="contact-title" className="block text-xs font-semibold text-gray-700 font-cairo">اللقب</label>
+                      <label className="block text-xs font-semibold text-gray-700 font-cairo text-start">اللقب</label>
                       <CustomSelect name="title" value={formData.title} icon={UserRound} ariaLabel="اللقب" onChange={setSelectValue} options={[{value:'السيد',label:'السيد'},{value:'السيدة',label:'السيدة'},{value:'شركة',label:'شركة / جهة'}]} />
                       {errors.title && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.title}</p>}
                     </div>
-
                     <div className="space-y-1">
-                      <label htmlFor="contact-first-name" className="block text-xs font-semibold text-gray-700 font-cairo">الاسم الأول *</label>
-                      <input
-                        id="contact-first-name"
-                        name="firstName"
-                        type="text"
-                        placeholder="أدخل الاسم الأول"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl ps-9 pe-3 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
-                      />
-                      <UserRound className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
-                      {errors.firstName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.firstName}</p>}
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="contact-last-name" className="block text-xs font-semibold text-gray-700 font-cairo">اسم العائلة *</label>
-                      <input
-                        id="contact-last-name"
-                        name="lastName"
-                        type="text"
-                        placeholder="أدخل اسم العائلة"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
-                      />
-                      <UserRound className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
-                      {errors.lastName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.lastName}</p>}
+                      <label htmlFor="contact-full-name" className="block text-xs font-semibold text-gray-700 font-cairo text-start">الاسم الثلاثي *</label>
+                      <div className="relative">
+                        <UserRound className="absolute top-1/2 -translate-y-1/2 end-3 w-4 h-4 text-[#B58B34] pointer-events-none" />
+                        <input id="contact-full-name" name="fullName" type="text" dir="rtl" autoComplete="name" placeholder="اكتب الاسم الثلاثي" value={formData.fullName} onChange={handleChange} className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl ps-3 pe-10 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[44px] font-cairo text-start" />
+                      </div>
+                      {errors.fullName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.fullName}</p>}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:gap-4">
                     <div className="space-y-1">
-                      <label htmlFor="contact-email" className="block text-xs font-semibold text-gray-700 font-cairo">البريد الإلكتروني *</label>
-                      <input
-                        id="contact-email"
-                        name="email"
-                        type="email"
-                        placeholder="name@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
-                      />
-                      <Mail className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
+                      <label htmlFor="contact-email" className="block text-xs font-semibold text-gray-700 font-cairo text-start">البريد الإلكتروني *</label>
+                      <div className="relative"><Mail className="absolute top-1/2 -translate-y-1/2 end-3 w-4 h-4 text-[#B58B34] pointer-events-none"/><input id="contact-email" name="email" type="email" dir="ltr" autoComplete="email" placeholder="name@example.com" value={formData.email} onChange={handleChange} className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] rounded-xl ps-3 pe-10 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[44px] text-start"/></div>
                       {errors.email && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-1">
-                      <label htmlFor="contact-phone" className="block text-xs font-semibold text-gray-700 font-cairo">رقم التليفون *</label>
-                      <input
-                        id="contact-phone"
-                        name="phone"
-                        type="tel"
-                        placeholder="05xxxxxxxx"
-                        dir="ltr"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all text-start font-mono min-h-[42px]"
-                      />
-                      <Phone className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
+                      <label htmlFor="contact-phone" className="block text-xs font-semibold text-gray-700 font-cairo text-start">رقم التليفون *</label>
+                      <div className="relative"><Phone className="absolute top-1/2 -translate-y-1/2 end-3 w-4 h-4 text-[#B58B34] pointer-events-none"/><input id="contact-phone" name="phone" type="tel" dir="ltr" inputMode="tel" autoComplete="tel" placeholder="05xxxxxxxx" value={formData.phone} onChange={handleChange} className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] rounded-xl ps-3 pe-10 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[44px] text-start font-mono"/></div>
                       {errors.phone && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.phone}</p>}
                     </div>
                   </div>
