@@ -10,10 +10,11 @@ interface CitiesSectionProps {
   selectedCity: string;
   setSelectedCity: (city: string) => void;
   properties: Property[];
+  cityCounts?: Record<string, number>;
   isLoading?: boolean;
 }
 
-export default function CitiesSection({ selectedCity, setSelectedCity, properties, isLoading = false }: CitiesSectionProps) {
+export default function CitiesSection({ selectedCity, setSelectedCity, properties, cityCounts = {}, isLoading = false }: CitiesSectionProps) {
   const shouldReduceMotion = useReducedMotion();
 
   const fadeUpVariants = {
@@ -26,7 +27,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
   };
 
   const getCityCount = (city: string) => {
-    return properties.filter(p => p.location.city === city).length;
+    return cityCounts[city] ?? properties.filter(p => p.location.city === city).length;
   };
 
   const CITIES = [
