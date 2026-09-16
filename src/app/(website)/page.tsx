@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Property, Project } from '@/lib/mockData';
-import { getHomePropertyCount, getHomePropertiesPage, getProjectsListAdmin } from '@/app/actions/properties';
+import { getHomePropertyStats, getHomePropertiesPage, getProjectsListAdmin } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty, normalizeProject } from '@/lib/normalizers';
 import { useInquiryStore } from '@/store/useInquiryStore';
@@ -24,6 +24,7 @@ export default function HomePage() {
   const [dbProperties, setDbProperties] = useState<Property[]>([]);
   const [dbProjects, setDbProjects] = useState<Project[]>([]);
   const [totalPropertyCount, setTotalPropertyCount] = useState(0);
+  const [cityPropertyCounts, setCityPropertyCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(USE_DATABASE);
   const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState(false);
   const loadingPageRef = useRef(false);
@@ -32,7 +33,7 @@ export default function HomePage() {
     if (!USE_DATABASE) return;
     let cancelled = false;
     // Count is deliberately independent of row/media loading.
-    getHomePropertyCount().then(count => { if (!cancelled) setTotalPropertyCount(count); });
+    getHomePropertyStats().then(stats => { if (!cancelled) { setTotalPropertyCount(stats.total); setCityPropertyCounts(stats.cityCounts); } });
 
     let started = false;
     async function loadInitialData() {
