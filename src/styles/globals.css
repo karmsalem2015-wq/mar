@@ -647,3 +647,32 @@ article h4,
     0 -1px 1.5px rgba(0, 0, 0, 0.38),
     0 0 20px rgba(230, 168, 33, 0.28);
 }
+
+/* ----------------------------------------------------
+   Home hero -> content seam + docked search filters
+   ---------------------------------------------------- */
+#content-start {
+  height: 1px !important;
+  background: #FAF8F5;
+}
+
+/* The docked search is close to the bottom edge of the hero. When its
+   advanced filters are opened, let the panel extend into the content area
+   instead of being clipped by the cinematic viewport. */
+#mar-story:has(#mobile-search-filter-section [aria-expanded="true"]) {
+  z-index: 30;
+}
+
+#mar-story:has(#mobile-search-filter-section [aria-expanded="true"]) > div {
+  overflow: visible !important;
+}
+
+/* Docked filters should always unfold below the search bar on both mobile
+   and desktop. SearchBarSection uses bottom-full for docked mode by default;
+   these overrides intentionally flip that placement. */
+#mobile-search-filter-section form > .bottom-full {
+  top: calc(100% + 0.75rem) !important;
+  bottom: auto !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
