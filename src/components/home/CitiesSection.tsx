@@ -60,7 +60,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
   ];
 
   return (
-    <div className="w-full bg-[#FAF8F5] pt-10 md:border-t md:border-gray-200/80 md:pt-36 lg:pt-40 pb-16">
+    <div className="relative z-10 w-full bg-[#FAF8F5] pt-16 md:border-t md:border-gray-200/80 md:pt-36 lg:pt-40 pb-16">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"
@@ -72,7 +72,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
           }}
           className="flex flex-col items-center text-center mb-10 sm:mb-14"
         >
-          <motion.div variants={fadeUpVariants} className="mb-3 sm:mb-4 pt-2">
+          <motion.div variants={fadeUpVariants} className="mb-3 sm:mb-4">
             <span className="inline-flex items-center gap-2 py-1.5 px-4 text-xs sm:text-sm font-bold text-white bg-[#111315] border border-white/20 rounded-full font-cairo shadow-sm backdrop-blur-md">
               <Compass className="w-3.5 h-3.5 text-white shrink-0" />
               <span>وجهاتنا الرئيسية</span>
