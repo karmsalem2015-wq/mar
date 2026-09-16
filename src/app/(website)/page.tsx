@@ -171,26 +171,8 @@ export default function HomePage() {
         }
       />
 
-      {/* 2. Desktop Search Bar Section: Original flow, position, height & timing at the end of the tour */}
-      <div id="content-start" className="scroll-mt-24">
-        <div className="hidden md:block">
-          <SearchBarSection
-            mode="flow"
-            idPrefix="desktop-"
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            selectedCity={selectedCity}
-            setSelectedCity={setSelectedCity}
-            selectedType={selectedType}
-            setSelectedType={setSelectedType}
-            selectedRooms={selectedRooms}
-            setSelectedRooms={setSelectedRooms}
-            maxPrice={maxPrice}
-            setMaxPrice={setMaxPrice}
-            handleSearch={handleSearch}
-          />
-        </div>
-      </div>
+      {/* Content preload sentinel. Search is now composed inside the hero on all viewports. */}
+      <div id="content-start" className="h-8 md:h-14 scroll-mt-24" aria-hidden="true" />
 
       {/* 3. Cities Destinations Grid */}
       <CitiesSection
