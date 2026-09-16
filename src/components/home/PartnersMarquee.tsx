@@ -45,7 +45,7 @@ export default function PartnersMarquee() {
   const MARQUEE_ITEMS = [...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS];
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 bg-white border-b border-gray-200/70 z-10">
+    <section ref={sectionRef} className="relative w-full overflow-hidden py-12 sm:py-16 bg-white border-b border-gray-200/70 z-10">
       <div className="relative w-full mx-auto z-10">
         <motion.div
           initial="hidden"
@@ -55,7 +55,7 @@ export default function PartnersMarquee() {
             hidden: {},
             visible: { transition: { staggerChildren: 0.1 } }
           }}
-          className="flex flex-col items-center text-center mb-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+          className="flex flex-col items-center text-center mb-8 sm:mb-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <motion.span variants={fadeUpVariants} className="inline-flex items-center gap-2 py-1.5 px-4 text-xs sm:text-sm font-bold text-white bg-[#111315] border border-white/20 rounded-full font-cairo shadow-sm backdrop-blur-md mb-3.5">
             <Handshake className="w-3.5 h-3.5 text-white shrink-0" />
@@ -72,7 +72,7 @@ export default function PartnersMarquee() {
           </motion.div>
         </motion.div>
 
-        <div className="w-full max-w-[1200px] mx-auto relative overflow-hidden py-2 select-none" dir="ltr">
+        <div className="w-full max-w-[1200px] mx-auto relative overflow-hidden py-3 sm:py-4 select-none" dir="ltr">
 
           <div
             className="flex flex-row flex-nowrap gap-4 sm:gap-6 w-max animate-marquee-ltr hover:[animation-play-state:paused] cursor-pointer"
@@ -82,16 +82,16 @@ export default function PartnersMarquee() {
               <div
                 key={`${partner.id}-marquee-${idx}`}
                 dir="rtl"
-                className="group relative flex items-center justify-center p-4 bg-gray-50/70 border border-gray-200/80 hover:border-[#CAA048] rounded-2xl w-[150px] sm:w-[180px] md:w-[220px] h-[90px] sm:h-[110px] md:h-[130px] transition-all duration-300 cursor-pointer overflow-hidden shrink-0 shadow-sm hover:shadow-md hover:-translate-y-1"
+                className="group relative flex items-center justify-center p-3 sm:p-4 bg-gray-50/70 border border-gray-200/80 hover:border-[#CAA048] rounded-2xl w-[170px] sm:w-[200px] md:w-[230px] h-[110px] sm:h-[125px] md:h-[140px] transition-all duration-300 cursor-pointer overflow-hidden shrink-0 shadow-sm hover:shadow-md hover:-translate-y-1"
               >
-                <div className="relative w-full h-full bg-white rounded-xl p-3 flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300 group-hover:scale-105">
+                <div className="relative w-full h-full bg-white rounded-xl p-2 sm:p-3 flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300 group-hover:scale-105">
                   <Image
                     src={partner.src}
                     alt={partner.alt}
-                    width={120}
-                    height={60}
+                    width={160}
+                    height={80}
                     loading="lazy"
-                    className="h-auto w-auto max-h-full max-w-full object-contain"
+                    className="h-auto w-auto max-h-[78px] sm:max-h-[92px] md:max-h-[104px] max-w-[92%] object-contain"
                   />
                 </div>
               </div>
