@@ -340,16 +340,17 @@ export default function PropertyListingsSection({
     return properties.filter(p => p.id !== featuredProperty.id);
   }, [properties, featuredProperty]);
 
+  // Set the RTL table's initial horizontal position only when switching into
+  // table view. Do not react to property batches: that would override the
+  // user's horizontal scroll every time background pagination adds rows.
   useEffect(() => {
-    if (propertiesViewMode === 'table' && propertiesTableRef.current) {
-      const el = propertiesTableRef.current;
+    if (propertiesViewMode !== 'table' || !propertiesTableRef.current) return;
+    const el = propertiesTableRef.current;
+    const frame = requestAnimationFrame(() => {
       el.scrollLeft = el.scrollWidth;
-      const timer = setTimeout(() => {
-        el.scrollLeft = el.scrollWidth;
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [propertiesViewMode, properties]);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [propertiesViewMode]);
 
   useEffect(() => {
     const el = loadMoreRef.current;
