@@ -16,7 +16,7 @@ import {
 
 const PRELOAD_TIMEOUT_MS = 45000;
 const SWIPE_THRESHOLD_PX = 28;
-const MOBILE_PLAYBACK_RATE = 1;
+const MOBILE_PLAYBACK_RATE = 1.15;
 
 type HintMode = 'start' | 'resume' | null;
 
@@ -43,18 +43,18 @@ function StoryAction({
 }) {
   const className =
     action.emphasis === 'primary'
-      ? 'inline-flex min-h-7 flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] px-2.5 py-1 text-[0.68rem] font-bold text-[#111315] shadow-md shadow-[#E6A821]/15 active:scale-[0.98] transition-transform duration-150 font-cairo cursor-pointer'
-      : 'inline-flex min-h-7 flex-1 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-2.5 py-1 text-[0.68rem] font-bold text-white backdrop-blur-md transition-colors duration-200 font-cairo cursor-pointer';
+      ? 'inline-flex min-h-6 flex-1 items-center justify-center gap-1 rounded-full bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] px-2 py-0.5 text-[0.62rem] font-bold text-[#111315] shadow-md shadow-[#E6A821]/15 active:scale-[0.98] transition-transform duration-150 font-cairo cursor-pointer'
+      : 'inline-flex min-h-6 flex-1 items-center justify-center gap-1 rounded-full border border-white/20 bg-black/40 px-2 py-0.5 text-[0.62rem] font-bold text-white backdrop-blur-md transition-colors duration-200 font-cairo cursor-pointer';
 
   const content = (
     <>
       {action.kind === 'inquiry' ? (
-        <MessageCircle className="size-3 text-[#E6A821]" aria-hidden="true" />
+        <MessageCircle className="size-2.5 text-[#E6A821]" aria-hidden="true" />
       ) : (
-        <Building2 className="size-3" aria-hidden="true" />
+        <Building2 className="size-2.5" aria-hidden="true" />
       )}
       <span>{action.label}</span>
-      {action.kind === 'link' && <ArrowLeft className="size-3" aria-hidden="true" />}
+      {action.kind === 'link' && <ArrowLeft className="size-2.5" aria-hidden="true" />}
     </>
   );
 
@@ -89,27 +89,27 @@ function StoryCardBody({
 }) {
   return (
     <>
-      <div className="absolute left-0 right-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#E6A821] to-transparent opacity-85" />
+      <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E6A821] to-transparent opacity-85" />
 
-      <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1 rounded-full border border-[#E6A821]/30 bg-[#E6A821]/15 px-2 py-0.5 text-[0.62rem] font-bold text-[#FDE36E] font-cairo">
-          <span className="size-1.5 rounded-full bg-[#E6A821] animate-pulse" />
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full border border-[#E6A821]/30 bg-[#E6A821]/15 px-1.5 py-0.5 text-[0.56rem] font-bold text-[#FDE36E] font-cairo">
+          <span className="size-1 rounded-full bg-[#E6A821] animate-pulse" />
           <span>{stop.eyebrow}</span>
         </span>
-        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-white/50" dir="ltr">
+        <span className="font-mono text-[0.56rem] font-bold tracking-wider text-white/50" dir="ltr">
           {stop.sceneNumber} / 05
         </span>
       </div>
 
-      <h2 className="text-balance text-xs font-black leading-snug text-white font-heading drop-shadow-md">
+      <h2 className="text-balance text-[0.72rem] font-black leading-snug text-white font-heading drop-shadow-md">
         {stop.title}
       </h2>
-      <p className="mt-1 line-clamp-2 max-w-xs text-[0.68rem] leading-relaxed text-white/85 font-cairo drop-shadow-xs">
+      <p className="mt-0.5 line-clamp-2 max-w-xs text-[0.63rem] leading-[1.55] text-white/82 font-cairo drop-shadow-xs">
         {stop.description}
       </p>
 
       {stop.actions && (
-        <div className="mt-2.5 flex flex-row gap-2">
+        <div className="mt-2 flex flex-row gap-1.5">
           {stop.actions.map((action) => (
             <StoryAction
               key={`${action.kind}-${action.label}`}
@@ -121,9 +121,9 @@ function StoryCardBody({
       )}
 
       {stop.sceneNumber === '01' && !shouldReduceMotion && (
-        <div className="mt-2 flex items-center gap-1.5 border-t border-white/10 pt-1.5 text-[0.62rem] text-white/65 font-cairo">
-          <span className="flex size-3.5 shrink-0 items-center justify-center rounded-full border border-[#E6A821]/35 bg-[#E6A821]/20 text-[#E6A821]">
-            <ArrowDown className="size-2 animate-bounce" aria-hidden="true" />
+        <div className="mt-1.5 flex items-center gap-1 border-t border-white/10 pt-1 text-[0.56rem] text-white/60 font-cairo">
+          <span className="flex size-3 shrink-0 items-center justify-center rounded-full border border-[#E6A821]/35 bg-[#E6A821]/20 text-[#E6A821]">
+            <ArrowDown className="size-1.5 animate-bounce" aria-hidden="true" />
           </span>
           <span>اسحب لأعلى مرة واحدة لبدء الجولة</span>
         </div>
@@ -469,7 +469,7 @@ export default function HeroMobileCinematicSection({
         sourceMode: preparedSrc?.startsWith('blob:') ? 'blob' : preparedSrc ? 'direct' : 'none',
         currentTime: video?.currentTime ?? 0,
         duration: video?.duration ?? 0,
-        playbackRate: video?.playbackRate ?? 1,
+        playbackRate: video?.playbackRate ?? MOBILE_PLAYBACK_RATE,
         readyState: video?.readyState ?? 0,
         networkState: video?.networkState ?? 0,
         waitingEvents: waitingEventsRef.current,
@@ -569,9 +569,9 @@ export default function HeroMobileCinematicSection({
         />
 
         {!isVideoReady && !shouldReduceMotion && !videoFailed && (
-          <div className="absolute right-4 top-20 z-30 min-w-44 rounded-full border border-[#E6A821]/30 bg-black/60 px-4 py-2 text-xs text-white backdrop-blur-md font-cairo shadow-lg">
+          <div className="absolute right-4 top-20 z-30 min-w-40 rounded-full border border-[#E6A821]/30 bg-black/60 px-3 py-1.5 text-[0.68rem] text-white backdrop-blur-md font-cairo shadow-lg">
             <div className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-[#E6A821] animate-pulse" />
+              <span className="size-1.5 rounded-full bg-[#E6A821] animate-pulse" />
               <span>جارٍ تحميل الجولة السينمائية…</span>
               {preloadProgress > 0 && preloadProgress < 1 && (
                 <span dir="ltr" className="text-white/60">{Math.round(preloadProgress * 100)}%</span>
@@ -581,41 +581,41 @@ export default function HeroMobileCinematicSection({
         )}
 
         {videoFailed && (
-          <div className="absolute right-4 top-20 z-30 rounded-full border border-white/15 bg-black/60 px-4 py-2 text-xs text-white/80 backdrop-blur-md font-cairo">
+          <div className="absolute right-4 top-20 z-30 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-[0.68rem] text-white/80 backdrop-blur-md font-cairo">
             تعذّر تشغيل الجولة على هذا الجهاز
           </div>
         )}
 
-        <AnimatePresence>
-          {hintMode && isVideoReady && !videoFailed && !isStoryCompleted && (
-            <motion.div
-              key={hintMode}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2 }}
-              className="pointer-events-none absolute inset-x-0 bottom-[9.5rem] z-40 flex justify-center px-4"
-            >
-              <div className="flex items-center gap-2 rounded-full border border-[#E6A821]/35 bg-black/75 px-4 py-2.5 text-xs font-bold text-white shadow-xl backdrop-blur-xl font-cairo">
-                <span className="flex size-7 items-center justify-center rounded-full border border-[#E6A821]/40 bg-[#E6A821]/15 text-[#FDE36E]">
-                  <ArrowDown className="size-3.5 rotate-180 animate-bounce" aria-hidden="true" />
-                </span>
-                <span>{hintMode === 'start' ? 'اسحب لأعلى لبدء الجولة' : 'اسحب لأعلى لاستكمال الجولة'}</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {!isStoryCompleted && displayedStop && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-[18vh] z-40 flex flex-col items-center gap-2 px-3 pb-[env(safe-area-inset-bottom)]">
+            <AnimatePresence>
+              {hintMode && isVideoReady && !videoFailed && (
+                <motion.div
+                  key={hintMode}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.18 }}
+                  className="pointer-events-none"
+                >
+                  <div className="flex items-center gap-1.5 rounded-full border border-[#E6A821]/35 bg-black/75 px-3 py-1.5 text-[0.66rem] font-bold text-white shadow-lg backdrop-blur-xl font-cairo">
+                    <span className="flex size-6 items-center justify-center rounded-full border border-[#E6A821]/40 bg-[#E6A821]/15 text-[#FDE36E]">
+                      <ArrowDown className="size-3 rotate-180 animate-bounce" aria-hidden="true" />
+                    </span>
+                    <span>{hintMode === 'start' ? 'اسحب لأعلى لبدء الجولة' : 'اسحب لأعلى لاستكمال الجولة'}</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-[20vh] z-20 flex justify-center px-4 pb-[env(safe-area-inset-bottom)]">
-          <AnimatePresence mode="wait" initial={false}>
-            {!isStoryCompleted && displayedStop && (
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={displayedStop.id}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6, scale: 0.98 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: 'easeOut' }}
-                className="pointer-events-auto relative w-full max-w-[19rem] overflow-hidden rounded-2xl border border-white/15 bg-black/70 p-3 text-right text-white shadow-[0_16px_36px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -5, scale: 0.985 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.2, ease: 'easeOut' }}
+                className="pointer-events-auto relative w-full max-w-[17.5rem] overflow-hidden rounded-xl border border-white/15 bg-black/68 p-2.5 text-right text-white shadow-[0_14px_30px_rgba(0,0,0,0.42)] backdrop-blur-xl"
               >
                 <StoryCardBody
                   stop={displayedStop}
@@ -623,9 +623,9 @@ export default function HeroMobileCinematicSection({
                   openInquiry={openInquiry}
                 />
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            </AnimatePresence>
+          </div>
+        )}
 
         {searchBar && (
           <div
