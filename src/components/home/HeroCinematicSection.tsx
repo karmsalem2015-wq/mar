@@ -24,6 +24,11 @@ import {
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px) and (orientation: landscape)';
 const PRELOAD_TIMEOUT_MS = 45000;
 
+type VideoWithFrameCallback = HTMLVideoElement & {
+  requestVideoFrameCallback?: (callback: (now: number) => void) => number;
+  cancelVideoFrameCallback?: (id: number) => void;
+};
+
 type HeroRuntimeWindow = Window & {
   __MAR_HERO_DIAG__?: () => unknown;
   __MAR_HERO_PRELOAD__?: {
@@ -146,6 +151,8 @@ export default function HeroCinematicSection({
   const progressBarRef = useRef<HTMLDivElement>(null);
   const scrollRafRef = useRef<number | null>(null);
   const scrubRafRef = useRef<number | null>(null);
+  const seekPaintRafRef = useRef<number | null>(null);
+  const seekFrameCallbackRef = useRef<number | null>(null);
   const mediaVariantRef = useRef<HeroMediaVariant | null>(null);
   const activeStopIndexRef = useRef(0);
   const isStoryCompletedRef = useRef(false);
@@ -153,21 +160,35 @@ export default function HeroCinematicSection({
   const targetProgressRef = useRef(0);
   const smoothProgressRef = useRef(0);
   const lastScrubTimestampRef = useRef(0);
-  const lastSeekTimestampRef = useRef(0);
+  const lastSeekRequestTimestampRef = useRef(0);
   const stableViewportHeightRef = useRef(0);
   const lastViewportWidthRef = useRef(0);
   const sectionHeightRef = useRef(0);
   const sectionTopRef = useRef(0);
   const objectUrlRef = useRef<string | null>(null);
   const lastDiagTargetRef = useRef(0);
+
+  // Only one native currentTime seek is allowed at a time. While that seek is
+  // decoding, every new scroll position simply replaces this pending target.
+  // Once the decoded frame has actually been presented, only the newest target
+  // is committed. This prevents desktop Chrome from building a long seek queue.
+  const seekInFlightRef = useRef(false);
+  const pendingSeekTimeRef = useRef<number | null>(null);
+  const seekStartedAtRef = useRef(0);
+
   const diagRef = useRef({
-    engine: 'blob-video',
+    engine: 'blob-video-coalesced',
     samples: 0,
     seeks: 0,
+    seekRequests: 0,
+    completedSeeks: 0,
+    coalescedSeeks: 0,
     longFrames: 0,
     waitingEvents: 0,
     stalledEvents: 0,
     seekErrors: 0,
+    totalSeekLatencyMs: 0,
+    maxSeekLatencyMs: 0,
     maxTargetJump: 0,
     maxSeekGap: 0,
     maxRafMs: 0,
@@ -207,6 +228,27 @@ export default function HeroCinematicSection({
     sectionTopRef.current = rect.top + currentScrollY;
   }, []);
 
+  const resetSeekPipeline = useCallback(() => {
+    seekInFlightRef.current = false;
+    pendingSeekTimeRef.current = null;
+    seekStartedAtRef.current = 0;
+    lastSeekRequestTimestampRef.current = 0;
+
+    if (seekPaintRafRef.current !== null) {
+      window.cancelAnimationFrame(seekPaintRafRef.current);
+      seekPaintRafRef.current = null;
+    }
+
+    const video = videoRef.current as VideoWithFrameCallback | null;
+    if (
+      seekFrameCallbackRef.current !== null &&
+      video?.cancelVideoFrameCallback
+    ) {
+      video.cancelVideoFrameCallback(seekFrameCallbackRef.current);
+      seekFrameCallbackRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
     const update = () => {
@@ -216,10 +258,10 @@ export default function HeroCinematicSection({
       targetProgressRef.current = 0;
       smoothProgressRef.current = 0;
       lastScrubTimestampRef.current = 0;
-      lastSeekTimestampRef.current = 0;
       activeStopIndexRef.current = 0;
       isStoryCompletedRef.current = false;
       isTourLockedRef.current = false;
+      resetSeekPipeline();
       setActiveStopIndex(0);
       setIsStoryCompleted(false);
       setIsMobileTourSettled(false);
@@ -233,7 +275,7 @@ export default function HeroCinematicSection({
     update();
     mediaQuery.addEventListener('change', update);
     return () => mediaQuery.removeEventListener('change', update);
-  }, []);
+  }, [resetSeekPipeline]);
 
   useEffect(() => {
     if (!mediaVariant || shouldReduceMotion) return;
@@ -317,8 +359,6 @@ export default function HeroCinematicSection({
       } catch (error) {
         if (disposed) return;
         const message = error instanceof Error ? error.message : String(error);
-        // No frame fallback anymore. If the all-at-once preload fails, keep the
-        // cinematic engine and use the same MP4 directly as a graceful network fallback.
         runtimeWindow.__MAR_HERO_PRELOAD__ = {
           status: 'direct-fallback',
           variant: mediaVariant,
@@ -346,6 +386,41 @@ export default function HeroCinematicSection({
     };
   }, [mediaVariant, shouldReduceMotion]);
 
+  const commitSeek = useCallback((desiredTime: number, force = false) => {
+    const video = videoRef.current;
+    const variant = mediaVariantRef.current;
+    if (!video || !variant || video.readyState < 1) return false;
+
+    const frameDuration = 1 / HERO_MEDIA[variant].fps;
+    const gap = Math.abs(video.currentTime - desiredTime);
+    const minimumGap = force ? Math.min(frameDuration * 0.15, 0.006) : frameDuration * 0.9;
+
+    if (gap < minimumGap) {
+      pendingSeekTimeRef.current = null;
+      return false;
+    }
+
+    if (seekInFlightRef.current || video.seeking) {
+      pendingSeekTimeRef.current = desiredTime;
+      diagRef.current.coalescedSeeks += 1;
+      return false;
+    }
+
+    try {
+      seekInFlightRef.current = true;
+      seekStartedAtRef.current = performance.now();
+      video.currentTime = desiredTime;
+      diagRef.current.seeks += 1;
+      diagRef.current.maxSeekGap = Math.max(diagRef.current.maxSeekGap, gap);
+      return true;
+    } catch {
+      seekInFlightRef.current = false;
+      seekStartedAtRef.current = 0;
+      diagRef.current.seekErrors += 1;
+      return false;
+    }
+  }, []);
+
   const applyVideoTime = useCallback((progress: number, force = false) => {
     const video = videoRef.current;
     const variant = mediaVariantRef.current;
@@ -355,18 +430,54 @@ export default function HeroCinematicSection({
       ? video.duration
       : HERO_MEDIA[variant].duration;
     const desiredTime = Math.min(Math.max(progress, 0), 1) * Math.max(0, duration - 0.04);
-    const gap = Math.abs(video.currentTime - desiredTime);
-    const minimumGap = variant === 'mobile' ? 1 / 48 : 1 / 60;
-    if (!force && gap < minimumGap) return;
 
-    try {
-      video.currentTime = desiredTime;
-      diagRef.current.seeks += 1;
-      diagRef.current.maxSeekGap = Math.max(diagRef.current.maxSeekGap, gap);
-    } catch {
-      diagRef.current.seekErrors += 1;
+    diagRef.current.seekRequests += 1;
+
+    if (seekInFlightRef.current || video.seeking) {
+      pendingSeekTimeRef.current = desiredTime;
+      diagRef.current.coalescedSeeks += 1;
+      return;
     }
-  }, []);
+
+    commitSeek(desiredTime, force);
+  }, [commitSeek]);
+
+  const flushLatestSeekAfterPaint = useCallback(() => {
+    const video = videoRef.current as VideoWithFrameCallback | null;
+    if (!video) return;
+
+    const flush = () => {
+      seekFrameCallbackRef.current = null;
+      seekPaintRafRef.current = null;
+      const pending = pendingSeekTimeRef.current;
+      pendingSeekTimeRef.current = null;
+      if (pending === null) return;
+      commitSeek(pending);
+    };
+
+    if (video.requestVideoFrameCallback) {
+      seekFrameCallbackRef.current = video.requestVideoFrameCallback(() => flush());
+    } else {
+      seekPaintRafRef.current = window.requestAnimationFrame(() => flush());
+    }
+  }, [commitSeek]);
+
+  const handleSeeked = useCallback(() => {
+    seekInFlightRef.current = false;
+    diagRef.current.completedSeeks += 1;
+
+    if (seekStartedAtRef.current > 0) {
+      const latency = performance.now() - seekStartedAtRef.current;
+      diagRef.current.totalSeekLatencyMs += latency;
+      diagRef.current.maxSeekLatencyMs = Math.max(diagRef.current.maxSeekLatencyMs, latency);
+      seekStartedAtRef.current = 0;
+    }
+
+    // Let the browser present the decoded frame before asking for the next seek.
+    // This is important on desktop where repeated currentTime writes previously
+    // starved frame presentation and produced visible jumps.
+    flushLatestSeekAfterPaint();
+  }, [flushLatestSeekAfterPaint]);
 
   const stepVideoScrub = useCallback((timestamp: number) => {
     const variant = mediaVariantRef.current;
@@ -388,16 +499,25 @@ export default function HeroCinematicSection({
     const target = targetProgressRef.current;
     const current = smoothProgressRef.current;
     const delta = target - current;
-    const response = variant === 'mobile' ? 11.5 : 13.5;
+
+    // Mobile already proved smooth at this response. Matching desktop to it
+    // softens discrete mouse-wheel bursts before they reach the seek scheduler.
+    const response = 11.5;
     const factor = 1 - Math.exp(-response * dt);
     let next = Math.abs(delta) > 0.00025 ? current + delta * factor : target;
     if (Math.abs(target - next) <= 0.00025) next = target;
     next = Math.min(Math.max(next, 0), 1);
     smoothProgressRef.current = next;
 
-    const seekInterval = 1000 / HERO_MEDIA[variant].fps;
-    if (timestamp - lastSeekTimestampRef.current >= seekInterval * 0.82 || next === target) {
-      lastSeekTimestampRef.current = timestamp;
+    // Request at most ~24 target updates/sec on desktop. The coalescer still keeps
+    // the latest target, but this avoids doing unnecessary JS work between frames.
+    const seekHz = variant === 'desktop' ? 24 : HERO_MEDIA[variant].fps;
+    const seekInterval = 1000 / seekHz;
+    if (
+      timestamp - lastSeekRequestTimestampRef.current >= seekInterval ||
+      next === target
+    ) {
+      lastSeekRequestTimestampRef.current = timestamp;
       applyVideoTime(next, next === target);
     }
 
@@ -518,13 +638,18 @@ export default function HeroCinematicSection({
     if (videoRef.current) resizeObserver.observe(videoRef.current);
 
     diagRef.current = {
-      engine: 'blob-video',
+      engine: 'blob-video-coalesced',
       samples: 0,
       seeks: 0,
+      seekRequests: 0,
+      completedSeeks: 0,
+      coalescedSeeks: 0,
       longFrames: 0,
       waitingEvents: 0,
       stalledEvents: 0,
       seekErrors: 0,
+      totalSeekLatencyMs: 0,
+      maxSeekLatencyMs: 0,
       maxTargetJump: 0,
       maxSeekGap: 0,
       maxRafMs: 0,
@@ -534,8 +659,14 @@ export default function HeroCinematicSection({
 
     (window as HeroRuntimeWindow).__MAR_HERO_DIAG__ = () => {
       const video = videoRef.current;
+      const completed = diagRef.current.completedSeeks;
       return {
         ...diagRef.current,
+        averageSeekLatencyMs: completed
+          ? diagRef.current.totalSeekLatencyMs / completed
+          : 0,
+        seekInFlight: seekInFlightRef.current,
+        pendingSeek: pendingSeekTimeRef.current,
         longFrameRate: diagRef.current.samples
           ? diagRef.current.longFrames / diagRef.current.samples
           : 0,
@@ -565,18 +696,20 @@ export default function HeroCinematicSection({
       if (scrubRafRef.current !== null) window.cancelAnimationFrame(scrubRafRef.current);
       scrollRafRef.current = null;
       scrubRafRef.current = null;
+      resetSeekPipeline();
     };
-  }, [mediaVariant, preparedSrc, requestScrollSync, shouldReduceMotion, updateSectionMetrics]);
+  }, [mediaVariant, preparedSrc, requestScrollSync, resetSeekPipeline, shouldReduceMotion, updateSectionMetrics]);
 
   useEffect(() => {
     return () => {
       delete (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__;
+      resetSeekPipeline();
       if (objectUrlRef.current) {
         URL.revokeObjectURL(objectUrlRef.current);
         objectUrlRef.current = null;
       }
     };
-  }, []);
+  }, [resetSeekPipeline]);
 
   const displayedStop = shouldReduceMotion
     ? HERO_STORY_STOPS[0]
@@ -637,15 +770,26 @@ export default function HeroCinematicSection({
               isVideoReady ? 'opacity-100' : 'opacity-0'
             }`}
             onLoadedData={(event) => {
+              resetSeekPipeline();
               setIsVideoReady(true);
               event.currentTarget.pause();
               applyVideoTime(smoothProgressRef.current, true);
               requestScrollSync();
             }}
             onCanPlay={() => setIsVideoReady(true)}
+            onSeeking={() => {
+              if (!seekInFlightRef.current) {
+                seekInFlightRef.current = true;
+                seekStartedAtRef.current = performance.now();
+              }
+            }}
+            onSeeked={handleSeeked}
             onWaiting={() => { diagRef.current.waitingEvents += 1; }}
             onStalled={() => { diagRef.current.stalledEvents += 1; }}
-            onError={() => setVideoFailed(true)}
+            onError={() => {
+              seekInFlightRef.current = false;
+              setVideoFailed(true);
+            }}
           />
         )}
 
