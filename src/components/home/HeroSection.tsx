@@ -225,15 +225,9 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
 
       const total = HERO_MEDIA[variant].totalFrames;
       const rawFrameIndex = Math.min(Math.max(Math.round(floatFrame), 1), total);
-      const previousRequested = lastRequestedFrameRef.current;
-      const direction = scrollDirectionRef.current;
-      // Pace large target jumps so a bursty scroll event cannot visually skip a
-      // long run of frames in one paint. Normal small movements remain 1:1.
-      const maxVisualStep = variant === 'mobile' ? 3 : 4;
-      const delta = rawFrameIndex - previousRequested;
-      const frameIndex = Math.abs(delta) > maxVisualStep
-        ? previousRequested + Math.sign(delta || direction) * maxVisualStep
-        : rawFrameIndex;
+      // Keep visual pacing responsive: the time-based scrub loop already filters
+      // bursty scroll input. Rendering should follow that smoothed target directly.
+      const frameIndex = rawFrameIndex;
       lastRequestedFrameRef.current = frameIndex;
 
       // Skip painting if this exact integer frame is already painted on screen
@@ -395,6 +389,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     let disposed = false;
     let active = 0;
     let backgroundIndex = 1;
+    let lastPriorityPumpAt = 0;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let decodedBytes = 0;
     let priorityLimit = 8;
@@ -515,7 +510,12 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         add(target - offset * direction);
       }
       priority = [...order].slice(0, priorityLimit);
-      pump();
+      // Avoid repeatedly refilling the decode queue on every high-refresh scroll tick.
+      const now = performance.now();
+      if (now - lastPriorityPumpAt >= 32 || active === 0) {
+        lastPriorityPumpAt = now;
+        pump();
+      }
     };
     prioritizeFramesRef.current = prioritize;
     prioritize(targetFrameRef.current, smoothFrameRef.current, scrollDirectionRef.current);
