@@ -7,6 +7,10 @@ import HeroMobileCinematicSection from './HeroMobileCinematicSection';
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px) and (orientation: landscape)';
 const DESKTOP_FINAL_FRAME = '/media/hero/frames/desktop/frame_0381.webp';
+const MOBILE_PLAYBACK_RATE_OVERRIDE = 1.65;
+const DESKTOP_CONTINUOUS_PLAYBACK_RATE = 1.5;
+
+type DesktopHintMode = 'start' | 'resume' | null;
 
 type HeroPreloadWindow = Window & {
   __MAR_HERO_PRELOAD__?: {
@@ -22,7 +26,12 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
   const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
   const [desktopFinalReady, setDesktopFinalReady] = useState(false);
   const [showDesktopFinal, setShowDesktopFinal] = useState(false);
+  const [desktopHintMode, setDesktopHintMode] = useState<DesktopHintMode>('start');
   const finalPreloadStartedRef = useRef(false);
+  const desktopRootRef = useRef<HTMLDivElement>(null);
+  const mobileRootRef = useRef<HTMLDivElement>(null);
+  const desktopTourCompletedRef = useRef(false);
+  const desktopStartedRef = useRef(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
@@ -33,10 +42,119 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
   }, []);
 
   useEffect(() => {
+    if (isDesktop !== false) return;
+    const root = mobileRootRef.current;
+    if (!root) return;
+
+    let disposed = false;
+    let attachedVideo: HTMLVideoElement | null = null;
+    let pollTimer: number | null = null;
+
+    const applyMobileRate = () => {
+      if (!attachedVideo || attachedVideo.paused) return;
+      if (Math.abs(attachedVideo.playbackRate - MOBILE_PLAYBACK_RATE_OVERRIDE) > 0.01) {
+        attachedVideo.playbackRate = MOBILE_PLAYBACK_RATE_OVERRIDE;
+      }
+    };
+
+    const attach = () => {
+      if (disposed) return;
+      const video = root.querySelector('video');
+      if (!video || video === attachedVideo) return;
+
+      if (attachedVideo) {
+        attachedVideo.removeEventListener('play', applyMobileRate);
+        attachedVideo.removeEventListener('playing', applyMobileRate);
+      }
+
+      attachedVideo = video;
+      attachedVideo.addEventListener('play', applyMobileRate);
+      attachedVideo.addEventListener('playing', applyMobileRate);
+      applyMobileRate();
+    };
+
+    attach();
+    pollTimer = window.setInterval(attach, 150);
+
+    return () => {
+      disposed = true;
+      if (pollTimer !== null) window.clearInterval(pollTimer);
+      if (attachedVideo) {
+        attachedVideo.removeEventListener('play', applyMobileRate);
+        attachedVideo.removeEventListener('playing', applyMobileRate);
+      }
+    };
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (isDesktop !== true) {
+      desktopTourCompletedRef.current = false;
+      desktopStartedRef.current = false;
+      setDesktopHintMode('start');
+      return;
+    }
+
+    const root = desktopRootRef.current;
+    if (!root) return;
+
+    const isInteractiveTarget = (target: EventTarget | null) =>
+      target instanceof Element && Boolean(target.closest('a,button,input,textarea,select'));
+
+    const getVideo = () => root.querySelector('video');
+
+    const startDesktopPlayback = () => {
+      const video = getVideo();
+      if (!video || desktopTourCompletedRef.current || video.ended) return;
+      desktopStartedRef.current = true;
+      setDesktopHintMode(null);
+      video.playbackRate = DESKTOP_CONTINUOUS_PLAYBACK_RATE;
+      if (video.paused) {
+        void video.play().catch(() => {
+          setDesktopHintMode(desktopStartedRef.current ? 'resume' : 'start');
+        });
+      }
+    };
+
+    const pauseDesktopPlayback = () => {
+      const video = getVideo();
+      if (!video || desktopTourCompletedRef.current) return;
+      if (!video.paused) video.pause();
+      video.playbackRate = DESKTOP_CONTINUOUS_PLAYBACK_RATE;
+      setDesktopHintMode(desktopStartedRef.current ? 'resume' : 'start');
+    };
+
+    const handleWheelCapture = (event: WheelEvent) => {
+      if (event.ctrlKey || desktopTourCompletedRef.current || event.deltaY === 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (event.deltaY > 0) startDesktopPlayback();
+      else pauseDesktopPlayback();
+    };
+
+    const handlePointerDownCapture = (event: PointerEvent) => {
+      if (desktopTourCompletedRef.current || isInteractiveTarget(event.target)) return;
+      const video = getVideo();
+      if (video && !video.paused) pauseDesktopPlayback();
+    };
+
+    root.addEventListener('wheel', handleWheelCapture, { passive: false, capture: true });
+    root.addEventListener('pointerdown', handlePointerDownCapture, { capture: true });
+
+    return () => {
+      root.removeEventListener('wheel', handleWheelCapture, true);
+      root.removeEventListener('pointerdown', handlePointerDownCapture, true);
+    };
+  }, [isDesktop]);
+
+  useEffect(() => {
     if (!isDesktop) {
       finalPreloadStartedRef.current = false;
+      desktopTourCompletedRef.current = false;
+      desktopStartedRef.current = false;
       setDesktopFinalReady(false);
       setShowDesktopFinal(false);
+      setDesktopHintMode('start');
       return;
     }
 
@@ -62,7 +180,6 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
           void image.decode().then(markReady).catch(markReady);
         };
         image.onerror = () => {
-          // Keep the video frame as a graceful fallback if the still image fails.
           finalPreloadStartedRef.current = false;
         };
       }
@@ -80,9 +197,8 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
     };
 
     const handleTourComplete = () => {
-      // The wheel engine is already on its final video position. Replace only
-      // the visual layer with the pre-decoded still so the completed hero stays
-      // razor sharp without touching playback or page-unlock behavior.
+      desktopTourCompletedRef.current = true;
+      setDesktopHintMode(null);
       preloadFinalFrame();
       setShowDesktopFinal(true);
     };
@@ -106,12 +222,31 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
   }
 
   if (!isDesktop) {
-    return <HeroMobileCinematicSection searchBar={searchBar} />;
+    return (
+      <div ref={mobileRootRef} className="relative h-[100svh] w-full bg-[#060D1A]">
+        <HeroMobileCinematicSection searchBar={searchBar} />
+      </div>
+    );
   }
 
   return (
-    <div className="relative h-[100svh] w-full bg-[#060D1A]">
+    <div ref={desktopRootRef} className="relative h-[100svh] w-full bg-[#060D1A]">
       <HeroDesktopWheelSection searchBar={searchBar} />
+
+      {desktopHintMode && !showDesktopFinal && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-7 z-[65] flex justify-center px-4">
+          <div className="flex items-center gap-2 rounded-full border border-[#E6A821]/35 bg-black/75 px-4 py-2 text-xs font-bold text-white shadow-xl backdrop-blur-xl font-cairo">
+            <span className="flex size-7 items-center justify-center rounded-full border border-[#E6A821]/40 bg-[#E6A821]/15 text-[#FDE36E]">
+              <span className="text-base leading-none">↓</span>
+            </span>
+            <span>
+              {desktopHintMode === 'start'
+                ? 'حرّك عجلة الماوس لأسفل مرة واحدة لبدء الجولة'
+                : 'حرّك عجلة الماوس لأسفل لاستكمال الجولة'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {desktopFinalReady && (
         <div
