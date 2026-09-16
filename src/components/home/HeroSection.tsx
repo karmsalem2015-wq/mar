@@ -137,6 +137,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const mediaVariantRef = useRef<HeroMediaVariant | null>(null);
   const activeStopIndexRef = useRef(0);
   const isStoryCompletedRef = useRef(false);
+  const isTourLockedRef = useRef(false);
 
   const [mediaVariant, setMediaVariant] = useState<HeroMediaVariant | null>(null);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
@@ -351,9 +352,10 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         setActiveStopIndex(nextStopIndex);
       }
       const completed = progress >= 0.85;
-      if (isStoryCompletedRef.current !== completed) {
-        isStoryCompletedRef.current = completed;
-        setIsStoryCompleted(completed);
+      if (completed && !isTourLockedRef.current) {
+        isTourLockedRef.current = true;
+        isStoryCompletedRef.current = true;
+        setIsStoryCompleted(true);
       }
 
       if (Math.abs(targetFrameRef.current - smoothFrameRef.current) > 0.01) {
@@ -587,6 +589,17 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     const variant = mediaVariantRef.current;
     if (!variant) return;
 
+    // Once the cinematic tour reaches its completion zone, keep the final villa
+    // frame locked for the rest of this page visit. Returning upward no longer
+    // restarts reverse scrubbing or competes with the content below.
+    if (isTourLockedRef.current) {
+      const totalFrames = HERO_MEDIA[variant].totalFrames;
+      targetFrameRef.current = totalFrames;
+      smoothFrameRef.current = totalFrames;
+      drawFrame(totalFrames);
+      return;
+    }
+
     const totalFrames = HERO_MEDIA[variant].totalFrames;
     const videoProgress = getHeroVideoProgress(scrollProgress);
     
@@ -602,14 +615,24 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     targetFrameRef.current = targetFrame;
     prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
 
-    const completed = videoProgress >= 0.85;
-    if (isStoryCompletedRef.current !== completed) {
-      isStoryCompletedRef.current = completed;
-      setIsStoryCompleted(completed);
+    if (videoProgress >= 0.85) {
+      isTourLockedRef.current = true;
+      isStoryCompletedRef.current = true;
+      setIsStoryCompleted(true);
+      targetFrameRef.current = totalFrames;
+      smoothFrameRef.current = totalFrames;
+      prioritizeFramesRef.current?.(totalFrames, totalFrames, 1);
+      drawFrame(totalFrames, true);
+      if (scrubRafRef.current !== null) {
+        window.cancelAnimationFrame(scrubRafRef.current);
+        scrubRafRef.current = null;
+      }
+      lastRafTimestampRef.current = 0;
+      return;
     }
 
     startSmoothAnimation();
-  }, [getStableViewportHeight, shouldReduceMotion, startSmoothAnimation]);
+  }, [drawFrame, getStableViewportHeight, shouldReduceMotion, startSmoothAnimation]);
 
   const requestScrollSync = useCallback(() => {
     if (animationFrameRef.current !== null) return;
@@ -820,7 +843,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         )}
 
         {/* Bottom Tour Progress Indicator */}
-        {!shouldReduceMotion && (
+        {!shouldReduceMotion && !isStoryCompleted && (
           <div
             ref={progressTrackRef}
             className="absolute inset-x-0 bottom-0 z-30 h-1 bg-white/15"
