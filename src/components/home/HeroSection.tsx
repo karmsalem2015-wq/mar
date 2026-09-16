@@ -160,10 +160,6 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const scrubRafRef = useRef<number | null>(null);
   const prioritizeFramesRef = useRef<((target: number, current: number, direction: number) => void) | null>(null);
   const scrollDirectionRef = useRef(1);
-  const scrubVelocityRef = useRef(0);
-  const desktopWheelFrameRef = useRef(1);
-  const desktopWheelActiveRef = useRef(false);
-  const desktopWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Viewport & section layout stability (prevents synchronous layout thrashing)
   const stableViewportHeightRef = useRef(0);
@@ -332,31 +328,13 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       const current = smoothFrameRef.current;
       const delta = target - current;
 
-      // Time-based scrub with acceleration + velocity limits. Desktop wheel/trackpad
-      // bursts can move the scroll target by dozens of frames in one event; chasing
-      // that target directly causes visible frame skips. This behaves like a damped
-      // camera dolly and remains refresh-rate independent.
-      if (isMobile) {
-        const factor = 1 - Math.exp(-20 * dt);
-        smoothFrameRef.current = Math.abs(delta) > 0.01 ? current + delta * factor : target;
-      } else {
-        const desiredVelocity = Math.max(-82, Math.min(82, delta * 7.5));
-        const maxAcceleration = 260;
-        const velocityDelta = desiredVelocity - scrubVelocityRef.current;
-        const accelerationStep = Math.max(-maxAcceleration * dt, Math.min(maxAcceleration * dt, velocityDelta));
-        scrubVelocityRef.current += accelerationStep;
-        if (Math.abs(delta) < 0.35) {
-          smoothFrameRef.current = target;
-          scrubVelocityRef.current = 0;
-        } else {
-          const step = scrubVelocityRef.current * dt;
-          smoothFrameRef.current = Math.abs(step) >= Math.abs(delta) ? target : current + step;
-        }
-      }
-      if (Math.abs(target - smoothFrameRef.current) <= 0.01) {
-        smoothFrameRef.current = target;
-        scrubVelocityRef.current = 0;
-      }
+      // Time-based easing behaves consistently on 60/90/120Hz screens.
+      // A short touch filter absorbs event bursts without replacing native scrolling.
+      const factor = 1 - Math.exp(-(isMobile ? 20 : 26) * dt);
+      smoothFrameRef.current = Math.abs(delta) > 0.01
+        ? current + delta * factor
+        : target;
+      if (Math.abs(target - smoothFrameRef.current) <= 0.01) smoothFrameRef.current = target;
 
       prioritizeFramesRef.current?.(target, smoothFrameRef.current, scrollDirectionRef.current);
       const currentFloatFrame = Math.min(
@@ -375,10 +353,9 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         setActiveStopIndex(nextStopIndex);
       }
       const completed = progress >= 0.85;
-      if (completed && variant === 'mobile' && !isTourLockedRef.current) {
-        isTourLockedRef.current = true;
-        isStoryCompletedRef.current = true;
-        setIsStoryCompleted(true);
+      if (isStoryCompletedRef.current !== completed) {
+        isStoryCompletedRef.current = completed;
+        setIsStoryCompleted(completed);
       }
 
       if (Math.abs(targetFrameRef.current - smoothFrameRef.current) > 0.01) {
@@ -575,9 +552,6 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       setActiveStopIndex(0);
       isStoryCompletedRef.current = false;
       setIsStoryCompleted(false);
-      scrubVelocityRef.current = 0;
-      desktopWheelFrameRef.current = 1;
-      desktopWheelActiveRef.current = false;
       setIsCanvasReady(false);
       setMediaVariant(nextVariant);
     };
@@ -638,14 +612,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     if (targetFrame !== targetFrameRef.current) {
       scrollDirectionRef.current = targetFrame > targetFrameRef.current ? 1 : -1;
     }
-    // Desktop wheel input owns the camera target while the wheel gesture is active.
-    // Native scroll still moves the page/progress, but cannot yank the camera across
-    // a large run of frames in a single wheel event.
-    if (!(variant === 'desktop' && desktopWheelActiveRef.current)) {
-      targetFrameRef.current = targetFrame;
-      if (variant === 'desktop') desktopWheelFrameRef.current = targetFrame;
-    }
-    prioritizeFramesRef.current?.(targetFrameRef.current, smoothFrameRef.current, scrollDirectionRef.current);
+    targetFrameRef.current = targetFrame;
+    prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
 
     if (variant === 'mobile' && videoProgress >= 0.85) {
       isTourLockedRef.current = true;
@@ -726,52 +694,14 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     if (sectionRef.current) resizeObserver.observe(sectionRef.current);
     if (canvasRef.current) resizeObserver.observe(canvasRef.current);
 
-    const handleWheel = (event: WheelEvent) => {
-      if (mediaVariantRef.current !== 'desktop' || !sectionRef.current) return;
-      const scrollY = window.scrollY || window.pageYOffset || 0;
-      const viewportHeight = canvasRef.current?.clientHeight || getStableViewportHeight();
-      const start = sectionTopRef.current || 0;
-      const end = start + Math.max((sectionHeightRef.current || sectionRef.current.offsetHeight) - viewportHeight, 1);
-      if (scrollY < start - 2 || scrollY > end + 2 || Math.abs(event.deltaY) < 0.5) return;
-
-      const direction = event.deltaY > 0 ? 1 : -1;
-      // Mouse wheels usually report ~100px notches; precision trackpads report much
-      // smaller deltas. Use a wider 1.4–6 frame range so wheel travel feels responsive while the scrub loop still interpolates the camera.
-      const magnitude = Math.abs(event.deltaY);
-      const framesPerEvent = magnitude < 24 ? 1.4 : magnitude < 80 ? 2.6 : magnitude < 180 ? 4.2 : 6;
-      const total = HERO_MEDIA.desktop.totalFrames;
-      const base = desktopWheelActiveRef.current ? desktopWheelFrameRef.current : targetFrameRef.current;
-      const next = Math.min(Math.max(base + direction * framesPerEvent, 1), total);
-
-      desktopWheelActiveRef.current = true;
-      desktopWheelFrameRef.current = next;
-      scrollDirectionRef.current = direction;
-      targetFrameRef.current = next;
-      prioritizeFramesRef.current?.(next, smoothFrameRef.current, direction);
-      startSmoothAnimation();
-
-      if (desktopWheelResetRef.current) clearTimeout(desktopWheelResetRef.current);
-      desktopWheelResetRef.current = setTimeout(() => {
-        desktopWheelActiveRef.current = false;
-        desktopWheelResetRef.current = null;
-        requestScrollSync();
-      }, 140);
-    };
-
     window.addEventListener('scroll', requestScrollSync, { passive: true });
-    window.addEventListener('wheel', handleWheel, { passive: true });
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('scroll', requestScrollSync);
-      window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', handleResize);
-      if (desktopWheelResetRef.current) {
-        clearTimeout(desktopWheelResetRef.current);
-        desktopWheelResetRef.current = null;
-      }
       window.removeEventListener('orientationchange', handleOrientationChange);
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
