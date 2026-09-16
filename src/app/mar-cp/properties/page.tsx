@@ -160,17 +160,17 @@ export default function PropertiesPage() {
         ) : (
           <>
             {viewMode === 'table' && (
-            <div className="neu-table-wrapper overflow-x-auto overscroll-x-contain w-full">
-              <table className="neu-table min-w-[860px]">
+            <div className="neu-table-wrapper w-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}>
+              <table className="neu-table !w-[960px] !min-w-[960px]">
                 <thead>
                   <tr>
                     <th>العقار</th>
-                    <th className="hidden md:table-cell">النوع</th>
+                    <th>النوع</th>
                     <th>الحالة</th>
-                    <th className="hidden sm:table-cell">السعر</th>
-                    <th className="hidden lg:table-cell">المشروع</th>
-                    <th className="hidden xl:table-cell">المدينة</th>
-                    <th>إجراءات</th>
+                    <th>السعر</th>
+                    <th>المشروع</th>
+                    <th>المدينة</th>
+                    <th className="!min-w-[150px]">إجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -209,7 +209,7 @@ export default function PropertiesPage() {
                             )}
                           </div>
                         </td>
-                        <td className="hidden md:table-cell">
+                        <td>
                           <span className="neu-badge neu-badge-gold">
                             {TYPE_LABELS[prop.type] || prop.type}
                           </span>
@@ -219,24 +219,24 @@ export default function PropertiesPage() {
                             {STATUS_LABELS[prop.status]?.label || prop.status}
                           </span>
                         </td>
-                        <td className="hidden sm:table-cell">
+                        <td>
                           <span className="font-semibold text-[var(--neu-gold)]">
                             {priceVal ? priceVal.toLocaleString('en-US') : '0'}
                           </span>
                           <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
                         </td>
-                        <td className="hidden lg:table-cell">
+                        <td>
                           <span className="text-sm text-[var(--neu-text-secondary)]">
                             {projectName}
                           </span>
                         </td>
-                        <td className="hidden xl:table-cell">
+                        <td>
                           <span className="text-sm text-[var(--neu-text-secondary)]">
                             {cityVal}، {districtVal}
                           </span>
                         </td>
-                        <td>
-                          <div className="flex items-center gap-1">
+                        <td className="!min-w-[150px]">
+                          <div className="flex items-center gap-1 whitespace-nowrap">
                             <Link
                               href={`/property/${prop.slug}`}
                               target="_blank"
