@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { z } from 'zod';
 import { createSubmission } from '@/app/actions/submissions';
-import { CheckCircle, AlertCircle, Loader2, Headphones } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Headphones, ChevronDown, UserRound, Mail, Phone, Building2, MapPin, BedDouble, Bath, WalletCards } from 'lucide-react';
 
 const contactSchema = z.object({
   title: z.string().min(1, 'الرجاء اختيار اللقب'),
@@ -20,6 +20,20 @@ const contactSchema = z.object({
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
+
+type SelectOption = { value: string; label: string };
+function CustomSelect({ name, value, options, icon: Icon, onChange, ariaLabel }: { name: keyof ContactFormData; value?: string; options: SelectOption[]; icon: React.ElementType; onChange: (name: keyof ContactFormData, value: string) => void; ariaLabel: string }) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.value === value) ?? options[0];
+  return <div className="relative">
+    <button type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen(v => !v)} className="w-full min-h-[44px] rounded-xl border border-gray-300 bg-white px-3 flex items-center gap-2 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#CAA048]/25 focus:border-[#CAA048]">
+      <Icon className="w-4 h-4 text-[#B58B34] shrink-0"/><span className="flex-1 text-start truncate font-cairo">{selected?.label}</span><ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`}/>
+    </button>
+    {open && <div className="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl">
+      {options.map(o => <button key={o.value} type="button" onClick={() => { onChange(name, o.value); setOpen(false); }} className={`w-full rounded-lg px-3 py-2 text-start text-xs sm:text-sm font-cairo hover:bg-[#CAA048]/10 ${o.value === value ? 'bg-[#CAA048]/10 font-bold text-[#8B681F]' : 'text-gray-700'}`}>{o.label}</button>)}
+    </div>}
+  </div>;
+}
 
 export default function ContactFormSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -47,6 +61,11 @@ export default function ContactFormSection() {
     if (errors[name as keyof ContactFormData]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  const setSelectValue = (name: keyof ContactFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -249,68 +268,17 @@ export default function ContactFormSection() {
                   <h3 className="text-xs sm:text-sm font-bold text-brand-black border-s-2 border-[#CAA048] ps-2.5 font-heading">معلومات العقار المطلوب</h3>
 
                   <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                    <div className="space-y-1">
-                      <label htmlFor="contact-property-type" className="block text-xs font-semibold text-gray-700 font-cairo">نوع العقار</label>
-                      <select
-                        id="contact-property-type"
-                        name="propertyType"
-                        value={formData.propertyType}
-                        onChange={handleChange}
-                        className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo shadow-sm"
-                      >
-                        <option value="شقة">شقة سكنية</option>
-                        <option value="فيلا">فيلا مستقلة</option>
-                        <option value="ملحق">ملحق روف / بنتهاوس</option>
-                        <option value="مشروع ابو هايل افينيو">مشروع أبو هايل أفينيو</option>
-                        <option value="مشروع امل ستارز">مشروع أمل ستارز</option>
-                        <option value="مشروع ريناد غاليري">مشروع ريناد غاليري</option>
-                        <option value="مشروع هتان التيسير">مشروع هتان التيسير</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="contact-city" className="block text-xs font-semibold text-gray-700 font-cairo">المدينة المفضلة</label>
-                      <select id="contact-city" name="city" value={formData.city} onChange={handleChange} className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[42px] font-cairo shadow-sm">
-                        <option value="جدة">جدة</option><option value="الرياض">الرياض</option><option value="مكة">مكة</option><option value="المدينة">المدينة</option><option value="الخبر">الخبر</option><option value="الدمام">الدمام</option>
-                      </select>
-                    </div>
-
+                    <div className="space-y-1"><label className="block text-xs font-semibold text-gray-700 font-cairo">نوع العقار</label><CustomSelect name="propertyType" value={formData.propertyType} icon={Building2} ariaLabel="نوع العقار" onChange={setSelectValue} options={[{value:'شقة',label:'شقة سكنية'},{value:'فيلا',label:'فيلا مستقلة'},{value:'ملحق',label:'ملحق روف / بنتهاوس'},{value:'مشروع ابو هايل افينيو',label:'أبو هايل أفينيو'},{value:'مشروع امل ستارز',label:'أمل ستارز'},{value:'مشروع ريناد غاليري',label:'ريناد غاليري'},{value:'مشروع هتان التيسير',label:'هتان التيسير'}]} /></div>
+                    <div className="space-y-1"><label className="block text-xs font-semibold text-gray-700 font-cairo">المدينة المفضلة</label><CustomSelect name="city" value={formData.city} icon={MapPin} ariaLabel="المدينة المفضلة" onChange={setSelectValue} options={['جدة','الرياض','مكة','المدينة','الخبر','الدمام'].map(v=>({value:v,label:v}))} /></div>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                    <div className="space-y-1">
-                      <label htmlFor="contact-bedrooms" className="block text-xs font-semibold text-gray-700 font-cairo">عدد الغرف</label>
-                      <select
-                        id="contact-bedrooms"
-                        name="bedrooms"
-                        value={formData.bedrooms}
-                        onChange={handleChange}
-                        className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo shadow-sm"
-                      >
-                        <option value="1">1 غرفة</option>
-                        <option value="2">2 غرف</option>
-                        <option value="3">3 غرف</option>
-                        <option value="4">4 غرف</option>
-                        <option value="5">5 غرف</option>
-                        <option value="6+">6+ غرف</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="contact-bathrooms" className="block text-xs font-semibold text-gray-700 font-cairo">عدد الحمامات</label>
-                      <select id="contact-bathrooms" name="bathrooms" value={formData.bathrooms} onChange={handleChange} className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-2 sm:px-3 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[42px] font-cairo shadow-sm">
-                        {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={String(n)}>{n}</option>)}<option value="9+">9+</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="contact-budget" className="block text-xs font-semibold text-gray-700 font-cairo">الميزانية المتوقعة (ر.س)</label>
-                      <select id="contact-budget" name="budget" value={formData.budget} onChange={handleChange} className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-2 sm:px-3 py-2.5 text-[11px] sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[42px] font-cairo shadow-sm">
-                        <option value="">الميزانية</option><option value="أقل من 500,000">أقل من 500ألف</option><option value="500,000 - 1,000,000">500ألف–1م</option><option value="1,000,000 - 2,000,000">1–2م</option><option value="2,000,000 - 3,000,000">2–3م</option><option value="3,000,000 - 5,000,000">3–5م</option><option value="أكثر من 5,000,000">+5م</option>
-                      </select>
-                    </div>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                    <div className="space-y-1"><label className="block text-xs font-semibold text-gray-700 font-cairo">عدد الغرف</label><CustomSelect name="bedrooms" value={formData.bedrooms} icon={BedDouble} ariaLabel="عدد الغرف" onChange={setSelectValue} options={[1,2,3,4,5].map(n=>({value:String(n),label:n+' غرف'})).concat([{value:'6+',label:'6 غرف أو أكثر'}])} /></div>
+                    <div className="space-y-1"><label className="block text-xs font-semibold text-gray-700 font-cairo">عدد الحمامات</label><CustomSelect name="bathrooms" value={formData.bathrooms} icon={Bath} ariaLabel="عدد الحمامات" onChange={setSelectValue} options={[1,2,3,4,5,6,7,8].map(n=>({value:String(n),label:String(n)})).concat([{value:'9+',label:'9 أو أكثر'}])} /></div>
                   </div>
-                </div>
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-gray-700 font-cairo">الميزانية المتوقعة</label>
+                    <CustomSelect name="budget" value={formData.budget} icon={WalletCards} ariaLabel="الميزانية المتوقعة" onChange={setSelectValue} options={[{value:'',label:'اختر الميزانية'},{value:'أقل من 500,000 ريال سعودي',label:'أقل من 500,000 ريال سعودي'},{value:'500,000 - 1,000,000 ريال سعودي',label:'500,000 – 1,000,000 ريال سعودي'},{value:'1,000,000 - 2,000,000 ريال سعودي',label:'1,000,000 – 2,000,000 ريال سعودي'},{value:'2,000,000 - 3,000,000 ريال سعودي',label:'2,000,000 – 3,000,000 ريال سعودي'},{value:'3,000,000 - 5,000,000 ريال سعودي',label:'3,000,000 – 5,000,000 ريال سعودي'},{value:'أكثر من 5,000,000 ريال سعودي',label:'أكثر من 5,000,000 ريال سعودي'}]} />
+                  </div>                </div>
 
                 <div className="pt-2">
                   <button
