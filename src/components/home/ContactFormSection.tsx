@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { z } from 'zod';
 import { createSubmission } from '@/app/actions/submissions';
@@ -24,14 +25,24 @@ type ContactFormData = z.infer<typeof contactSchema>;
 type SelectOption = { value: string; label: string };
 function CustomSelect({ name, value, options, icon: Icon, onChange, ariaLabel }: { name: keyof ContactFormData; value?: string; options: SelectOption[]; icon: React.ElementType; onChange: (name: keyof ContactFormData, value: string) => void; ariaLabel: string }) {
   const [open, setOpen] = useState(false);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selected = options.find(o => o.value === value) ?? options[0];
+  useEffect(() => {
+    if (!open) return;
+    const update = () => triggerRef.current && setRect(triggerRef.current.getBoundingClientRect());
+    update(); window.addEventListener('resize', update); window.addEventListener('scroll', update, true);
+    return () => { window.removeEventListener('resize', update); window.removeEventListener('scroll', update, true); };
+  }, [open]);
   return <div className="relative">
-    <button type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen(v => !v)} className="w-full min-h-[44px] rounded-xl border border-gray-300 bg-white px-3 flex items-center gap-2 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#CAA048]/25 focus:border-[#CAA048]">
+    <button ref={triggerRef} type="button" aria-label={ariaLabel} aria-expanded={open} onClick={() => setOpen(v => !v)} className="w-full min-h-[44px] rounded-xl border border-gray-300 bg-white px-3 flex items-center gap-2 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#CAA048]/25 focus:border-[#CAA048]">
       <Icon className="w-4 h-4 text-[#B58B34] shrink-0"/><span className="flex-1 text-start truncate font-cairo">{selected?.label}</span><ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`}/>
     </button>
-    {open && <div className="absolute z-50 mt-1 w-full max-h-56 overflow-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl">
-      {options.map(o => <button key={o.value} type="button" onClick={() => { onChange(name, o.value); setOpen(false); }} className={`w-full rounded-lg px-3 py-2 text-start text-xs sm:text-sm font-cairo hover:bg-[#CAA048]/10 ${o.value === value ? 'bg-[#CAA048]/10 font-bold text-[#8B681F]' : 'text-gray-700'}`}>{o.label}</button>)}
-    </div>}
+    {open && rect && typeof document !== 'undefined' && createPortal(
+      <><button type="button" aria-label="إغلاق القائمة" className="fixed inset-0 z-[9998] cursor-default" onClick={() => setOpen(false)}/>
+      <div className="fixed z-[9999] max-h-[min(280px,45vh)] overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-2xl" style={{ top: Math.min(rect.bottom + 6, window.innerHeight - Math.min(286, window.innerHeight * .45)), left: rect.left, width: rect.width }}>
+        {options.map(o => <button key={o.value} type="button" onClick={() => { onChange(name, o.value); setOpen(false); }} className={`w-full rounded-lg px-3 py-2.5 text-start text-xs sm:text-sm font-cairo hover:bg-[#CAA048]/10 ${o.value === value ? 'bg-[#CAA048]/10 font-bold text-[#8B681F]' : 'text-gray-700'}`}>{o.label}</button>)}
+      </div></>, document.body)}
   </div>;
 }
 
@@ -188,17 +199,7 @@ export default function ContactFormSection() {
                   <div className="grid grid-cols-[0.65fr_1fr_1fr] gap-2 sm:gap-4">
                     <div className="space-y-1">
                       <label htmlFor="contact-title" className="block text-xs font-semibold text-gray-700 font-cairo">اللقب</label>
-                      <select
-                        id="contact-title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo shadow-sm"
-                      >
-                        <option value="السيد">السيد</option>
-                        <option value="السيدة">السيدة</option>
-                        <option value="شركة">شركة / جهة</option>
-                      </select>
+                      <CustomSelect name="title" value={formData.title} icon={UserRound} ariaLabel="اللقب" onChange={setSelectValue} options={[{value:'السيد',label:'السيد'},{value:'السيدة',label:'السيدة'},{value:'شركة',label:'شركة / جهة'}]} />
                       {errors.title && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.title}</p>}
                     </div>
 
@@ -211,8 +212,9 @@ export default function ContactFormSection() {
                         placeholder="أدخل الاسم الأول"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
+                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl ps-9 pe-3 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
+                      <UserRound className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
                       {errors.firstName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.firstName}</p>}
                     </div>
 
@@ -227,6 +229,7 @@ export default function ContactFormSection() {
                         onChange={handleChange}
                         className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
+                      <UserRound className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
                       {errors.lastName && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.lastName}</p>}
                     </div>
                   </div>
@@ -243,6 +246,7 @@ export default function ContactFormSection() {
                         onChange={handleChange}
                         className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
                       />
+                      <Mail className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
                       {errors.email && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.email}</p>}
                     </div>
 
@@ -258,6 +262,7 @@ export default function ContactFormSection() {
                         onChange={handleChange}
                         className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all text-start font-mono min-h-[42px]"
                       />
+                      <Phone className="absolute pointer-events-none w-4 h-4 text-[#B58B34]" style={{marginTop:'-29px',marginInlineStart:'12px'}} />
                       {errors.phone && <p className="text-xs text-red-500 mt-1 font-cairo">{errors.phone}</p>}
                     </div>
                   </div>
