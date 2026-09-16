@@ -830,7 +830,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         {/* Mobile Search Bar: Docked cleanly inside Hero Section on mobile only at bottom-[10vh] */}
         {searchBar && (
           <div
-            className={`md:hidden absolute inset-x-0 bottom-[10vh] z-30 flex justify-center px-3 transition-all duration-500 pointer-events-none ${
+            className={`md:hidden absolute inset-x-0 bottom-[10vh] z-[60] flex justify-center px-3 transition-all duration-500 ${
               shouldReduceMotion || isStoryCompleted
                 ? 'opacity-100 translate-y-0 pointer-events-auto'
                 : 'opacity-0 translate-y-6 pointer-events-none'
