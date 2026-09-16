@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Property, Project } from '@/lib/mockData';
-import { getPropertiesListAdmin, getProjectsListAdmin } from '@/app/actions/properties';
+import { getHomePropertyCount, getHomePropertiesPage, getProjectsListAdmin } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty, normalizeProject } from '@/lib/normalizers';
 import { useInquiryStore } from '@/store/useInquiryStore';
@@ -20,107 +20,65 @@ import PartnersMarquee from '@/components/home/PartnersMarquee';
 import ContactFormSection from '@/components/home/ContactFormSection';
 
 export default function HomePage() {
-  const INITIAL_HOME_BATCH = 50;
+  const HOME_BATCH = 12;
   const [dbProperties, setDbProperties] = useState<Property[]>([]);
   const [dbProjects, setDbProjects] = useState<Project[]>([]);
+  const [totalPropertyCount, setTotalPropertyCount] = useState(0);
   const [isLoading, setIsLoading] = useState<boolean>(USE_DATABASE);
-  const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState<boolean>(USE_DATABASE);
-  const [loadedPropertyCount, setLoadedPropertyCount] = useState<number>(0);
-  const remainingPropertiesRef = useRef<Property[] | null>(null);
+  const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState(false);
+  const loadingPageRef = useRef(false);
 
   useEffect(() => {
     if (!USE_DATABASE) return;
     let cancelled = false;
-    let started = false;
-    async function loadData() {
-      try {
-        const [propsData, projsData] = await Promise.all([
-          getPropertiesListAdmin(),
-          getProjectsListAdmin()
-        ]);
-        if (cancelled) return;
-        if (propsData && propsData.length > 0) {
-          const normalizedProperties = propsData.map(normalizeProperty);
-          const firstBatch = normalizedProperties.slice(0, INITIAL_HOME_BATCH);
-          setDbProperties(firstBatch);
-          setLoadedPropertyCount(firstBatch.length);
+    // Count is deliberately independent of row/media loading.
+    getHomePropertyCount().then(count => { if (!cancelled) setTotalPropertyCount(count); });
 
-          // Network work is already finished here. Commit the full result shortly after
-          // the initial lightweight paint so the listings never remain stuck at 50.
-          remainingPropertiesRef.current = normalizedProperties;
-          window.setTimeout(() => {
-            if (cancelled || !remainingPropertiesRef.current) return;
-            setDbProperties(remainingPropertiesRef.current);
-            setLoadedPropertyCount(remainingPropertiesRef.current.length);
-            setIsLoadingRemainingProperties(false);
-            remainingPropertiesRef.current = null;
-          }, 250);
-        } else {
-          setDbProperties([]);
-          setLoadedPropertyCount(0);
-          setIsLoadingRemainingProperties(false);
-        }
-        if (projsData && projsData.length > 0) {
-          setDbProjects(projsData.map(normalizeProject));
-        } else {
-          setDbProjects([]);
-        }
-      } catch (e) {
-        console.error("Error loading home page database data:", e);
-        setDbProperties([]);
-        setLoadedPropertyCount(0);
-        setIsLoadingRemainingProperties(false);
-        setDbProjects([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    const startDataLoad = () => {
+    let started = false;
+    async function loadInitialData() {
       if (started || cancelled) return;
       started = true;
-      loadData();
-    };
-
-    // Keep the hero's frame decoding and scroll scrub isolated from Supabase/data work.
-    // Diagnostic test: do not fetch until content-start actually enters the viewport, isolating hero performance from database work.
+      try {
+        const [rows, projects] = await Promise.all([getHomePropertiesPage(0, HOME_BATCH), getProjectsListAdmin()]);
+        if (cancelled) return;
+        setDbProperties((rows || []).map(normalizeProperty));
+        setDbProjects((projects || []).map(normalizeProject));
+      } catch (e) {
+        console.error('Error loading home data:', e);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
     const contentStart = document.getElementById('content-start');
     let observer: IntersectionObserver | undefined;
     if (contentStart && 'IntersectionObserver' in window) {
-      observer = new IntersectionObserver((entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          startDataLoad();
-          observer?.disconnect();
-        }
-      }, { rootMargin: '0px 0px' });
+      observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) { loadInitialData(); observer?.disconnect(); }
+      }, { rootMargin: '700px 0px' });
       observer.observe(contentStart);
+    } else {
+      loadInitialData();
     }
-
-    const fallbackTimer = window.setTimeout(startDataLoad, 30000);
-    return () => {
-      cancelled = true;
-      observer?.disconnect();
-      window.clearTimeout(fallbackTimer);
-    };
+    const fallback = window.setTimeout(loadInitialData, 12000);
+    return () => { cancelled = true; observer?.disconnect(); window.clearTimeout(fallback); };
   }, []);
 
-  useEffect(() => {
-    if (!USE_DATABASE) return;
-    const listings = document.getElementById('listings-section');
-    if (!listings || !('IntersectionObserver' in window)) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      const remaining = remainingPropertiesRef.current;
-      if (remaining) {
-        setDbProperties(remaining);
-        setLoadedPropertyCount(remaining.length);
-        setIsLoadingRemainingProperties(false);
-        remainingPropertiesRef.current = null;
-      }
-      observer.disconnect();
-    }, { rootMargin: '1400px 0px' });
-    observer.observe(listings);
-    return () => observer.disconnect();
-  }, []);
+  const loadMoreProperties = async () => {
+    if (!USE_DATABASE || loadingPageRef.current || dbProperties.length >= totalPropertyCount) return;
+    loadingPageRef.current = true;
+    setIsLoadingRemainingProperties(true);
+    try {
+      const rows = await getHomePropertiesPage(dbProperties.length, HOME_BATCH);
+      const normalized = (rows || []).map(normalizeProperty);
+      setDbProperties(prev => {
+        const ids = new Set(prev.map(p => p.id));
+        return [...prev, ...normalized.filter(p => !ids.has(p.id))];
+      });
+    } finally {
+      loadingPageRef.current = false;
+      setIsLoadingRemainingProperties(false);
+    }
+  };
 
   // Filter States
   const [selectedCity, setSelectedCity] = useState<string>('all');
@@ -132,13 +90,6 @@ export default function HomePage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const remaining = remainingPropertiesRef.current;
-    if (remaining) {
-      setDbProperties(remaining);
-      setLoadedPropertyCount(remaining.length);
-      setIsLoadingRemainingProperties(false);
-      remainingPropertiesRef.current = null;
-    }
     const listingsSection = document.getElementById('listings-section');
     listingsSection?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -234,7 +185,9 @@ export default function HomePage() {
         setMaxPrice={setMaxPrice}
         isLoading={isLoading}
         isLoadingRemaining={isLoadingRemainingProperties}
-        loadedPropertyCount={loadedPropertyCount}
+        loadedPropertyCount={totalPropertyCount}
+        onLoadMore={loadMoreProperties}
+        hasMore={dbProperties.length < totalPropertyCount}
       />
 
       {/* 5. Request Property Custom Banner */}
