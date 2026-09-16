@@ -27,6 +27,7 @@ export default function HomePage() {
   const [cityPropertyCounts, setCityPropertyCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(USE_DATABASE);
   const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState(false);
+  const [displayedPropertyCount, setDisplayedPropertyCount] = useState(0);
   const loadingPageRef = useRef(false);
 
   useEffect(() => {
@@ -80,6 +81,32 @@ export default function HomePage() {
       setIsLoadingRemainingProperties(false);
     }
   };
+
+  // Once listing data starts arriving, keep paging in the background without
+  // requiring further scroll. Media remains browser-lazy inside the cards.
+  useEffect(() => {
+    if (!USE_DATABASE || dbProperties.length === 0 || totalPropertyCount === 0 || dbProperties.length >= totalPropertyCount || loadingPageRef.current) return;
+    const timer = window.setTimeout(() => { void loadMoreProperties(); }, 120);
+    return () => window.clearTimeout(timer);
+  }, [dbProperties.length, totalPropertyCount]);
+
+  // Continuous visual counter: independent from network batch boundaries.
+  useEffect(() => {
+    if (totalPropertyCount <= 0) return;
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - last;
+      if (elapsed >= 38) {
+        const steps = Math.max(1, Math.floor(elapsed / 38));
+        setDisplayedPropertyCount(current => Math.min(totalPropertyCount, current + steps));
+        last = now;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [totalPropertyCount]);
 
   // Filter States
   const [selectedCity, setSelectedCity] = useState<string>('all');
@@ -187,7 +214,7 @@ export default function HomePage() {
         setMaxPrice={setMaxPrice}
         isLoading={isLoading}
         isLoadingRemaining={isLoadingRemainingProperties}
-        loadedPropertyCount={dbProperties.length}
+        loadedPropertyCount={displayedPropertyCount}
         onLoadMore={loadMoreProperties}
         hasMore={dbProperties.length < totalPropertyCount}
       />
