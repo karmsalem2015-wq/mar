@@ -16,7 +16,7 @@ import {
 
 const PRELOAD_TIMEOUT_MS = 45000;
 const SWIPE_THRESHOLD_PX = 28;
-const MOBILE_PLAYBACK_RATE = 1.15;
+const MOBILE_PLAYBACK_RATE = 1.4;
 
 type HintMode = 'start' | 'resume' | null;
 
@@ -43,18 +43,18 @@ function StoryAction({
 }) {
   const className =
     action.emphasis === 'primary'
-      ? 'inline-flex min-h-6 flex-1 items-center justify-center gap-1 rounded-full bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] px-2 py-0.5 text-[0.62rem] font-bold text-[#111315] shadow-md shadow-[#E6A821]/15 active:scale-[0.98] transition-transform duration-150 font-cairo cursor-pointer'
-      : 'inline-flex min-h-6 flex-1 items-center justify-center gap-1 rounded-full border border-white/20 bg-black/40 px-2 py-0.5 text-[0.62rem] font-bold text-white backdrop-blur-md transition-colors duration-200 font-cairo cursor-pointer';
+      ? 'inline-flex min-h-6 flex-[1.08] items-center justify-center gap-1 rounded-full bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] px-1.5 py-0.5 text-[0.56rem] font-bold leading-none whitespace-nowrap text-[#111315] shadow-md shadow-[#E6A821]/15 active:scale-[0.98] transition-transform duration-150 font-cairo cursor-pointer'
+      : 'inline-flex min-h-6 flex-[0.92] items-center justify-center gap-1 rounded-full border border-white/20 bg-black/40 px-1.5 py-0.5 text-[0.56rem] font-bold leading-none whitespace-nowrap text-white backdrop-blur-md transition-colors duration-200 font-cairo cursor-pointer';
 
   const content = (
     <>
       {action.kind === 'inquiry' ? (
-        <MessageCircle className="size-2.5 text-[#E6A821]" aria-hidden="true" />
+        <MessageCircle className="size-2.5 shrink-0 text-[#E6A821]" aria-hidden="true" />
       ) : (
-        <Building2 className="size-2.5" aria-hidden="true" />
+        <Building2 className="size-2.5 shrink-0" aria-hidden="true" />
       )}
-      <span>{action.label}</span>
-      {action.kind === 'link' && <ArrowLeft className="size-2.5" aria-hidden="true" />}
+      <span className="whitespace-nowrap">{action.label}</span>
+      {action.kind === 'link' && <ArrowLeft className="size-2.5 shrink-0" aria-hidden="true" />}
     </>
   );
 
