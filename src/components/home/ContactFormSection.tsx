@@ -13,7 +13,6 @@ const contactSchema = z.object({
   email: z.string().email('عنوان البريد الإلكتروني غير صحيح'),
   phone: z.string().min(8, 'رقم التليفون يجب أن يكون 8 أرقام على الأقل'),
   propertyType: z.string().min(1, 'الرجاء اختيار نوع العقار أو المشروع'),
-  zipCode: z.string().optional(),
   city: z.string().optional(),
   bedrooms: z.string().optional(),
   bathrooms: z.string().optional(),
@@ -31,7 +30,6 @@ export default function ContactFormSection() {
     email: '',
     phone: '',
     propertyType: 'شقة',
-    zipCode: '',
     city: 'جدة',
     bedrooms: '4',
     bathrooms: '3',
@@ -74,7 +72,7 @@ export default function ContactFormSection() {
     try {
       const data = validation.data;
       const fullName = `${data.title} ${data.firstName} ${data.lastName}`.trim();
-      const messageNotes = `نوع العقار: ${data.propertyType} | المدينة: ${data.city || 'غير محدد'} | الرمز البريدي: ${data.zipCode || 'لا يوجد'} | الغرف: ${data.bedrooms || 'غير محدد'} | الحمامات: ${data.bathrooms || 'غير محدد'} | الميزانية: ${data.budget || 'غير محدد'}`;
+      const messageNotes = `نوع العقار: ${data.propertyType} | المدينة: ${data.city || 'غير محدد'} | الغرف: ${data.bedrooms || 'غير محدد'} | الحمامات: ${data.bathrooms || 'غير محدد'} | الميزانية: ${data.budget || 'غير محدد'}`;
 
       const res = await createSubmission({
         name: fullName,
@@ -96,7 +94,6 @@ export default function ContactFormSection() {
           email: '',
           phone: '',
           propertyType: 'شقة',
-          zipCode: '',
           city: 'جدة',
           bedrooms: '4',
           bathrooms: '3',
@@ -177,7 +174,7 @@ export default function ContactFormSection() {
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
+                        className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo shadow-sm"
                       >
                         <option value="السيد">السيد</option>
                         <option value="السيدة">السيدة</option>
@@ -251,7 +248,7 @@ export default function ContactFormSection() {
                 <div className="space-y-4 pt-2">
                   <h3 className="text-xs sm:text-sm font-bold text-brand-black border-s-2 border-[#CAA048] ps-2.5 font-heading">معلومات العقار المطلوب</h3>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
                     <div className="space-y-1">
                       <label htmlFor="contact-property-type" className="block text-xs font-semibold text-gray-700 font-cairo">نوع العقار</label>
                       <select
@@ -259,7 +256,7 @@ export default function ContactFormSection() {
                         name="propertyType"
                         value={formData.propertyType}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
+                        className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo shadow-sm"
                       >
                         <option value="شقة">شقة سكنية</option>
                         <option value="فيلا">فيلا مستقلة</option>
@@ -273,32 +270,14 @@ export default function ContactFormSection() {
 
                     <div className="space-y-1">
                       <label htmlFor="contact-city" className="block text-xs font-semibold text-gray-700 font-cairo">المدينة المفضلة</label>
-                      <input
-                        id="contact-city"
-                        name="city"
-                        type="text"
-                        placeholder="جدة، الرياض، مكة"
-                        value={formData.city}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
-                      />
+                      <select id="contact-city" name="city" value={formData.city} onChange={handleChange} className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[42px] font-cairo shadow-sm">
+                        <option value="جدة">جدة</option><option value="الرياض">الرياض</option><option value="مكة">مكة</option><option value="المدينة">المدينة</option><option value="الخبر">الخبر</option><option value="الدمام">الدمام</option>
+                      </select>
                     </div>
 
-                    <div className="space-y-1">
-                      <label htmlFor="contact-zip" className="block text-xs font-semibold text-gray-700 font-cairo">الرمز البريدي</label>
-                      <input
-                        id="contact-zip"
-                        name="zipCode"
-                        type="text"
-                        placeholder="الرمز البريدي"
-                        value={formData.zipCode}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all font-mono min-h-[42px]"
-                      />
-                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4">
                     <div className="space-y-1">
                       <label htmlFor="contact-bedrooms" className="block text-xs font-semibold text-gray-700 font-cairo">عدد الغرف</label>
                       <select
@@ -306,7 +285,7 @@ export default function ContactFormSection() {
                         name="bedrooms"
                         value={formData.bedrooms}
                         onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
+                        className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo shadow-sm"
                       >
                         <option value="1">1 غرفة</option>
                         <option value="2">2 غرف</option>
@@ -319,28 +298,16 @@ export default function ContactFormSection() {
 
                     <div className="space-y-1">
                       <label htmlFor="contact-bathrooms" className="block text-xs font-semibold text-gray-700 font-cairo">عدد الحمامات</label>
-                      <input
-                        id="contact-bathrooms"
-                        name="bathrooms"
-                        type="number"
-                        placeholder="مثال: 3"
-                        value={formData.bathrooms}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
-                      />
+                      <select id="contact-bathrooms" name="bathrooms" value={formData.bathrooms} onChange={handleChange} className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-2 sm:px-3 py-2.5 text-xs sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[42px] font-cairo shadow-sm">
+                        {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={String(n)}>{n}</option>)}<option value="9+">9+</option>
+                      </select>
                     </div>
 
                     <div className="space-y-1">
                       <label htmlFor="contact-budget" className="block text-xs font-semibold text-gray-700 font-cairo">الميزانية المتوقعة (ر.س)</label>
-                      <input
-                        id="contact-budget"
-                        name="budget"
-                        type="text"
-                        placeholder="مثال: 800,000"
-                        value={formData.budget}
-                        onChange={handleChange}
-                        className="w-full bg-gray-50 border border-gray-300 focus:border-[#CAA048] focus:bg-white rounded-xl px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-brand-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 transition-all min-h-[42px] font-cairo"
-                      />
+                      <select id="contact-budget" name="budget" value={formData.budget} onChange={handleChange} className="w-full appearance-none bg-white border border-gray-300 focus:border-[#CAA048] rounded-xl px-2 sm:px-3 py-2.5 text-[11px] sm:text-sm text-brand-black focus:outline-none focus:ring-2 focus:ring-[#CAA048]/20 min-h-[42px] font-cairo shadow-sm">
+                        <option value="">الميزانية</option><option value="أقل من 500,000">أقل من 500ألف</option><option value="500,000 - 1,000,000">500ألف–1م</option><option value="1,000,000 - 2,000,000">1–2م</option><option value="2,000,000 - 3,000,000">2–3م</option><option value="3,000,000 - 5,000,000">3–5م</option><option value="أكثر من 5,000,000">+5م</option>
+                      </select>
                     </div>
                   </div>
                 </div>
