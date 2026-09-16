@@ -160,6 +160,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const scrubRafRef = useRef<number | null>(null);
   const prioritizeFramesRef = useRef<((target: number, current: number, direction: number) => void) | null>(null);
   const scrollDirectionRef = useRef(1);
+  const scrubVelocityRef = useRef(0);
 
   // Viewport & section layout stability (prevents synchronous layout thrashing)
   const stableViewportHeightRef = useRef(0);
@@ -328,13 +329,31 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       const current = smoothFrameRef.current;
       const delta = target - current;
 
-      // Time-based easing behaves consistently on 60/90/120Hz screens.
-      // A short touch filter absorbs event bursts without replacing native scrolling.
-      const factor = 1 - Math.exp(-(isMobile ? 20 : 26) * dt);
-      smoothFrameRef.current = Math.abs(delta) > 0.01
-        ? current + delta * factor
-        : target;
-      if (Math.abs(target - smoothFrameRef.current) <= 0.01) smoothFrameRef.current = target;
+      // Time-based scrub with acceleration + velocity limits. Desktop wheel/trackpad
+      // bursts can move the scroll target by dozens of frames in one event; chasing
+      // that target directly causes visible frame skips. This behaves like a damped
+      // camera dolly and remains refresh-rate independent.
+      if (isMobile) {
+        const factor = 1 - Math.exp(-20 * dt);
+        smoothFrameRef.current = Math.abs(delta) > 0.01 ? current + delta * factor : target;
+      } else {
+        const desiredVelocity = Math.max(-82, Math.min(82, delta * 7.5));
+        const maxAcceleration = 260;
+        const velocityDelta = desiredVelocity - scrubVelocityRef.current;
+        const accelerationStep = Math.max(-maxAcceleration * dt, Math.min(maxAcceleration * dt, velocityDelta));
+        scrubVelocityRef.current += accelerationStep;
+        if (Math.abs(delta) < 0.35) {
+          smoothFrameRef.current = target;
+          scrubVelocityRef.current = 0;
+        } else {
+          const step = scrubVelocityRef.current * dt;
+          smoothFrameRef.current = Math.abs(step) >= Math.abs(delta) ? target : current + step;
+        }
+      }
+      if (Math.abs(target - smoothFrameRef.current) <= 0.01) {
+        smoothFrameRef.current = target;
+        scrubVelocityRef.current = 0;
+      }
 
       prioritizeFramesRef.current?.(target, smoothFrameRef.current, scrollDirectionRef.current);
       const currentFloatFrame = Math.min(
@@ -504,13 +523,13 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       };
       add(current);
       add(target);
-      // Keep a balanced decoded neighborhood around both current and target.
-      // This makes direction reversals immediately reusable instead of waiting on fresh decodes.
-      for (let offset = 1; offset <= 20; offset++) {
+      // Bias decoding toward the direction of travel. Frames immediately in front
+      // of the painted camera are more valuable than a distant target frame.
+      for (let offset = 1; offset <= 28; offset++) {
         add(current + offset * direction);
-        add(target + offset * direction);
-        add(current - offset * direction);
-        add(target - offset * direction);
+        if (offset <= 10) add(current - offset * direction);
+        if (offset <= 14) add(target - offset * direction);
+        if (offset <= 8) add(target + offset * direction);
       }
       priority = [...order].slice(0, priorityLimit);
       // Avoid repeatedly refilling the decode queue on every high-refresh scroll tick.
@@ -553,6 +572,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       setActiveStopIndex(0);
       isStoryCompletedRef.current = false;
       setIsStoryCompleted(false);
+      scrubVelocityRef.current = 0;
       setIsCanvasReady(false);
       setMediaVariant(nextVariant);
     };
@@ -635,6 +655,17 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       }
       lastRafTimestampRef.current = 0;
       return;
+    }
+
+    // Desktop keeps reversible scrubbing, but exposes the final search composition
+    // only in the settle zone near the end of the tour.
+    if (variant === 'desktop') {
+      const completed = videoProgress >= 0.965;
+      if (completed !== isStoryCompletedRef.current) {
+        isStoryCompletedRef.current = completed;
+        setIsStoryCompleted(completed);
+        if (completed) window.dispatchEvent(new CustomEvent('mar:tour-complete'));
+      }
     }
 
     startSmoothAnimation();
@@ -837,13 +868,15 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
           </AnimatePresence>
         </div>
 
-        {/* Mobile Search Bar: Docked cleanly inside Hero Section on mobile only at bottom-[10vh] */}
+        {/* Search Bar: final hero composition. It stays inside the sticky hero with
+            a safe bottom inset so it never visually sticks to the following section. */}
         {searchBar && (
           <div
-            className={`md:hidden absolute inset-x-0 bottom-[10vh] z-[60] flex justify-center px-3 transition-all duration-500 ${
+            className={`absolute inset-x-0 z-[60] flex justify-center px-3 transition-[opacity,transform] duration-500
+              bottom-[10vh] md:bottom-10 lg:bottom-12 ${
               shouldReduceMotion || isStoryCompleted
                 ? 'opacity-100 translate-y-0 pointer-events-auto'
-                : 'opacity-0 translate-y-6 pointer-events-none'
+                : 'opacity-0 translate-y-5 pointer-events-none'
             }`}
           >
             <div className="w-full max-w-5xl">
