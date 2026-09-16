@@ -619,6 +619,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       isTourLockedRef.current = true;
       isStoryCompletedRef.current = true;
       setIsStoryCompleted(true);
+      window.dispatchEvent(new CustomEvent('mar:tour-complete'));
       targetFrameRef.current = totalFrames;
       smoothFrameRef.current = totalFrames;
       prioritizeFramesRef.current?.(totalFrames, totalFrames, 1);
@@ -708,7 +709,11 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       id="mar-story"
       aria-label="جولة مار العقارية"
       className={`relative w-full bg-[#060D1A] ${
-        shouldReduceMotion ? 'h-[100svh]' : 'h-[420svh] md:h-[750vh] lg:h-[850vh]'
+        shouldReduceMotion
+          ? 'h-[100svh]'
+          : mediaVariant === 'mobile' && isStoryCompleted
+            ? 'h-[100svh]'
+            : 'h-[420svh] md:h-[750vh] lg:h-[850vh]'
       }`}
     >
       <div className="sticky top-0 h-screen h-[100svh] w-full overflow-hidden bg-[#060D1A]">
