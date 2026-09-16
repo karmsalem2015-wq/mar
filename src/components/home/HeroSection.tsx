@@ -637,8 +637,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     const progressDelta = rawVideoProgress - previousProgress;
     // Mobile needs a more responsive scrub because touch scrolling produces fewer
     // scroll-sync samples than desktop. Keep desktop tuning unchanged.
-    const progressFactor = 1 - Math.exp(-(variant === 'mobile' ? 28 : 18) * syncDt);
-    const maxProgressStep = (variant === 'mobile' ? 11 : 7) / Math.max(totalFrames - 1, 1);
+    const progressFactor = 1 - Math.exp(-(variant === 'mobile' ? 34 : 18) * syncDt);
+    const maxProgressStep = (variant === 'mobile' ? 14 : 7) / Math.max(totalFrames - 1, 1);
     const easedProgressStep = progressDelta * progressFactor;
     const boundedProgressStep = Math.max(
       -maxProgressStep,
