@@ -352,7 +352,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         setActiveStopIndex(nextStopIndex);
       }
       const completed = progress >= 0.85;
-      if (completed && !isTourLockedRef.current) {
+      if (completed && variant === 'mobile' && !isTourLockedRef.current) {
         isTourLockedRef.current = true;
         isStoryCompletedRef.current = true;
         setIsStoryCompleted(true);
@@ -592,7 +592,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     // Once the cinematic tour reaches its completion zone, keep the final villa
     // frame locked for the rest of this page visit. Returning upward no longer
     // restarts reverse scrubbing or competes with the content below.
-    if (isTourLockedRef.current) {
+    if (variant === 'mobile' && isTourLockedRef.current) {
       const totalFrames = HERO_MEDIA[variant].totalFrames;
       targetFrameRef.current = totalFrames;
       smoothFrameRef.current = totalFrames;
@@ -615,7 +615,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     targetFrameRef.current = targetFrame;
     prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
 
-    if (videoProgress >= 0.85) {
+    if (variant === 'mobile' && videoProgress >= 0.85) {
       isTourLockedRef.current = true;
       isStoryCompletedRef.current = true;
       setIsStoryCompleted(true);
@@ -843,7 +843,7 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
         )}
 
         {/* Bottom Tour Progress Indicator */}
-        {!shouldReduceMotion && !isStoryCompleted && (
+        {!shouldReduceMotion && !(mediaVariant === 'mobile' && isStoryCompleted) && (
           <div
             ref={progressTrackRef}
             className="absolute inset-x-0 bottom-0 z-30 h-1 bg-white/15"
