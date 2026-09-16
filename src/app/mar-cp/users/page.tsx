@@ -395,18 +395,19 @@ export default function UsersManagementPage() {
                       </button>
                       <button
                         onClick={() => setChangePasswordAccount(acc)}
-                        className="neu-btn neu-btn-secondary p-2"
+                        className="neu-btn neu-btn-secondary !w-11 !h-11 !min-w-11 !p-0 flex items-center justify-center text-[var(--neu-gold)]"
                         title="تغيير كلمة المرور"
+                        aria-label="تغيير كلمة المرور"
                       >
-                        <Key className="w-4 h-4 text-[var(--neu-gold)]" />
+                        <Key className="w-5 h-5 shrink-0" strokeWidth={2.25} />
                       </button>
                       <button
                         onClick={() => setConfirmDeleteAccount(acc)}
                         disabled={acc.name === 'سوبر أدمن' || acc.email.toLowerCase() === 'admin@mar-ksa.com'} // Protect main super admin account
-                        className="neu-btn neu-btn-secondary p-2 text-red-400 hover:text-red-500 disabled:opacity-30"
+                        className="neu-btn neu-btn-secondary !w-11 !h-11 !min-w-11 !p-0 flex items-center justify-center text-red-400 hover:text-red-500 disabled:opacity-30"
                         title="حذف الحساب"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5 shrink-0" strokeWidth={2.25} />
                       </button>
                     </div>
                   </div>
