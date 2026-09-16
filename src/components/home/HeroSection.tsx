@@ -161,6 +161,9 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
   const prioritizeFramesRef = useRef<((target: number, current: number, direction: number) => void) | null>(null);
   const scrollDirectionRef = useRef(1);
   const scrubVelocityRef = useRef(0);
+  const desktopWheelFrameRef = useRef(1);
+  const desktopWheelActiveRef = useRef(false);
+  const desktopWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Viewport & section layout stability (prevents synchronous layout thrashing)
   const stableViewportHeightRef = useRef(0);
@@ -573,6 +576,8 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
       isStoryCompletedRef.current = false;
       setIsStoryCompleted(false);
       scrubVelocityRef.current = 0;
+      desktopWheelFrameRef.current = 1;
+      desktopWheelActiveRef.current = false;
       setIsCanvasReady(false);
       setMediaVariant(nextVariant);
     };
@@ -633,8 +638,14 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     if (targetFrame !== targetFrameRef.current) {
       scrollDirectionRef.current = targetFrame > targetFrameRef.current ? 1 : -1;
     }
-    targetFrameRef.current = targetFrame;
-    prioritizeFramesRef.current?.(targetFrame, smoothFrameRef.current, scrollDirectionRef.current);
+    // Desktop wheel input owns the camera target while the wheel gesture is active.
+    // Native scroll still moves the page/progress, but cannot yank the camera across
+    // a large run of frames in a single wheel event.
+    if (!(variant === 'desktop' && desktopWheelActiveRef.current)) {
+      targetFrameRef.current = targetFrame;
+      if (variant === 'desktop') desktopWheelFrameRef.current = targetFrame;
+    }
+    prioritizeFramesRef.current?.(targetFrameRef.current, smoothFrameRef.current, scrollDirectionRef.current);
 
     if (variant === 'mobile' && videoProgress >= 0.85) {
       isTourLockedRef.current = true;
@@ -715,14 +726,52 @@ export default function HeroSection({ searchBar }: HeroSectionProps = {}) {
     if (sectionRef.current) resizeObserver.observe(sectionRef.current);
     if (canvasRef.current) resizeObserver.observe(canvasRef.current);
 
+    const handleWheel = (event: WheelEvent) => {
+      if (mediaVariantRef.current !== 'desktop' || !sectionRef.current) return;
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const viewportHeight = canvasRef.current?.clientHeight || getStableViewportHeight();
+      const start = sectionTopRef.current || 0;
+      const end = start + Math.max((sectionHeightRef.current || sectionRef.current.offsetHeight) - viewportHeight, 1);
+      if (scrollY < start - 2 || scrollY > end + 2 || Math.abs(event.deltaY) < 0.5) return;
+
+      const direction = event.deltaY > 0 ? 1 : -1;
+      // Mouse wheels usually report ~100px notches; precision trackpads report much
+      // smaller deltas. Cap a single event to 3 frames and keep precision input near 1.
+      const magnitude = Math.abs(event.deltaY);
+      const framesPerEvent = magnitude < 24 ? 0.65 : magnitude < 80 ? 1.15 : magnitude < 180 ? 1.8 : 2.6;
+      const total = HERO_MEDIA.desktop.totalFrames;
+      const base = desktopWheelActiveRef.current ? desktopWheelFrameRef.current : targetFrameRef.current;
+      const next = Math.min(Math.max(base + direction * framesPerEvent, 1), total);
+
+      desktopWheelActiveRef.current = true;
+      desktopWheelFrameRef.current = next;
+      scrollDirectionRef.current = direction;
+      targetFrameRef.current = next;
+      prioritizeFramesRef.current?.(next, smoothFrameRef.current, direction);
+      startSmoothAnimation();
+
+      if (desktopWheelResetRef.current) clearTimeout(desktopWheelResetRef.current);
+      desktopWheelResetRef.current = setTimeout(() => {
+        desktopWheelActiveRef.current = false;
+        desktopWheelResetRef.current = null;
+        requestScrollSync();
+      }, 140);
+    };
+
     window.addEventListener('scroll', requestScrollSync, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: true });
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('scroll', requestScrollSync);
+      window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', handleResize);
+      if (desktopWheelResetRef.current) {
+        clearTimeout(desktopWheelResetRef.current);
+        desktopWheelResetRef.current = null;
+      }
       window.removeEventListener('orientationchange', handleOrientationChange);
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
