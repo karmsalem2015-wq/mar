@@ -350,6 +350,38 @@ export async function deleteProperty(id: string) {
   }
 }
 
+// Lightweight public home queries: count separately, then page rows in small batches.
+export async function getHomePropertyCount() {
+  if (!USE_DATABASE) return PROPERTIES.length;
+  try {
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { count, error } = await supabase.from('properties').select('id', { count: 'exact', head: true }).eq('published', true);
+    if (error) throw error;
+    return count || 0;
+  } catch (err: any) {
+    console.error('Database error in getHomePropertyCount:', err?.message || err);
+    return 0;
+  }
+}
+
+export async function getHomePropertiesPage(offset = 0, limit = 12) {
+  if (!USE_DATABASE) return PROPERTIES.slice(offset, offset + limit);
+  try {
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*, projects(id, name, slug)')
+      .eq('published', true)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (error) throw error;
+    return data || [];
+  } catch (err: any) {
+    console.error('Database error in getHomePropertiesPage:', err?.message || err);
+    return [];
+  }
+}
+
 // Fetch all properties for admin dashboard and website lists
 export async function getPropertiesListAdmin() {
   if (!USE_DATABASE) {
