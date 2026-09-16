@@ -364,6 +364,34 @@ export async function getHomePropertyCount() {
   }
 }
 
+export async function getHomePropertyStats() {
+  if (!USE_DATABASE) {
+    const cityCounts: Record<string, number> = {};
+    for (const property of PROPERTIES) {
+      const city = property.location?.city;
+      if (city) cityCounts[city] = (cityCounts[city] || 0) + 1;
+    }
+    return { total: PROPERTIES.length, cityCounts };
+  }
+  try {
+    const supabase = (await getSupabaseServerClient()) as any;
+    const cities = ['جدة', 'الرياض', 'مكه'];
+    const requests = [
+      supabase.from('properties').select('id', { count: 'exact', head: true }).eq('published', true),
+      ...cities.map(city => supabase.from('properties').select('id', { count: 'exact', head: true }).eq('published', true).eq('city', city))
+    ];
+    const results = await Promise.all(requests);
+    if (results.some((result: any) => result.error)) throw results.find((result: any) => result.error)?.error;
+    return {
+      total: results[0].count || 0,
+      cityCounts: Object.fromEntries(cities.map((city, index) => [city, results[index + 1].count || 0]))
+    };
+  } catch (err: any) {
+    console.error('Database error in getHomePropertyStats:', err?.message || err);
+    return { total: 0, cityCounts: {} as Record<string, number> };
+  }
+}
+
 export async function getHomePropertiesPage(offset = 0, limit = 12) {
   if (!USE_DATABASE) return PROPERTIES.slice(offset, offset + limit);
   try {
