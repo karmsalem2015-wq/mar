@@ -656,7 +656,7 @@ export async function quickUpdateProject(
       return { success: false, error: 'التعديل المباشر متاح عند الاتصال بقاعدة البيانات فقط' };
     }
 
-    const allowedStatuses = new Set(['under_construction', 'completed', 'upcoming']);
+    const allowedStatuses = new Set(['under_construction', 'completed', 'upcoming', 'unknown']);
     const updateData: Record<string, string | number> = {};
 
     if (changes.status !== undefined) {

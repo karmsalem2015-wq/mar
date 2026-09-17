@@ -184,6 +184,7 @@ export default function ProjectsPage() {
                 { value: 'under_construction', label: 'تحت الإنشاء' },
                 { value: 'completed', label: 'مكتمل' },
                 { value: 'upcoming', label: 'قادم' },
+                { value: 'unknown', label: 'غير محدد' },
               ]}
               className="w-full sm:w-44"
               placeholder="تصفية حسب الحالة"
@@ -294,14 +295,15 @@ export default function ProjectsPage() {
                           <td>
                             <div className="flex items-center gap-2 min-w-[170px]">
                               <AdminSelect
-                                value={proj.status || 'upcoming'}
+                                value={proj.status || 'unknown'}
                                 onChange={(status) => void handleProjectStatusChange(proj.id, status)}
                                 options={[
                                   { value: 'under_construction', label: 'تحت الإنشاء' },
                                   { value: 'completed', label: 'مكتمل' },
                                   { value: 'upcoming', label: 'قادم' },
+                                  { value: 'unknown', label: 'غير محدد' },
                                 ]}
-                                className={`!min-w-[145px] w-[145px] admin-inline-status admin-status-${proj.status || 'upcoming'}`}
+                                className={`!min-w-[145px] w-[145px] admin-inline-status admin-status-${proj.status || 'unknown'}`}
                                 placeholder="الحالة"
                               />
                               {savingField === `${proj.id}:status` && (
