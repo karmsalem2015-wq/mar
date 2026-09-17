@@ -220,6 +220,58 @@ export async function updateProperty(id: string, formData: any) {
   }
 }
 
+// Fast inline updates from the admin properties table.
+export async function quickUpdateProperty(
+  id: string,
+  changes: { status?: string; price?: number },
+) {
+  try {
+    if (!USE_DATABASE) {
+      return { success: false, error: 'التعديل المباشر متاح عند الاتصال بقاعدة البيانات فقط' };
+    }
+
+    const allowedStatuses = new Set(['available', 'reserved', 'sold', 'coming_soon', 'unknown']);
+    const updateData: Record<string, string | number> = {};
+
+    if (changes.status !== undefined) {
+      if (!allowedStatuses.has(changes.status)) {
+        return { success: false, error: 'حالة العقار غير صالحة' };
+      }
+      updateData.status = changes.status;
+    }
+
+    if (changes.price !== undefined) {
+      const price = Number(changes.price);
+      if (!Number.isFinite(price) || price < 0) {
+        return { success: false, error: 'السعر غير صالح' };
+      }
+      updateData.price = Math.round(price);
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: 'لا توجد بيانات للتحديث' };
+    }
+
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { data, error } = await supabase
+      .from('properties')
+      .update(updateData)
+      .eq('id', id)
+      .select('id, status, price')
+      .single();
+
+    if (error) throw error;
+
+    revalidatePath('/mar-cp/properties');
+    revalidatePath('/properties');
+    revalidatePath('/');
+    return { success: true, data };
+  } catch (err: any) {
+    console.error(`Error quick updating property ${id}:`, err);
+    return { success: false, error: err.message || 'فشل حفظ التعديل' };
+  }
+}
+
 // Delete property
 export async function deleteProperty(id: string) {
   try {

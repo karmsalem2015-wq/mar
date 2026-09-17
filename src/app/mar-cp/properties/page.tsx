@@ -20,7 +20,7 @@ import {
   LayoutGrid,
   List,
 } from 'lucide-react';
-import { getPropertiesListAdmin, deleteProperty } from '@/app/actions/properties';
+import { getPropertiesListAdmin, deleteProperty, quickUpdateProperty } from '@/app/actions/properties';
 
 const STATUS_LABELS: Record<string, { label: string; class: string }> = {
   available: { label: 'متاح', class: 'neu-badge-success neu-badge-dot' },
@@ -48,6 +48,9 @@ export default function PropertiesPage() {
   const [propertyToDelete, setPropertyToDelete] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [savingField, setSavingField] = useState<string | null>(null);
+  const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+  const [inlineError, setInlineError] = useState('');
 
   const fetchProperties = async () => {
     setLoading(true);
@@ -63,6 +66,64 @@ export default function PropertiesPage() {
   const handleDelete = (id: string, title: string) => {
     setDeleteError('');
     setPropertyToDelete({ id, title });
+  };
+
+  const formatPrice = (value: number | string | null | undefined) => {
+    const digits = String(value ?? 0).replace(/[^0-9]/g, '');
+    return (digits || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handleStatusChange = async (id: string, status: string) => {
+    const previousStatus = properties.find((item) => item.id === id)?.status;
+    setInlineError('');
+    setSavingField(`${id}:status`);
+    setProperties((prev) => prev.map((item) => item.id === id ? { ...item, status } : item));
+
+    const result = await quickUpdateProperty(id, { status });
+    if (!result.success) {
+      setProperties((prev) => prev.map((item) => item.id === id ? { ...item, status: previousStatus } : item));
+      setInlineError(result.error || 'فشل حفظ الحالة');
+    }
+    setSavingField(null);
+  };
+
+  const handlePriceSave = async (id: string, currentPrice: number | null | undefined) => {
+    const draft = priceDrafts[id];
+    if (draft === undefined) return;
+
+    const nextPrice = Number(draft.replace(/[^0-9]/g, ''));
+    const previousPrice = Number(currentPrice || 0);
+
+    if (!Number.isFinite(nextPrice) || nextPrice < 0) {
+      setInlineError('السعر غير صالح');
+      return;
+    }
+
+    if (nextPrice === previousPrice) {
+      setPriceDrafts((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      return;
+    }
+
+    setInlineError('');
+    setSavingField(`${id}:price`);
+    setProperties((prev) => prev.map((item) => item.id === id ? { ...item, price: nextPrice } : item));
+
+    const result = await quickUpdateProperty(id, { price: nextPrice });
+    if (!result.success) {
+      setProperties((prev) => prev.map((item) => item.id === id ? { ...item, price: previousPrice } : item));
+      setInlineError(result.error || 'فشل حفظ السعر');
+    }
+
+    setPriceDrafts((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setSavingField(null);
   };
 
   const filteredProperties = properties.filter((prop) => {
@@ -150,6 +211,12 @@ export default function PropertiesPage() {
         </div>
       </div>
 
+      {inlineError && (
+        <div className="mb-4 rounded-xl border border-[var(--neu-danger)]/30 bg-[var(--neu-danger)]/10 px-4 py-3 text-sm font-semibold text-[var(--neu-danger)]">
+          تعذر حفظ التعديل: {inlineError}
+        </div>
+      )}
+
       {/* Properties Table */}
       <div>
         {loading ? (
@@ -160,8 +227,8 @@ export default function PropertiesPage() {
         ) : (
           <>
             {viewMode === 'table' && (
-            <div className="custom-table-wrapper w-full max-h-[65vh] overflow-auto rounded-2xl border border-[var(--neu-border)] bg-[var(--neu-card)] shadow-xl scrollbar-thin" dir="rtl">
-              <table className="neu-table w-full min-w-[1100px] table-auto border-collapse" dir="rtl">
+            <div className="custom-table-wrapper w-full max-h-[65vh] overflow-auto rounded-2xl shadow-xl" dir="rtl">
+              <table className="neu-table admin-data-table w-full min-w-[1100px] table-auto" dir="rtl">
                 <thead className="sticky top-0 z-20 bg-[var(--neu-card)] shadow-sm">
                   <tr>
                     <th>العقار</th>
@@ -215,15 +282,55 @@ export default function PropertiesPage() {
                           </span>
                         </td>
                         <td>
-                          <span className={`neu-badge ${STATUS_LABELS[prop.status]?.class || ''}`}>
-                            {STATUS_LABELS[prop.status]?.label || prop.status}
-                          </span>
+                          <div className="flex items-center gap-2 min-w-[155px]">
+                            <AdminSelect
+                              value={prop.status || 'unknown'}
+                              onChange={(status) => void handleStatusChange(prop.id, status)}
+                              options={[
+                                { value: 'available', label: 'متاح' },
+                                { value: 'reserved', label: 'محجوز' },
+                                { value: 'sold', label: 'مُباع' },
+                                { value: 'coming_soon', label: 'قريباً' },
+                                { value: 'unknown', label: 'غير محدد' },
+                              ]}
+                              className="!min-w-[128px] w-[128px] admin-inline-status"
+                              placeholder="الحالة"
+                            />
+                            {savingField === `${prop.id}:status` && (
+                              <Loader2 className="w-4 h-4 animate-spin text-[var(--neu-gold)] shrink-0" />
+                            )}
+                          </div>
                         </td>
                         <td>
-                          <span className="font-semibold text-[var(--neu-gold)]">
-                            {priceVal ? priceVal.toLocaleString('en-US') : '0'}
-                          </span>
-                          <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
+                          <div className="admin-inline-price flex items-center gap-2 min-w-[165px]" dir="ltr">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              aria-label={`تعديل سعر ${prop.title}`}
+                              value={priceDrafts[prop.id] ?? formatPrice(priceVal)}
+                              onChange={(event) => {
+                                const digits = event.target.value.replace(/[^0-9]/g, '');
+                                setPriceDrafts((prev) => ({ ...prev, [prop.id]: formatPrice(digits) }));
+                              }}
+                              onBlur={() => void handlePriceSave(prop.id, priceVal)}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter') event.currentTarget.blur();
+                                if (event.key === 'Escape') {
+                                  setPriceDrafts((prev) => {
+                                    const next = { ...prev };
+                                    delete next[prop.id];
+                                    return next;
+                                  });
+                                  event.currentTarget.blur();
+                                }
+                              }}
+                              className="admin-inline-price-input"
+                            />
+                            <span className="text-xs text-[var(--neu-text-muted)] whitespace-nowrap">ر.س</span>
+                            {savingField === `${prop.id}:price` && (
+                              <Loader2 className="w-4 h-4 animate-spin text-[var(--neu-gold)] shrink-0" />
+                            )}
+                          </div>
                         </td>
                         <td>
                           <span className="text-sm text-[var(--neu-text-secondary)]">
