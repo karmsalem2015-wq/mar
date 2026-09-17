@@ -21,7 +21,7 @@ import {
   Calendar,
   MapPin,
 } from 'lucide-react';
-import { getProjectsListAdmin, deleteProject } from '@/app/actions/properties';
+import { getProjectsListAdmin, deleteProject, quickUpdateProject } from '@/app/actions/properties';
 
 const STATUS_LABELS: Record<string, { label: string; class: string }> = {
   under_construction: { label: 'تحت الإنشاء', class: 'neu-badge-warning neu-badge-dot' },
@@ -39,6 +39,9 @@ export default function ProjectsPage() {
   const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [savingField, setSavingField] = useState<string | null>(null);
+  const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+  const [inlineError, setInlineError] = useState('');
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -54,6 +57,73 @@ export default function ProjectsPage() {
   const handleDelete = (id: string, name: string) => {
     setDeleteError('');
     setProjectToDelete({ id, name });
+  };
+
+  const formatPrice = (value: number | string | null | undefined) => {
+    const digits = String(value ?? 0).replace(/[^0-9]/g, '');
+    return (digits || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handleProjectStatusChange = async (id: string, status: string) => {
+    const previousStatus = projects.find((item) => item.id === id)?.status;
+    setInlineError('');
+    setSavingField(`${id}:status`);
+    setProjects((prev) => prev.map((item) => item.id === id ? { ...item, status } : item));
+
+    const result = await quickUpdateProject(id, { status });
+    if (!result.success) {
+      setProjects((prev) => prev.map((item) => item.id === id ? { ...item, status: previousStatus } : item));
+      setInlineError(result.error || 'فشل حفظ حالة المشروع');
+    }
+    setSavingField(null);
+  };
+
+  const handleProjectPriceSave = async (
+    id: string,
+    field: 'price_min' | 'price_max',
+    currentValue: number | null | undefined,
+  ) => {
+    const key = `${id}:${field}`;
+    const draft = priceDrafts[key];
+    if (draft === undefined) return;
+
+    const nextPrice = Number(draft.replace(/[^0-9]/g, ''));
+    const previousPrice = Number(currentValue || 0);
+
+    if (!Number.isFinite(nextPrice) || nextPrice < 0) {
+      setInlineError('السعر غير صالح');
+      return;
+    }
+
+    if (nextPrice === previousPrice) {
+      setPriceDrafts((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+      return;
+    }
+
+    setInlineError('');
+    setSavingField(key);
+    setProjects((prev) => prev.map((item) => item.id === id ? { ...item, [field]: nextPrice } : item));
+
+    const result = await quickUpdateProject(
+      id,
+      field === 'price_min' ? { priceMin: nextPrice } : { priceMax: nextPrice },
+    );
+
+    if (!result.success) {
+      setProjects((prev) => prev.map((item) => item.id === id ? { ...item, [field]: previousPrice } : item));
+      setInlineError(result.error || 'فشل حفظ السعر');
+    }
+
+    setPriceDrafts((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+    setSavingField(null);
   };
 
   const filteredProjects = projects.filter((proj) => {
@@ -154,6 +224,12 @@ export default function ProjectsPage() {
         </div>
       </div>
 
+      {inlineError && (
+        <div className="mb-4 rounded-xl border border-[var(--neu-danger)]/30 bg-[var(--neu-danger)]/10 px-4 py-3 text-sm font-semibold text-[var(--neu-danger)]">
+          تعذر حفظ تعديل المشروع: {inlineError}
+        </div>
+      )}
+
       {/* Content Area */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-center neu-card">
@@ -165,8 +241,8 @@ export default function ProjectsPage() {
           {viewMode === 'table' ? (
             <div>
               {/* Desktop Table View */}
-              <div className="custom-table-wrapper w-full max-h-[65vh] overflow-auto rounded-2xl border border-[var(--neu-border)] bg-[var(--neu-card)] shadow-xl scrollbar-thin" dir="rtl">
-                <table className="neu-table w-full min-w-[1100px] table-auto border-collapse" dir="rtl">
+              <div className="custom-table-wrapper w-full max-h-[65vh] overflow-auto rounded-2xl shadow-xl" dir="rtl">
+                <table className="neu-table admin-data-table w-full min-w-[1180px] table-auto" dir="rtl">
                   <thead className="sticky top-0 z-20 bg-[var(--neu-card)] shadow-sm">
                     <tr>
                       <th>المشروع</th>
@@ -216,9 +292,22 @@ export default function ProjectsPage() {
                             </div>
                           </td>
                           <td>
-                            <span className={`neu-badge ${STATUS_LABELS[proj.status]?.class || ''}`}>
-                              {STATUS_LABELS[proj.status]?.label || proj.status}
-                            </span>
+                            <div className="flex items-center gap-2 min-w-[170px]">
+                              <AdminSelect
+                                value={proj.status || 'upcoming'}
+                                onChange={(status) => void handleProjectStatusChange(proj.id, status)}
+                                options={[
+                                  { value: 'under_construction', label: 'تحت الإنشاء' },
+                                  { value: 'completed', label: 'مكتمل' },
+                                  { value: 'upcoming', label: 'قادم' },
+                                ]}
+                                className={`!min-w-[145px] w-[145px] admin-inline-status admin-status-${proj.status || 'upcoming'}`}
+                                placeholder="الحالة"
+                              />
+                              {savingField === `${proj.id}:status` && (
+                                <Loader2 className="w-4 h-4 animate-spin text-[var(--neu-gold)] shrink-0" />
+                              )}
+                            </div>
                           </td>
                           <td>
                             <span className="text-sm text-[var(--neu-text-secondary)]">
@@ -226,11 +315,60 @@ export default function ProjectsPage() {
                             </span>
                           </td>
                           <td>
-                            <span className="font-semibold text-[var(--neu-gold)]">
-                              {minPrice ? minPrice.toLocaleString('en-US') : '0'}
-                              {maxPrice && maxPrice > minPrice ? ` - ${maxPrice.toLocaleString('en-US')}` : ''}
-                            </span>
-                            <span className="text-xs text-[var(--neu-text-muted)] ms-1">ر.س</span>
+                            <div className="admin-project-price-range flex items-center gap-1.5 min-w-[275px]" dir="ltr">
+                              <span className="text-[10px] text-[var(--neu-text-muted)]">من</span>
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                aria-label={`الحد الأدنى لسعر ${proj.name}`}
+                                value={priceDrafts[`${proj.id}:price_min`] ?? formatPrice(minPrice)}
+                                onChange={(event) => {
+                                  const digits = event.target.value.replace(/[^0-9]/g, '');
+                                  setPriceDrafts((prev) => ({ ...prev, [`${proj.id}:price_min`]: formatPrice(digits) }));
+                                }}
+                                onBlur={() => void handleProjectPriceSave(proj.id, 'price_min', minPrice)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter') event.currentTarget.blur();
+                                  if (event.key === 'Escape') {
+                                    setPriceDrafts((prev) => {
+                                      const next = { ...prev };
+                                      delete next[`${proj.id}:price_min`];
+                                      return next;
+                                    });
+                                    event.currentTarget.blur();
+                                  }
+                                }}
+                                className="admin-inline-price-input !w-[92px]"
+                              />
+                              <span className="text-[10px] text-[var(--neu-text-muted)]">إلى</span>
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                aria-label={`الحد الأعلى لسعر ${proj.name}`}
+                                value={priceDrafts[`${proj.id}:price_max`] ?? formatPrice(maxPrice)}
+                                onChange={(event) => {
+                                  const digits = event.target.value.replace(/[^0-9]/g, '');
+                                  setPriceDrafts((prev) => ({ ...prev, [`${proj.id}:price_max`]: formatPrice(digits) }));
+                                }}
+                                onBlur={() => void handleProjectPriceSave(proj.id, 'price_max', maxPrice)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter') event.currentTarget.blur();
+                                  if (event.key === 'Escape') {
+                                    setPriceDrafts((prev) => {
+                                      const next = { ...prev };
+                                      delete next[`${proj.id}:price_max`];
+                                      return next;
+                                    });
+                                    event.currentTarget.blur();
+                                  }
+                                }}
+                                className="admin-inline-price-input !w-[92px]"
+                              />
+                              <span className="text-[10px] text-[var(--neu-text-muted)] whitespace-nowrap">ر.س</span>
+                              {(savingField === `${proj.id}:price_min` || savingField === `${proj.id}:price_max`) && (
+                                <Loader2 className="w-4 h-4 animate-spin text-[var(--neu-gold)] shrink-0" />
+                              )}
+                            </div>
                           </td>
                           <td>
                             <span className="text-sm font-semibold text-[var(--neu-text-heading)] font-mono">

@@ -293,7 +293,7 @@ export default function PropertiesPage() {
                                 { value: 'coming_soon', label: 'قريباً' },
                                 { value: 'unknown', label: 'غير محدد' },
                               ]}
-                              className="!min-w-[128px] w-[128px] admin-inline-status"
+                              className={`!min-w-[128px] w-[128px] admin-inline-status admin-status-${prop.status || 'unknown'}`}
                               placeholder="الحالة"
                             />
                             {savingField === `${prop.id}:status` && (

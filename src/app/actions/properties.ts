@@ -646,6 +646,66 @@ export async function seedDatabase() {
   }
 }
 
+// Fast inline updates from the admin projects table.
+export async function quickUpdateProject(
+  id: string,
+  changes: { status?: string; priceMin?: number; priceMax?: number },
+) {
+  try {
+    if (!USE_DATABASE) {
+      return { success: false, error: 'التعديل المباشر متاح عند الاتصال بقاعدة البيانات فقط' };
+    }
+
+    const allowedStatuses = new Set(['under_construction', 'completed', 'upcoming']);
+    const updateData: Record<string, string | number> = {};
+
+    if (changes.status !== undefined) {
+      if (!allowedStatuses.has(changes.status)) {
+        return { success: false, error: 'حالة المشروع غير صالحة' };
+      }
+      updateData.status = changes.status;
+    }
+
+    if (changes.priceMin !== undefined) {
+      const priceMin = Number(changes.priceMin);
+      if (!Number.isFinite(priceMin) || priceMin < 0) {
+        return { success: false, error: 'الحد الأدنى للسعر غير صالح' };
+      }
+      updateData.price_min = Math.round(priceMin);
+    }
+
+    if (changes.priceMax !== undefined) {
+      const priceMax = Number(changes.priceMax);
+      if (!Number.isFinite(priceMax) || priceMax < 0) {
+        return { success: false, error: 'الحد الأعلى للسعر غير صالح' };
+      }
+      updateData.price_max = Math.round(priceMax);
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return { success: false, error: 'لا توجد بيانات للتحديث' };
+    }
+
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { data, error } = await supabase
+      .from('projects')
+      .update(updateData)
+      .eq('id', id)
+      .select('id, status, price_min, price_max')
+      .single();
+
+    if (error) throw error;
+
+    revalidatePath('/mar-cp/projects');
+    revalidatePath('/projects');
+    revalidatePath('/');
+    return { success: true, data };
+  } catch (err: any) {
+    console.error(`Error quick updating project ${id}:`, err);
+    return { success: false, error: err.message || 'فشل حفظ تعديل المشروع' };
+  }
+}
+
 // Delete project
 export async function deleteProject(id: string) {
   try {

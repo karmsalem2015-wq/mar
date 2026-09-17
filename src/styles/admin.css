@@ -1123,7 +1123,7 @@
 }
 
 .admin-layout ::-webkit-scrollbar-thumb {
-  background: var(--neu-text-muted);
+  background: var(--neu-gold);
   border-radius: 3px;
 }
 
@@ -1462,7 +1462,7 @@
   border: 1px solid rgba(17, 19, 21, 0.18);
   background: rgba(17, 19, 21, 0.035);
   scrollbar-width: thin;
-  scrollbar-color: #34363b #17181b;
+  scrollbar-color: var(--neu-gold) #17181b;
 }
 
 .custom-table-wrapper::-webkit-scrollbar {
@@ -1476,13 +1476,13 @@
 }
 
 .custom-table-wrapper::-webkit-scrollbar-thumb {
-  background: #3b3d43;
+  background: var(--neu-gold);
   border: 2px solid #17181b;
   border-radius: 999px;
 }
 
 .custom-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #555860;
+  background: var(--neu-gold-light);
 }
 
 .custom-table-wrapper .admin-data-table,
@@ -1586,4 +1586,33 @@
 [data-theme="dark"] .admin-inline-status > button {
   background: rgba(4, 5, 7, 0.34);
   border-color: rgba(255, 255, 255, 0.10);
+}
+
+
+/* Status text keeps semantic color inside inline dropdown triggers */
+.admin-inline-status > button > span:first-child {
+  font-weight: 800;
+}
+
+.admin-inline-status.admin-status-available > button > span:first-child,
+.admin-inline-status.admin-status-completed > button > span:first-child {
+  color: #22C55E !important;
+}
+
+.admin-inline-status.admin-status-reserved > button > span:first-child,
+.admin-inline-status.admin-status-under_construction > button > span:first-child {
+  color: #F59E0B !important;
+}
+
+.admin-inline-status.admin-status-sold > button > span:first-child {
+  color: #EF4444 !important;
+}
+
+.admin-inline-status.admin-status-coming_soon > button > span:first-child,
+.admin-inline-status.admin-status-upcoming > button > span:first-child {
+  color: #FB923C !important;
+}
+
+.admin-inline-status.admin-status-unknown > button > span:first-child {
+  color: #A1A1AA !important;
 }
