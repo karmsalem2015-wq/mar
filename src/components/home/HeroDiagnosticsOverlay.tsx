@@ -174,7 +174,7 @@ export default function HeroDiagnosticsOverlay() {
     const longRafRate = metrics.rafSamples ? metrics.longRaf / metrics.rafSamples : 0;
 
     if (metrics.sourceMode === 'none') return 'Waiting for video element';
-    if (metrics.sourceMode !== 'blob') return 'Network fallback active';
+    // Native direct-source playback is the optimized path, not a fallback error.
     if (avgSeek > 55 || metrics.maxSeekMs > 140) return 'Seek/decode bottleneck';
     if (metrics.waitingEvents + metrics.stalledEvents > 1) return 'Decoder/media starvation';
     if (longRafRate > 0.2) return 'Main-thread / RAF pressure';

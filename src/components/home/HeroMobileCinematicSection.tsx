@@ -14,9 +14,8 @@ import {
   type HeroStoryStop,
 } from './heroStory';
 
-const PRELOAD_TIMEOUT_MS = 45000;
 const SWIPE_THRESHOLD_PX = 28;
-const MOBILE_PLAYBACK_RATE = 1.4;
+const MOBILE_PLAYBACK_RATE = 1.65;
 
 type HintMode = 'start' | 'resume' | null;
 
@@ -143,8 +142,8 @@ export default function HeroMobileCinematicSection({
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressTrackRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const objectUrlRef = useRef<string | null>(null);
   const uiRafRef = useRef<number | null>(null);
+  const videoFrameRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const activeStopIndexRef = useRef(0);
   const tourCompletedRef = useRef(false);
@@ -155,10 +154,9 @@ export default function HeroMobileCinematicSection({
   const playStartsRef = useRef(0);
   const playPausesRef = useRef(0);
 
-  const [preparedSrc, setPreparedSrc] = useState<string | null>(null);
-  const [preloadProgress, setPreloadProgress] = useState(0);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
   const [isStoryCompleted, setIsStoryCompleted] = useState(false);
+  const [wasSkipped, setWasSkipped] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [hintMode, setHintMode] = useState<HintMode>(null);
@@ -192,20 +190,38 @@ export default function HeroMobileCinematicSection({
       window.cancelAnimationFrame(uiRafRef.current);
       uiRafRef.current = null;
     }
+    const video = videoRef.current;
+    if (video && videoFrameRef.current !== null) {
+      video.cancelVideoFrameCallback?.(videoFrameRef.current);
+    }
+    videoFrameRef.current = null;
   }, []);
 
   const startUiLoop = useCallback(() => {
-    if (uiRafRef.current !== null) return;
+    const video = videoRef.current;
+    if (!video || uiRafRef.current !== null || videoFrameRef.current !== null) return;
 
+    // Sync story cards to decoded video frames instead of repainting at display refresh rate.
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      const onFrame = () => {
+        videoFrameRef.current = null;
+        syncPresentation();
+        if (!video.paused && !video.ended && !tourCompletedRef.current) {
+          videoFrameRef.current = video.requestVideoFrameCallback(onFrame);
+        }
+      };
+      videoFrameRef.current = video.requestVideoFrameCallback(onFrame);
+      return;
+    }
+
+    // Graceful fallback on older browsers.
     const tick = () => {
       uiRafRef.current = null;
       syncPresentation();
-      const video = videoRef.current;
-      if (video && !video.paused && !video.ended && !tourCompletedRef.current) {
+      if (!video.paused && !video.ended && !tourCompletedRef.current) {
         uiRafRef.current = window.requestAnimationFrame(tick);
       }
     };
-
     uiRafRef.current = window.requestAnimationFrame(tick);
   }, [syncPresentation]);
 
@@ -276,111 +292,42 @@ export default function HeroMobileCinematicSection({
     window.dispatchEvent(new CustomEvent('mar:tour-complete'));
   }, [stopUiLoop]);
 
+  // Native video progressive loading avoids allocating a duplicate full-size MP4 Blob.
   useEffect(() => {
     if (shouldReduceMotion) return;
-
-    const originalSrc = HERO_MEDIA.mobile.src;
-    const controller = new AbortController();
-    let disposed = false;
-    const startedAt = performance.now();
-    const runtimeWindow = window as HeroRuntimeWindow;
-
-    runtimeWindow.__MAR_HERO_PRELOAD__ = {
+    (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__ = {
       status: 'loading',
       variant: 'mobile',
-      source: originalSrc,
-      progress: 0,
-    };
-
-    const timeout = window.setTimeout(() => controller.abort(), PRELOAD_TIMEOUT_MS);
-
-    const prepare = async () => {
-      try {
-        const response = await fetch(originalSrc, {
-          cache: 'force-cache',
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const totalBytes = Number(response.headers.get('content-length') || 0);
-        let blob: Blob;
-
-        if (response.body && totalBytes > 0) {
-          const reader = response.body.getReader();
-          const chunks: ArrayBuffer[] = [];
-          let received = 0;
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (!value) continue;
-            const chunk = new Uint8Array(value.byteLength);
-            chunk.set(value);
-            chunks.push(chunk.buffer);
-            received += value.byteLength;
-            const progress = Math.min(received / totalBytes, 1);
-            setPreloadProgress(progress);
-            runtimeWindow.__MAR_HERO_PRELOAD__ = {
-              status: 'loading',
-              variant: 'mobile',
-              bytes: received,
-              totalBytes,
-              progress,
-              ms: performance.now() - startedAt,
-              source: originalSrc,
-            };
-          }
-
-          blob = new Blob(chunks, {
-            type: response.headers.get('content-type') || 'video/mp4',
-          });
-        } else {
-          blob = await response.blob();
-          setPreloadProgress(1);
-        }
-
-        if (disposed || blob.size < 1024) return;
-        const objectUrl = URL.createObjectURL(blob);
-        objectUrlRef.current = objectUrl;
-        runtimeWindow.__MAR_HERO_PRELOAD__ = {
-          status: 'ready',
-          variant: 'mobile',
-          bytes: blob.size,
-          totalBytes: totalBytes || blob.size,
-          progress: 1,
-          ms: performance.now() - startedAt,
-          source: originalSrc,
-        };
-        setPreparedSrc(objectUrl);
-      } catch (error) {
-        if (disposed) return;
-        const message = error instanceof Error ? error.message : String(error);
-        runtimeWindow.__MAR_HERO_PRELOAD__ = {
-          status: 'direct-fallback',
-          variant: 'mobile',
-          progress: preloadProgress,
-          ms: performance.now() - startedAt,
-          source: originalSrc,
-          error: message,
-        };
-        setPreparedSrc(originalSrc);
-      } finally {
-        window.clearTimeout(timeout);
-      }
-    };
-
-    void prepare();
-
-    return () => {
-      disposed = true;
-      controller.abort();
-      window.clearTimeout(timeout);
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-        objectUrlRef.current = null;
-      }
+      source: HERO_MEDIA.mobile.src,
     };
   }, [shouldReduceMotion]);
+
+  const markMediaReady = useCallback(() => {
+    if (tourCompletedRef.current) return;
+    setIsVideoReady(true);
+    (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__ = {
+      status: 'ready',
+      variant: 'mobile',
+      source: HERO_MEDIA.mobile.src,
+    };
+    window.dispatchEvent(new Event('mar:hero-media-ready'));
+  }, []);
+
+  useEffect(() => {
+    const skip = () => {
+      completeTour();
+      setWasSkipped(true);
+    };
+    window.addEventListener('mar:tour-skip', skip);
+    if ((window as Window & { __MAR_HERO_SKIPPED__?: boolean }).__MAR_HERO_SKIPPED__) {
+      skip();
+    }
+    return () => window.removeEventListener('mar:tour-skip', skip);
+  }, [completeTour]);
+
+  useEffect(() => {
+    if (shouldReduceMotion) completeTour();
+  }, [shouldReduceMotion, completeTour]);
 
   useEffect(() => {
     if (shouldReduceMotion) return;
@@ -394,7 +341,7 @@ export default function HeroMobileCinematicSection({
     };
 
     const handleTouchStart = (event: TouchEvent) => {
-      if (tourCompletedRef.current || isInteractiveTarget(event.target)) return;
+      if (tourCompletedRef.current || !isVideoReady || videoFailed || isInteractiveTarget(event.target)) return;
       const touch = event.touches[0];
       touchStartYRef.current = touch?.clientY ?? null;
 
@@ -405,12 +352,12 @@ export default function HeroMobileCinematicSection({
     };
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (tourCompletedRef.current || isInteractiveTarget(event.target)) return;
+      if (tourCompletedRef.current || !isVideoReady || videoFailed || isInteractiveTarget(event.target)) return;
       event.preventDefault();
     };
 
     const handleTouchEnd = (event: TouchEvent) => {
-      if (tourCompletedRef.current || isInteractiveTarget(event.target)) return;
+      if (tourCompletedRef.current || !isVideoReady || videoFailed || isInteractiveTarget(event.target)) return;
 
       const startY = touchStartYRef.current;
       touchStartYRef.current = null;
@@ -429,7 +376,7 @@ export default function HeroMobileCinematicSection({
     };
 
     const handleWheel = (event: WheelEvent) => {
-      if (tourCompletedRef.current || event.ctrlKey || event.deltaY === 0) return;
+      if (tourCompletedRef.current || !isVideoReady || videoFailed || event.ctrlKey || event.deltaY === 0) return;
       event.preventDefault();
       if (event.deltaY > 0) startPlayback();
       else pauseForTouch();
@@ -446,7 +393,7 @@ export default function HeroMobileCinematicSection({
       section.removeEventListener('touchend', handleTouchEnd);
       section.removeEventListener('wheel', handleWheel);
     };
-  }, [pauseForTouch, shouldReduceMotion, startPlayback]);
+  }, [pauseForTouch, shouldReduceMotion, startPlayback, isVideoReady, videoFailed]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -466,7 +413,7 @@ export default function HeroMobileCinematicSection({
         engine: 'mobile-one-swipe-native-playback',
         transportMode: video && !video.paused ? 'playback' : 'idle',
         oneWay: true,
-        sourceMode: preparedSrc?.startsWith('blob:') ? 'blob' : preparedSrc ? 'direct' : 'none',
+        sourceMode: video?.currentSrc ? 'direct' : 'none',
         currentTime: video?.currentTime ?? 0,
         duration: video?.duration ?? 0,
         playbackRate: video?.playbackRate ?? MOBILE_PLAYBACK_RATE,
@@ -485,7 +432,7 @@ export default function HeroMobileCinematicSection({
       delete runtimeWindow.__MAR_HERO_DIAG__;
       delete runtimeWindow.__MAR_HERO_PRELOAD__;
     };
-  }, [hintMode, preparedSrc]);
+  }, [hintMode]);
 
   useEffect(() => {
     return () => {
@@ -505,12 +452,12 @@ export default function HeroMobileCinematicSection({
       id="mar-story"
       aria-label="جولة مار العقارية"
       className="relative h-[100svh] w-full bg-[#060D1A] overscroll-none"
-      style={{ touchAction: isStoryCompleted ? 'pan-y' : 'none' }}
+      style={{ touchAction: isStoryCompleted || !isVideoReady || videoFailed || shouldReduceMotion ? 'pan-y' : 'none' }}
     >
       <div className="relative h-[100svh] w-full overflow-hidden bg-[#060D1A]">
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
-            isVideoReady && !shouldReduceMotion ? 'pointer-events-none opacity-0' : 'opacity-100'
+            isVideoReady && !wasSkipped && !videoFailed && !shouldReduceMotion ? 'pointer-events-none opacity-0' : 'opacity-100'
           }`}
         >
           <Image
@@ -523,10 +470,10 @@ export default function HeroMobileCinematicSection({
           />
         </div>
 
-        {preparedSrc && !shouldReduceMotion && (
+        {!shouldReduceMotion && !wasSkipped && (
           <video
             ref={videoRef}
-            src={preparedSrc}
+            src={HERO_MEDIA.mobile.src}
             poster={HERO_MEDIA.mobile.poster}
             preload="auto"
             muted
@@ -540,26 +487,36 @@ export default function HeroMobileCinematicSection({
             onLoadedData={(event) => {
               const video = event.currentTarget;
               video.pause();
-              video.currentTime = 0;
               video.playbackRate = MOBILE_PLAYBACK_RATE;
-              setIsVideoReady(true);
+              markMediaReady();
               setHintMode('start');
               syncPresentation();
             }}
-            onCanPlay={() => setIsVideoReady(true)}
+            onCanPlay={markMediaReady}
             onPlay={() => {
               setHintMode(null);
               startUiLoop();
             }}
             onPause={() => {
               playPendingRef.current = false;
+              stopUiLoop();
               syncPresentation();
             }}
             onTimeUpdate={() => syncPresentation()}
             onWaiting={() => { waitingEventsRef.current += 1; }}
             onStalled={() => { stalledEventsRef.current += 1; }}
             onEnded={() => completeTour()}
-            onError={() => setVideoFailed(true)}
+            onError={() => {
+              if (tourCompletedRef.current) return;
+              (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__ = {
+                status: 'error',
+                variant: 'mobile',
+                source: HERO_MEDIA.mobile.src,
+                error: 'Unable to play the cinematic tour',
+              };
+              setVideoFailed(true);
+              completeTour();
+            }}
           />
         )}
 
@@ -568,14 +525,12 @@ export default function HeroMobileCinematicSection({
           aria-hidden="true"
         />
 
-        {!isVideoReady && !shouldReduceMotion && !videoFailed && (
+        {!isVideoReady && !shouldReduceMotion && !videoFailed && !isStoryCompleted && (
           <div className="absolute right-4 top-20 z-30 min-w-40 rounded-full border border-[#E6A821]/30 bg-black/60 px-3 py-1.5 text-[0.68rem] text-white backdrop-blur-md font-cairo shadow-lg">
             <div className="flex items-center gap-2">
               <span className="size-1.5 rounded-full bg-[#E6A821] animate-pulse" />
               <span>جارٍ تحميل الجولة السينمائية…</span>
-              {preloadProgress > 0 && preloadProgress < 1 && (
-                <span dir="ltr" className="text-white/60">{Math.round(preloadProgress * 100)}%</span>
-              )}
+
             </div>
           </div>
         )}

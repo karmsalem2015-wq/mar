@@ -25,23 +25,11 @@ export default function Navbar() {
   const openInquiry = useInquiryStore((state) => state.open);
 
   const handleSkipTour = () => {
-    const hero = document.getElementById('mar-story');
-    const video = hero?.querySelector('video') as HTMLVideoElement | null;
-
-    if (video) {
-      video.pause();
-      if (Number.isFinite(video.duration) && video.duration > 0) {
-        video.currentTime = Math.max(video.duration - 0.04, 0);
-      }
-
-      // Reuse the hero engine's own completion path so all UI state is updated:
-      // final scene, progress, search bar, page unlock and the desktop sharp still.
-      video.dispatchEvent(new Event('ended'));
-      return;
-    }
-
-    // Reduced-motion / no-video fallback: still expose the completed hero state.
-    window.dispatchEvent(new CustomEvent('mar:tour-complete'));
+    (window as Window & { __MAR_HERO_SKIPPED__?: boolean }).__MAR_HERO_SKIPPED__ = true;
+    window.dispatchEvent(new Event('mar:tour-skip'));
+    setIsTourCompleted(true);
+    window.dispatchEvent(new Event('mar:tour-complete'));
+    document.getElementById('content-start')?.scrollIntoView({ behavior: 'auto', block: 'start' });
   };
 
   const checkHeroExit = useCallback(() => {
@@ -102,6 +90,9 @@ export default function Navbar() {
   useEffect(() => {
     setShowMobileMenu(false);
     setIsTourCompleted(false);
+    if (pathname !== '/') {
+      (window as Window & { __MAR_HERO_SKIPPED__?: boolean }).__MAR_HERO_SKIPPED__ = false;
+    }
   }, [pathname]);
 
   return (

@@ -28,6 +28,7 @@ export default function HomePage() {
   const [cityPropertyCounts, setCityPropertyCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(USE_DATABASE);
   const [isLoadingRemainingProperties, setIsLoadingRemainingProperties] = useState(false);
+  const [allowBackgroundPagination, setAllowBackgroundPagination] = useState(false);
   const [displayedPropertyCount, setDisplayedPropertyCount] = useState(0);
   const loadingPageRef = useRef(false);
 
@@ -63,7 +64,13 @@ export default function HomePage() {
       loadInitialData();
     }
     const fallback = window.setTimeout(loadInitialData, 12000);
-    return () => { cancelled = true; observer?.disconnect(); window.clearTimeout(fallback); };
+    window.addEventListener('mar:tour-skip', loadInitialData);
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+      window.clearTimeout(fallback);
+      window.removeEventListener('mar:tour-skip', loadInitialData);
+    };
   }, []);
 
   const loadMoreProperties = async () => {
@@ -83,13 +90,32 @@ export default function HomePage() {
     }
   };
 
-  // Once listing data starts arriving, keep paging in the background without
-  // requiring further scroll. Media remains browser-lazy inside the cards.
+  // Keep the network free for the cinematic hero. Load additional rows once the
+  // tour ends or the visitor actually scrolls into the main page content.
   useEffect(() => {
-    if (!USE_DATABASE || dbProperties.length === 0 || totalPropertyCount === 0 || dbProperties.length >= totalPropertyCount || loadingPageRef.current) return;
+    if (!USE_DATABASE) return;
+    const allow = () => setAllowBackgroundPagination(true);
+    window.addEventListener('mar:tour-complete', allow);
+    const sentinel = document.getElementById('content-start');
+    const observer = sentinel && 'IntersectionObserver' in window
+      ? new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) allow();
+        }, { threshold: 0.1 })
+      : null;
+    if (observer && sentinel) observer.observe(sentinel);
+    return () => {
+      window.removeEventListener('mar:tour-complete', allow);
+      observer?.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!USE_DATABASE || !allowBackgroundPagination ||
+        dbProperties.length === 0 || totalPropertyCount === 0 ||
+        dbProperties.length >= totalPropertyCount || loadingPageRef.current) return;
     const timer = window.setTimeout(() => { void loadMoreProperties(); }, 120);
     return () => window.clearTimeout(timer);
-  }, [dbProperties.length, totalPropertyCount]);
+  }, [allowBackgroundPagination, dbProperties.length, totalPropertyCount]);
 
   // Continuous visual counter: independent from network batch boundaries.
   useEffect(() => {

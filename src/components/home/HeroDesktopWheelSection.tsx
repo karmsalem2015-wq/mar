@@ -14,10 +14,6 @@ import {
   type HeroStoryStop,
 } from './heroStory';
 
-const PRELOAD_TIMEOUT_MS = 45000;
-const WHEEL_IDLE_MS = 180;
-const MIN_PLAYBACK_RATE = 1.1;
-const MAX_PLAYBACK_RATE = 2.4;
 
 type HeroRuntimeWindow = Window & {
   __MAR_HERO_DIAG__?: () => unknown;
@@ -133,25 +129,21 @@ interface HeroDesktopWheelSectionProps {
 export default function HeroDesktopWheelSection({
   searchBar,
 }: HeroDesktopWheelSectionProps = {}) {
-  const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressTrackRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const objectUrlRef = useRef<string | null>(null);
-  const wheelIdleTimerRef = useRef<number | null>(null);
   const uiRafRef = useRef<number | null>(null);
+  const videoFrameRef = useRef<number | null>(null);
   const activeStopIndexRef = useRef(0);
   const tourCompletedRef = useRef(false);
-  const playPendingRef = useRef(false);
   const waitingEventsRef = useRef(0);
   const stalledEventsRef = useRef(0);
   const playStartsRef = useRef(0);
   const playPausesRef = useRef(0);
 
-  const [preparedSrc, setPreparedSrc] = useState<string | null>(null);
-  const [preloadProgress, setPreloadProgress] = useState(0);
   const [activeStopIndex, setActiveStopIndex] = useState(0);
   const [isStoryCompleted, setIsStoryCompleted] = useState(false);
+  const [wasSkipped, setWasSkipped] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const shouldReduceMotion = useReducedMotion();
@@ -183,15 +175,35 @@ export default function HeroDesktopWheelSection({
       window.cancelAnimationFrame(uiRafRef.current);
       uiRafRef.current = null;
     }
+    const video = videoRef.current;
+    if (video && videoFrameRef.current !== null) {
+      video.cancelVideoFrameCallback?.(videoFrameRef.current);
+    }
+    videoFrameRef.current = null;
   }, []);
 
   const startUiLoop = useCallback(() => {
-    if (uiRafRef.current !== null) return;
+    const video = videoRef.current;
+    if (!video || uiRafRef.current !== null || videoFrameRef.current !== null) return;
+
+    // Sync story cards to decoded video frames instead of repainting at display refresh rate.
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      const onFrame = () => {
+        videoFrameRef.current = null;
+        syncPresentation();
+        if (!video.paused && !video.ended && !tourCompletedRef.current) {
+          videoFrameRef.current = video.requestVideoFrameCallback(onFrame);
+        }
+      };
+      videoFrameRef.current = video.requestVideoFrameCallback(onFrame);
+      return;
+    }
+
+    // Graceful fallback on older browsers.
     const tick = () => {
       uiRafRef.current = null;
       syncPresentation();
-      const video = videoRef.current;
-      if (video && !video.paused && !video.ended && !tourCompletedRef.current) {
+      if (!video.paused && !video.ended && !tourCompletedRef.current) {
         uiRafRef.current = window.requestAnimationFrame(tick);
       }
     };
@@ -199,12 +211,7 @@ export default function HeroDesktopWheelSection({
   }, [syncPresentation]);
 
   const pausePlayback = useCallback(() => {
-    if (wheelIdleTimerRef.current !== null) {
-      window.clearTimeout(wheelIdleTimerRef.current);
-      wheelIdleTimerRef.current = null;
-    }
     const video = videoRef.current;
-    playPendingRef.current = false;
     if (!video) return;
     if (!video.paused) {
       video.pause();
@@ -230,169 +237,42 @@ export default function HeroDesktopWheelSection({
     window.dispatchEvent(new CustomEvent('mar:tour-complete'));
   }, [pausePlayback]);
 
+  // Native video progressive loading avoids allocating a duplicate full-size MP4 Blob.
   useEffect(() => {
     if (shouldReduceMotion) return;
-
-    const originalSrc = HERO_MEDIA.desktop.src;
-    const controller = new AbortController();
-    let disposed = false;
-    const startedAt = performance.now();
-    const runtimeWindow = window as HeroRuntimeWindow;
-
-    runtimeWindow.__MAR_HERO_PRELOAD__ = {
+    (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__ = {
       status: 'loading',
       variant: 'desktop',
-      source: originalSrc,
-      progress: 0,
-    };
-
-    const timeout = window.setTimeout(() => controller.abort(), PRELOAD_TIMEOUT_MS);
-
-    const prepare = async () => {
-      try {
-        const response = await fetch(originalSrc, {
-          cache: 'force-cache',
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const totalBytes = Number(response.headers.get('content-length') || 0);
-        let blob: Blob;
-
-        if (response.body && totalBytes > 0) {
-          const reader = response.body.getReader();
-          const chunks: ArrayBuffer[] = [];
-          let received = 0;
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (!value) continue;
-            const chunk = new Uint8Array(value.byteLength);
-            chunk.set(value);
-            chunks.push(chunk.buffer);
-            received += value.byteLength;
-            const progress = Math.min(received / totalBytes, 1);
-            setPreloadProgress(progress);
-            runtimeWindow.__MAR_HERO_PRELOAD__ = {
-              status: 'loading',
-              variant: 'desktop',
-              bytes: received,
-              totalBytes,
-              progress,
-              ms: performance.now() - startedAt,
-              source: originalSrc,
-            };
-          }
-
-          blob = new Blob(chunks, {
-            type: response.headers.get('content-type') || 'video/mp4',
-          });
-        } else {
-          blob = await response.blob();
-          setPreloadProgress(1);
-        }
-
-        if (disposed || blob.size < 1024) return;
-        const objectUrl = URL.createObjectURL(blob);
-        objectUrlRef.current = objectUrl;
-        runtimeWindow.__MAR_HERO_PRELOAD__ = {
-          status: 'ready',
-          variant: 'desktop',
-          bytes: blob.size,
-          totalBytes: totalBytes || blob.size,
-          progress: 1,
-          ms: performance.now() - startedAt,
-          source: originalSrc,
-        };
-        setPreparedSrc(objectUrl);
-      } catch (error) {
-        if (disposed) return;
-        const message = error instanceof Error ? error.message : String(error);
-        runtimeWindow.__MAR_HERO_PRELOAD__ = {
-          status: 'direct-fallback',
-          variant: 'desktop',
-          progress: preloadProgress,
-          ms: performance.now() - startedAt,
-          source: originalSrc,
-          error: message,
-        };
-        setPreparedSrc(originalSrc);
-      } finally {
-        window.clearTimeout(timeout);
-      }
-    };
-
-    void prepare();
-
-    return () => {
-      disposed = true;
-      controller.abort();
-      window.clearTimeout(timeout);
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-        objectUrlRef.current = null;
-      }
+      source: HERO_MEDIA.desktop.src,
     };
   }, [shouldReduceMotion]);
 
+  const markMediaReady = useCallback(() => {
+    if (tourCompletedRef.current) return;
+    setIsVideoReady(true);
+    (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__ = {
+      status: 'ready',
+      variant: 'desktop',
+      source: HERO_MEDIA.desktop.src,
+    };
+    window.dispatchEvent(new Event('mar:hero-media-ready'));
+  }, []);
+
   useEffect(() => {
-    if (shouldReduceMotion) return;
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const handleWheel = (event: WheelEvent) => {
-      if (event.ctrlKey || tourCompletedRef.current) return;
-      event.preventDefault();
-
-      const video = videoRef.current;
-      if (!video || !isVideoReady || videoFailed || event.deltaY === 0) return;
-
-      if (event.deltaY < 0) {
-        // The desktop tour is deliberately one-way. Upward wheel input simply
-        // pauses the movie; it never asks the decoder to seek backwards.
-        pausePlayback();
-        return;
-      }
-
-      const multiplier = event.deltaMode === 1
-        ? 16
-        : event.deltaMode === 2
-          ? window.innerHeight
-          : 1;
-      const normalizedDelta = Math.min(Math.abs(event.deltaY * multiplier), 180);
-      const intensity = normalizedDelta / 180;
-      const playbackRate = MIN_PLAYBACK_RATE + intensity * (MAX_PLAYBACK_RATE - MIN_PLAYBACK_RATE);
-      video.playbackRate = playbackRate;
-
-      if (wheelIdleTimerRef.current !== null) {
-        window.clearTimeout(wheelIdleTimerRef.current);
-      }
-      wheelIdleTimerRef.current = window.setTimeout(() => {
-        pausePlayback();
-      }, WHEEL_IDLE_MS);
-
-      startUiLoop();
-
-      if (video.paused && !playPendingRef.current) {
-        playPendingRef.current = true;
-        playStartsRef.current += 1;
-        void video.play().then(() => {
-          playPendingRef.current = false;
-          startUiLoop();
-        }).catch(() => {
-          playPendingRef.current = false;
-        });
-      }
+    const skip = () => {
+      completeTour();
+      setWasSkipped(true);
     };
+    window.addEventListener('mar:tour-skip', skip);
+    if ((window as Window & { __MAR_HERO_SKIPPED__?: boolean }).__MAR_HERO_SKIPPED__) {
+      skip();
+    }
+    return () => window.removeEventListener('mar:tour-skip', skip);
+  }, [completeTour]);
 
-    section.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      section.removeEventListener('wheel', handleWheel);
-      pausePlayback();
-      stopUiLoop();
-    };
-  }, [isVideoReady, pausePlayback, shouldReduceMotion, startUiLoop, stopUiLoop, videoFailed]);
+  useEffect(() => {
+    if (shouldReduceMotion) completeTour();
+  }, [shouldReduceMotion, completeTour]);
 
   useEffect(() => {
     const runtimeWindow = window as HeroRuntimeWindow;
@@ -402,7 +282,7 @@ export default function HeroDesktopWheelSection({
         engine: 'desktop-wheel-native-playback',
         transportMode: video && !video.paused ? 'playback' : 'idle',
         oneWay: true,
-        sourceMode: preparedSrc?.startsWith('blob:') ? 'blob' : preparedSrc ? 'direct' : 'none',
+        sourceMode: video?.currentSrc ? 'direct' : 'none',
         currentTime: video?.currentTime ?? 0,
         duration: video?.duration ?? 0,
         playbackRate: video?.playbackRate ?? 1,
@@ -420,11 +300,10 @@ export default function HeroDesktopWheelSection({
       delete runtimeWindow.__MAR_HERO_DIAG__;
       delete runtimeWindow.__MAR_HERO_PRELOAD__;
     };
-  }, [preparedSrc]);
+  }, []);
 
   useEffect(() => {
     return () => {
-      if (wheelIdleTimerRef.current !== null) window.clearTimeout(wheelIdleTimerRef.current);
       stopUiLoop();
     };
   }, [stopUiLoop]);
@@ -435,7 +314,6 @@ export default function HeroDesktopWheelSection({
 
   return (
     <section
-      ref={sectionRef}
       id="mar-story"
       aria-label="جولة مار العقارية"
       className="relative h-[100svh] w-full bg-[#060D1A]"
@@ -443,7 +321,7 @@ export default function HeroDesktopWheelSection({
       <div className="relative h-screen h-[100svh] w-full overflow-hidden bg-[#060D1A]">
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
-            isVideoReady && !shouldReduceMotion ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            isVideoReady && !wasSkipped && !videoFailed && !shouldReduceMotion ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
           <Image
@@ -456,10 +334,10 @@ export default function HeroDesktopWheelSection({
           />
         </div>
 
-        {preparedSrc && !shouldReduceMotion && (
+        {!shouldReduceMotion && !wasSkipped && (
           <video
             ref={videoRef}
-            src={preparedSrc}
+            src={HERO_MEDIA.desktop.src}
             poster={HERO_MEDIA.desktop.poster}
             preload="auto"
             muted
@@ -473,22 +351,31 @@ export default function HeroDesktopWheelSection({
             onLoadedData={(event) => {
               const video = event.currentTarget;
               video.pause();
-              video.currentTime = 0;
               video.playbackRate = 1;
-              setIsVideoReady(true);
+              markMediaReady();
               syncPresentation();
             }}
-            onCanPlay={() => setIsVideoReady(true)}
-            onPlay={() => startUiLoop()}
+            onCanPlay={markMediaReady}
+            onPlay={() => { playStartsRef.current += 1; startUiLoop(); }}
             onPause={() => {
-              playPendingRef.current = false;
+              stopUiLoop();
               syncPresentation();
             }}
             onTimeUpdate={() => syncPresentation()}
             onWaiting={() => { waitingEventsRef.current += 1; }}
             onStalled={() => { stalledEventsRef.current += 1; }}
             onEnded={() => completeTour()}
-            onError={() => setVideoFailed(true)}
+            onError={() => {
+              if (tourCompletedRef.current) return;
+              (window as HeroRuntimeWindow).__MAR_HERO_PRELOAD__ = {
+                status: 'error',
+                variant: 'desktop',
+                source: HERO_MEDIA.desktop.src,
+                error: 'Unable to play the cinematic tour',
+              };
+              setVideoFailed(true);
+              completeTour();
+            }}
           />
         )}
 
@@ -497,14 +384,12 @@ export default function HeroDesktopWheelSection({
           aria-hidden="true"
         />
 
-        {!isVideoReady && !shouldReduceMotion && !videoFailed && (
+        {!isVideoReady && !shouldReduceMotion && !videoFailed && !isStoryCompleted && (
           <div className="absolute right-8 top-24 z-20 min-w-44 rounded-full border border-[#E6A821]/30 bg-black/60 px-4 py-2 text-xs text-white backdrop-blur-md font-cairo shadow-lg">
             <div className="flex items-center gap-2">
               <span className="size-2 rounded-full bg-[#E6A821] animate-pulse" />
               <span>جارٍ تحميل الجولة السينمائية…</span>
-              {preloadProgress > 0 && preloadProgress < 1 && (
-                <span dir="ltr" className="text-white/60">{Math.round(preloadProgress * 100)}%</span>
-              )}
+
             </div>
           </div>
         )}

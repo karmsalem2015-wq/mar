@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import HeroDesktopWheelSection from './HeroDesktopWheelSection';
 import HeroMobileCinematicSection from './HeroMobileCinematicSection';
+import { HERO_MEDIA } from './heroStory';
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px) and (orientation: landscape)';
 const DESKTOP_FINAL_FRAME = '/media/hero/frames/desktop/frame_0381.webp';
-const MOBILE_PLAYBACK_RATE_OVERRIDE = 1.65;
 const DESKTOP_CONTINUOUS_PLAYBACK_RATE = 1.5;
 
 type DesktopHintMode = 'start' | 'resume' | null;
@@ -40,51 +40,6 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
     mediaQuery.addEventListener('change', update);
     return () => mediaQuery.removeEventListener('change', update);
   }, []);
-
-  useEffect(() => {
-    if (isDesktop !== false) return;
-    const root = mobileRootRef.current;
-    if (!root) return;
-
-    let disposed = false;
-    let attachedVideo: HTMLVideoElement | null = null;
-    let pollTimer: number | null = null;
-
-    const applyMobileRate = () => {
-      if (!attachedVideo || attachedVideo.paused) return;
-      if (Math.abs(attachedVideo.playbackRate - MOBILE_PLAYBACK_RATE_OVERRIDE) > 0.01) {
-        attachedVideo.playbackRate = MOBILE_PLAYBACK_RATE_OVERRIDE;
-      }
-    };
-
-    const attach = () => {
-      if (disposed) return;
-      const video = root.querySelector('video');
-      if (!video || video === attachedVideo) return;
-
-      if (attachedVideo) {
-        attachedVideo.removeEventListener('play', applyMobileRate);
-        attachedVideo.removeEventListener('playing', applyMobileRate);
-      }
-
-      attachedVideo = video;
-      attachedVideo.addEventListener('play', applyMobileRate);
-      attachedVideo.addEventListener('playing', applyMobileRate);
-      applyMobileRate();
-    };
-
-    attach();
-    pollTimer = window.setInterval(attach, 150);
-
-    return () => {
-      disposed = true;
-      if (pollTimer !== null) window.clearInterval(pollTimer);
-      if (attachedVideo) {
-        attachedVideo.removeEventListener('play', applyMobileRate);
-        attachedVideo.removeEventListener('playing', applyMobileRate);
-      }
-    };
-  }, [isDesktop]);
 
   useEffect(() => {
     if (isDesktop !== true) {
@@ -125,6 +80,9 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
 
     const handleWheelCapture = (event: WheelEvent) => {
       if (event.ctrlKey || desktopTourCompletedRef.current || event.deltaY === 0) return;
+      const video = getVideo();
+      // The page must remain scrollable while video data is unavailable.
+      if (!video || video.readyState < 2 || video.error) return;
       event.preventDefault();
       event.stopPropagation();
 
@@ -159,7 +117,6 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
     }
 
     let disposed = false;
-    let pollTimer: number | null = null;
 
     const preloadFinalFrame = () => {
       if (finalPreloadStartedRef.current) return;
@@ -185,16 +142,8 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
       }
     };
 
-    const checkVideoPreload = () => {
-      const status = (window as HeroPreloadWindow).__MAR_HERO_PRELOAD__?.status;
-      if (status === 'ready' || status === 'direct-fallback') {
-        preloadFinalFrame();
-        if (pollTimer !== null) {
-          window.clearInterval(pollTimer);
-          pollTimer = null;
-        }
-      }
-    };
+    // Event-driven final-frame loading; no polling while the video runs.
+    const handleMediaReady = () => preloadFinalFrame();
 
     const handleTourComplete = () => {
       desktopTourCompletedRef.current = true;
@@ -203,22 +152,37 @@ export default function HeroCinematicSection({ searchBar }: HeroCinematicSection
       setShowDesktopFinal(true);
     };
 
-    checkVideoPreload();
-    if (!finalPreloadStartedRef.current) {
-      pollTimer = window.setInterval(checkVideoPreload, 250);
-    }
-
+    window.addEventListener('mar:hero-media-ready', handleMediaReady);
     window.addEventListener('mar:tour-complete', handleTourComplete);
-
+    if ((window as HeroPreloadWindow).__MAR_HERO_PRELOAD__?.status === 'ready') {
+      preloadFinalFrame();
+    }
+    if ((window as Window & { __MAR_HERO_SKIPPED__?: boolean }).__MAR_HERO_SKIPPED__) {
+      handleTourComplete();
+    }
     return () => {
       disposed = true;
-      if (pollTimer !== null) window.clearInterval(pollTimer);
+      window.removeEventListener('mar:hero-media-ready', handleMediaReady);
       window.removeEventListener('mar:tour-complete', handleTourComplete);
     };
   }, [isDesktop]);
 
   if (isDesktop === null) {
-    return <div className="h-[100svh] w-full bg-[#060D1A]" aria-hidden="true" />;
+    return (
+      <div className="relative h-[100svh] w-full overflow-hidden bg-[#060D1A]">
+        {/* Render the appropriate poster before the viewport mode is resolved. */}
+        <picture>
+          <source media={DESKTOP_MEDIA_QUERY} srcSet={HERO_MEDIA.desktop.poster} />
+          <img
+            src={HERO_MEDIA.mobile.poster}
+            alt="جولة سينمائية داخل مشاريع مار العقارية"
+            fetchPriority="high"
+            className="absolute inset-0 size-full object-cover"
+          />
+        </picture>
+        <div className="pointer-events-none absolute inset-0 bg-black/20" />
+      </div>
+    );
   }
 
   if (!isDesktop) {
