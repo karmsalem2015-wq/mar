@@ -4,6 +4,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isMarAdmin } from '@/lib/auth/roles';
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -132,9 +133,11 @@ export async function proxy(request: NextRequest) {
     // Refresh session if it exists
     const { data: { user }, error } = await supabase.auth.getUser();
 
-    // If authenticated user exists, allow access
     if (user && !error) {
-      return response;
+      if (isMarAdmin(user)) return response;
+      const deniedUrl = new URL('/mar-cp/login', request.url);
+      deniedUrl.searchParams.set('denied', '1');
+      return NextResponse.redirect(deniedUrl);
     }
   } catch (err) {
     console.error('Supabase auth check error in proxy:', err);

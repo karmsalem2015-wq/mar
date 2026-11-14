@@ -11,7 +11,8 @@ import '../.././../../src/styles/admin.css';
 function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/mar-cp';
+  const requested = searchParams.get('redirect');
+  const redirect = requested?.startsWith('/mar-cp') && !requested.startsWith('//') ? requested : '/mar-cp';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,12 +42,19 @@ function LoginFormContent() {
         return;
       }
 
-      // Store authenticated user metadata for dashboard use
+      // Auth app_metadata is assigned by administrators; user_metadata is editable by users.
+      const role = data.user.app_metadata?.mar_role;
+      if (!['super_admin', 'admin', 'editor'].includes(role)) {
+        await supabase.auth.signOut();
+        setError('الحساب لا يملك صلاحية دخول لوحة التحكم. تواصل مع مدير النظام.');
+        setLoading(false);
+        return;
+      }
       const meta = data.user.user_metadata || {};
       localStorage.setItem('mar_admin_user', JSON.stringify({
         id: data.user.id,
         email: data.user.email,
-        role: meta.role || 'super_admin',
+        role,
         name: meta.name || 'مدير النظام'
       }));
 

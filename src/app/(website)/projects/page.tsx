@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import type { Project } from '@/lib/mockData';
-import { getProjectsListAdmin } from '@/app/actions/properties';
+import { getPublicProjectsList } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProject } from '@/lib/normalizers';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -296,7 +296,7 @@ export default function ProjectsPage() {
     if (!USE_DATABASE) return;
     async function loadData() {
       try {
-        const projsData = await getProjectsListAdmin();
+        const projsData = await getPublicProjectsList();
         if (projsData && projsData.length > 0) {
           setDbProjects(projsData.map(normalizeProject));
         }

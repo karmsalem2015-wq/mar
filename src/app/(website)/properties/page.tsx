@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import type { Property } from '@/lib/mockData';
-import { getPropertiesListAdmin } from '@/app/actions/properties';
+import { getPublicPropertiesList } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty } from '@/lib/normalizers';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -223,7 +223,7 @@ export default function PropertiesPage() {
     if (!USE_DATABASE) return;
     async function loadData() {
       try {
-        const propsData = await getPropertiesListAdmin();
+        const propsData = await getPublicPropertiesList();
         if (propsData && propsData.length > 0) {
           const normalized = propsData.map(normalizeProperty);
           const firstBatch = normalized.slice(0, INITIAL_PROPERTY_BATCH);

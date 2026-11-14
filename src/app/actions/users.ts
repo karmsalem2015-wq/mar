@@ -2,6 +2,7 @@
 'use server';
 
 import { getSupabaseAdminClient } from '../../lib/supabase/admin';
+import { requireAdmin } from '@/lib/auth/require-admin';
 
 export interface UserPermissions {
   properties: boolean;
@@ -22,6 +23,7 @@ export interface DbUserAccount {
 
 // List all users from Supabase Auth using the admin client
 export async function getAccountsList(): Promise<DbUserAccount[]> {
+  await requireAdmin('users');
   try {
     const supabase = getSupabaseAdminClient();
     const { data: { users }, error } = await supabase.auth.admin.listUsers();
@@ -30,7 +32,7 @@ export async function getAccountsList(): Promise<DbUserAccount[]> {
 
     return users.map((user) => {
       const meta = user.user_metadata || {};
-      const permissions: UserPermissions = meta.permissions || {
+      const permissions: UserPermissions = user.app_metadata?.mar_permissions || {
         properties: true,
         projects: true,
         media: true,
@@ -62,16 +64,15 @@ export async function createAccount(
   name: string,
   permissions: UserPermissions
 ): Promise<DbUserAccount> {
+  await requireAdmin('users');
   try {
     const supabase = getSupabaseAdminClient();
     const { data: { user }, error } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: {
-        name,
-        permissions,
-      },
+      user_metadata: { name },
+      app_metadata: { mar_role: 'editor', mar_permissions: permissions },
     });
 
     if (error) throw error;
@@ -96,12 +97,13 @@ export async function updateAccountPermissions(
   userId: string,
   permissions: UserPermissions
 ): Promise<void> {
+  await requireAdmin('users');
   try {
     const supabase = getSupabaseAdminClient();
+    const { data: existing, error: fetchError } = await supabase.auth.admin.getUserById(userId);
+    if (fetchError || !existing?.user) throw fetchError || new Error('المستخدم غير موجود');
     const { error } = await supabase.auth.admin.updateUserById(userId, {
-      user_metadata: {
-        permissions,
-      },
+      app_metadata: { ...existing.user.app_metadata, mar_permissions: permissions },
     });
 
     if (error) throw error;
@@ -116,6 +118,7 @@ export async function updateAccountPassword(
   userId: string,
   newPassword: string
 ): Promise<void> {
+  await requireAdmin('users');
   try {
     const supabase = getSupabaseAdminClient();
     const { error } = await supabase.auth.admin.updateUserById(userId, {
@@ -131,6 +134,7 @@ export async function updateAccountPassword(
 
 // Delete user account
 export async function deleteAccount(userId: string): Promise<void> {
+  await requireAdmin('users');
   try {
     const supabase = getSupabaseAdminClient();
     const { error } = await supabase.auth.admin.deleteUser(userId);

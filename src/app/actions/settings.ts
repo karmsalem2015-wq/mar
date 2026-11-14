@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import fs from 'fs';
 import path from 'path';
 import { BRAND } from '@/config/brand';
+import { requireAdmin } from '@/lib/auth/require-admin';
 
 export interface SiteSocialSettings {
   instagram: string;
@@ -100,17 +101,6 @@ function readLocalSettingsCache(): Partial<SiteSettingsData> | null {
   return null;
 }
 
-function writeLocalSettingsCache(data: SiteSettingsData): void {
-  try {
-    const dir = path.dirname(CACHE_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(data, null, 2), 'utf8');
-  } catch (err) {
-    console.warn('Could not write local settings cache:', err);
-  }
-}
 
 // Fetch site settings with multi-layer fallback
 export async function getSiteSettings(): Promise<SiteSettingsData> {
@@ -135,8 +125,6 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
           stats: { ...DEFAULT_SETTINGS.stats, ...(data.value.stats || {}) },
           seo: { ...DEFAULT_SETTINGS.seo, ...(data.value.seo || {}) },
         };
-        // Keep local cache synced
-        writeLocalSettingsCache(merged);
         return merged;
       }
     }
@@ -159,6 +147,7 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
 
 // Save site settings to Supabase and local cache
 export async function saveSiteSettings(payload: Partial<SiteSettingsData>): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin('settings');
   try {
     const current = await getSiteSettings();
     const updated: SiteSettingsData = {
@@ -169,26 +158,14 @@ export async function saveSiteSettings(payload: Partial<SiteSettingsData>): Prom
       seo: { ...current.seo, ...(payload.seo || {}) },
     };
 
-    // 1. Write to local cache first for instant resilience
-    writeLocalSettingsCache(updated);
-
-    // 2. Persist to Supabase site_settings
-    try {
-      const supabase = (await getSupabaseServerClient()) as any;
-      const { error } = await supabase
-        .from('site_settings')
-        .upsert({
-          id: 'general_settings',
-          value: updated,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (error) {
-        console.warn('Supabase upsert warning for site_settings:', error.message);
-      }
-    } catch (dbErr: any) {
-      console.warn('Supabase not reachable for site_settings, local cache saved:', dbErr.message);
-    }
+    // Persist on Supabase first; a serverless filesystem is not durable.
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { error } = await supabase.from('site_settings').upsert({
+      id: 'general_settings',
+      value: updated,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
 
     // 3. Invalidate caches for all public pages
     revalidatePath('/');

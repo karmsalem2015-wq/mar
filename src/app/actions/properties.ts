@@ -8,9 +8,11 @@ import { revalidatePath } from 'next/cache';
 import { PROPERTIES, PROJECTS } from '../../lib/mockData';
 import { normalizeProperty, normalizeProject } from '../../lib/normalizers';
 import { deleteCloudinaryVideo } from './cloudinary';
+import { requireAdmin } from '@/lib/auth/require-admin';
 
 // Load projects list for dynamic dropdowns
 export async function getProjectsList() {
+  await requireAdmin('projects');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -28,6 +30,7 @@ export async function getProjectsList() {
 
 // Get single property detail by ID
 export async function getPropertyById(id: string) {
+  await requireAdmin('properties');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -56,6 +59,7 @@ function generateSlug(text: string): string {
 
 // Quick create a new project
 export async function quickCreateProject(name: string, city: string, district: string) {
+  await requireAdmin('projects');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     
@@ -99,6 +103,7 @@ export async function quickCreateProject(name: string, city: string, district: s
 
 // Create new property
 export async function createProperty(formData: any) {
+  await requireAdmin('properties');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     
@@ -164,6 +169,7 @@ export async function createProperty(formData: any) {
 
 // Update existing property
 export async function updateProperty(id: string, formData: any) {
+  await requireAdmin('properties');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
 
@@ -225,6 +231,7 @@ export async function quickUpdateProperty(
   id: string,
   changes: { status?: string; price?: number },
 ) {
+  await requireAdmin('properties');
   try {
     if (!USE_DATABASE) {
       return { success: false, error: 'التعديل المباشر متاح عند الاتصال بقاعدة البيانات فقط' };
@@ -274,6 +281,7 @@ export async function quickUpdateProperty(
 
 // Delete property
 export async function deleteProperty(id: string) {
+  await requireAdmin('properties');
   try {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(id)) {
@@ -430,7 +438,7 @@ export async function getHomePropertyStats() {
     const cities = ['جدة', 'الرياض', 'مكه'];
     const requests = [
       supabase.from('properties').select('id', { count: 'exact', head: true }).eq('published', true),
-      ...cities.map(city => supabase.from('properties').select('id', { count: 'exact', head: true }).eq('published', true).eq('city', city))
+      ...cities.map(city => supabase.from('properties').select('id', { count: 'exact', head: true }).eq('published', true).in('city', city === 'مكه' ? ['مكه', 'مكة'] : [city]))
     ];
     const results = await Promise.all(requests);
     if (results.some((result: any) => result.error)) throw results.find((result: any) => result.error)?.error;
@@ -462,11 +470,42 @@ export async function getHomePropertiesPage(offset = 0, limit = 12) {
   }
 }
 
-// Fetch all properties for admin dashboard and website lists
+// Public pages never call admin actions; both queries exclude unpublished records.
+export async function getPublicPropertiesList() {
+  if (!USE_DATABASE) return PROPERTIES;
+  try {
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { data, error } = await supabase.from('properties')
+      .select('*, projects(id, name, slug)').eq('published', true)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Public property query failed:', error);
+    return [];
+  }
+}
+export async function getPublicProjectsList() {
+  if (!USE_DATABASE) return PROJECTS;
+  try {
+    const supabase = (await getSupabaseServerClient()) as any;
+    const { data, error } = await supabase.from('projects')
+      .select('*').eq('published', true)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Public project query failed:', error);
+    return [];
+  }
+}
+
+// Fetch all properties for admin dashboard (including drafts)
 export async function getPropertiesListAdmin() {
   if (!USE_DATABASE) {
     return PROPERTIES;
   }
+  await requireAdmin('properties');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -482,11 +521,12 @@ export async function getPropertiesListAdmin() {
   }
 }
 
-// Fetch all projects for admin dashboard and website lists
+// Fetch all projects for admin dashboard (including drafts)
 export async function getProjectsListAdmin() {
   if (!USE_DATABASE) {
     return PROJECTS;
   }
+  await requireAdmin('projects');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -560,6 +600,7 @@ function getUuidFromMockId(id: string): string {
 
 // Seed Database with mock data from lib/mockData.ts
 export async function seedDatabase() {
+  await requireAdmin('users');
   try {
     const supabase = getSupabaseAdminClient() as any;
 
@@ -651,6 +692,7 @@ export async function quickUpdateProject(
   id: string,
   changes: { status?: string; priceMin?: number; priceMax?: number },
 ) {
+  await requireAdmin('projects');
   try {
     if (!USE_DATABASE) {
       return { success: false, error: 'التعديل المباشر متاح عند الاتصال بقاعدة البيانات فقط' };
@@ -708,6 +750,7 @@ export async function quickUpdateProject(
 
 // Delete project
 export async function deleteProject(id: string) {
+  await requireAdmin('projects');
   try {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(id)) {
@@ -827,11 +870,12 @@ export async function getPropertyBySlug(slug: string) {
     return PROPERTIES.find((p) => p.slug === decodedSlug) || null;
   }
   try {
-    const supabase = getSupabaseAdminClient() as any;
+    const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
       .from('properties')
       .select('*, projects(id, name, slug)')
       .eq('slug', decodedSlug)
+      .eq('published', true)
       .maybeSingle();
 
     if (error) throw error;
@@ -850,11 +894,12 @@ export async function getProjectBySlug(slug: string) {
     return PROJECTS.find((p) => p.slug === decodedSlug) || null;
   }
   try {
-    const supabase = getSupabaseAdminClient() as any;
+    const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
       .from('projects')
       .select('*')
       .eq('slug', decodedSlug)
+      .eq('published', true)
       .maybeSingle();
 
     if (error) throw error;
@@ -873,11 +918,12 @@ export async function getPropertiesByProjectSlug(projectSlug: string) {
     return PROPERTIES.filter((p) => p.project.slug === decodedSlug);
   }
   try {
-    const supabase = getSupabaseAdminClient() as any;
+    const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
       .from('properties')
       .select('*, projects!inner(id, name, slug)')
-      .eq('projects.slug', decodedSlug);
+      .eq('projects.slug', decodedSlug)
+      .eq('published', true);
 
     if (error) throw error;
     if (data && data.length > 0) return data.map(normalizeProperty);
@@ -890,6 +936,7 @@ export async function getPropertiesByProjectSlug(projectSlug: string) {
 
 // Fetch single project details by ID
 export async function getProjectById(id: string) {
+  await requireAdmin('projects');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -908,6 +955,7 @@ export async function getProjectById(id: string) {
 
 // Create new project with optional bulk unit insertion
 export async function createProject(formData: any, propertiesToInsert?: any[]) {
+  await requireAdmin('projects');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     
@@ -1006,6 +1054,7 @@ export async function createProject(formData: any, propertiesToInsert?: any[]) {
 
 // Update existing project with optional bulk unit insertion
 export async function updateProject(id: string, formData: any, propertiesToInsert?: any[]) {
+  await requireAdmin('projects');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
 
@@ -1107,6 +1156,7 @@ export async function fetchGoogleSheetCsvData(googleSheetsUrl: string): Promise<
   csvData?: string;
   error?: string;
 }> {
+  await requireAdmin('projects');
   try {
     if (!googleSheetsUrl || typeof googleSheetsUrl !== 'string') {
       return { success: false, error: 'الرجاء إدخال رابط جدول بيانات جوجل أولاً' };

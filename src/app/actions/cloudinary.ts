@@ -2,6 +2,7 @@
 'use server';
 
 import { v2 as cloudinary } from 'cloudinary';
+import { requireAdmin } from '@/lib/auth/require-admin';
 
 interface CloudinarySignatureResponse {
   signature: string;
@@ -13,6 +14,7 @@ interface CloudinarySignatureResponse {
 }
 
 export async function getCloudinarySignature(): Promise<CloudinarySignatureResponse> {
+  await requireAdmin('media');
   const timestamp = Math.round(new Date().getTime() / 1000);
   
   const paramsToSign = {
@@ -49,6 +51,7 @@ export async function getCloudinarySignature(): Promise<CloudinarySignatureRespo
 }
 
 export async function deleteCloudinaryVideo(publicId: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin('media');
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
   const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -80,6 +83,7 @@ export async function deleteCloudinaryVideo(publicId: string): Promise<{ success
 }
 
 export async function listCloudinaryVideos(): Promise<{ success: boolean; resources?: any[]; error?: string }> {
+  await requireAdmin('media');
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
   const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;

@@ -3,6 +3,7 @@
 
 import { getSupabaseServerClient } from '../../lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { requireAdmin } from '@/lib/auth/require-admin';
 
 export interface Submission {
   id: string;
@@ -22,6 +23,7 @@ export interface Submission {
 
 // Fetch all submissions from the database (returns empty array if none exist)
 export async function getSubmissionsList(): Promise<Submission[]> {
+  await requireAdmin('submissions');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { data, error } = await supabase
@@ -60,7 +62,7 @@ export async function getSubmissionsList(): Promise<Submission[]> {
 export async function createSubmission(payload: Omit<Submission, 'id' | 'created_at' | 'status'>): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const supabase = (await getSupabaseServerClient()) as any;
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('submissions')
       .insert([
         {
@@ -75,14 +77,13 @@ export async function createSubmission(payload: Omit<Submission, 'id' | 'created
           project_id: payload.project_id || null,
           status: 'new'
         }
-      ])
-      .select();
+      ]);
 
     if (error) throw error;
     
     revalidatePath('/mar-cp');
     revalidatePath('/mar-cp/submissions');
-    return { success: true, data };
+    return { success: true };
   } catch (err: any) {
     console.error('Error creating submission:', err);
     return { success: false, error: err.message || 'حدث خطأ أثناء إرسال طلبك' };
@@ -91,6 +92,7 @@ export async function createSubmission(payload: Omit<Submission, 'id' | 'created
 
 // Update status of a submission
 export async function updateSubmissionStatus(id: string, status: 'new' | 'reviewed' | 'closed'): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin('submissions');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { error } = await supabase
@@ -111,6 +113,7 @@ export async function updateSubmissionStatus(id: string, status: 'new' | 'review
 
 // Update admin notes of a submission
 export async function updateSubmissionNotes(id: string, notes: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin('submissions');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { error } = await supabase
@@ -130,6 +133,7 @@ export async function updateSubmissionNotes(id: string, notes: string): Promise<
 
 // Delete a submission
 export async function deleteSubmissionAction(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin('submissions');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     const { error } = await supabase
@@ -150,6 +154,7 @@ export async function deleteSubmissionAction(id: string): Promise<{ success: boo
 
 // Fetch dashboard counts dynamically from database
 export async function getDashboardStats(): Promise<{ properties: number; projects: number; newSubmissions: number }> {
+  await requireAdmin('submissions');
   try {
     const supabase = (await getSupabaseServerClient()) as any;
     

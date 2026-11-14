@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Property, Project } from '@/lib/mockData';
-import { getHomePropertyStats, getHomePropertiesPage, getProjectsListAdmin } from '@/app/actions/properties';
+import { getHomePropertyStats, getHomePropertiesPage, getPublicProjectsList } from '@/app/actions/properties';
 import { USE_DATABASE } from '@/config/brand';
 import { normalizeProperty, normalizeProject } from '@/lib/normalizers';
 import { useInquiryStore } from '@/store/useInquiryStore';
@@ -42,7 +42,7 @@ export default function HomePage() {
       if (started || cancelled) return;
       started = true;
       try {
-        const [rows, projects] = await Promise.all([getHomePropertiesPage(0, HOME_BATCH), getProjectsListAdmin()]);
+        const [rows, projects] = await Promise.all([getHomePropertiesPage(0, HOME_BATCH), getPublicProjectsList()]);
         if (cancelled) return;
         setDbProperties((rows || []).map(normalizeProperty));
         setDbProjects((projects || []).map(normalizeProject));

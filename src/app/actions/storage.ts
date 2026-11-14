@@ -2,8 +2,10 @@
 'use server';
 
 import { getSupabaseAdminClient } from '../../lib/supabase/admin';
+import { requireAdmin } from '@/lib/auth/require-admin';
 
 export async function serverUploadFile(formData: FormData): Promise<{ url: string; path: string } | null> {
+  await requireAdmin('media');
   try {
     const file = formData.get('file') as File | null;
     const bucket = (formData.get('bucket') as string) || 'media';
@@ -47,6 +49,7 @@ export async function serverUploadFile(formData: FormData): Promise<{ url: strin
 }
 
 export async function serverDeleteFile(bucket: string, path: string): Promise<boolean> {
+  await requireAdmin('media');
   try {
     const supabase = getSupabaseAdminClient() as any;
     const { error } = await supabase.storage.from(bucket).remove([path]);
@@ -62,6 +65,7 @@ export async function serverDeleteFile(bucket: string, path: string): Promise<bo
 }
 
 export async function serverDeleteFiles(bucket: string, paths: string[]): Promise<boolean> {
+  await requireAdmin('media');
   try {
     const supabase = getSupabaseAdminClient() as any;
     const { error } = await supabase.storage.from(bucket).remove(paths);
@@ -77,6 +81,7 @@ export async function serverDeleteFiles(bucket: string, paths: string[]): Promis
 }
 
 export async function serverListFiles(bucket: string, folder: string = '') {
+  await requireAdmin('media');
   try {
     const supabase = getSupabaseAdminClient() as any;
     const { data, error } = await supabase.storage

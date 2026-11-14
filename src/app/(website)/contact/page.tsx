@@ -456,9 +456,6 @@ export default function ContactPage() {
                         <h4 className="text-xl font-bold text-brand-black">
                           تم استلام رسالتكم بنجاح
                         </h4>
-                        <p className="text-xs font-semibold text-[#E6A821]">
-                          رقم المتابعة الخاص بطلبكم: <span className="font-mono text-brand-black">#MAR-{Math.floor(1000 + Math.random() * 9000)}</span>
-                        </p>
                         <p className="text-xs text-gray-500 leading-relaxed pt-2">
                           نشكر اهتمامكم بشركة مار العقارية. سيتواصل معكم المستشار المختص عبر الهاتف أو الواتساب قريباً.
                         </p>
