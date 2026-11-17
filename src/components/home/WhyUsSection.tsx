@@ -60,7 +60,7 @@ export default function WhyUsSection() {
               <span>سر تميزنا</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-bold text-brand-black font-heading heading-engraved">
             لماذا يختار العملاء شركة مار العقارية؟
           </motion.h2>
         </motion.div>
@@ -91,7 +91,7 @@ export default function WhyUsSection() {
                 </div>
 
                 <h3 className="text-base sm:text-lg font-bold text-brand-black group-hover:text-[#CAA048] mb-3 transition-colors duration-200 font-heading">{card.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-cairo">
+                <p className="text-sm text-gray-600 leading-relaxed font-cairo">
                   {card.desc}
                 </p>
               </motion.div>

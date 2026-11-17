@@ -168,7 +168,7 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="mar-page-title font-black font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
+            className="mar-page-title font-bold font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
           >
             <span className="block text-white">قنوات الاتصال المباشر لـ</span>
             <span className="block bg-gradient-to-r from-[#FDE36E] via-[#F9CC40] to-[#E6A821] bg-clip-text text-transparent drop-shadow-md font-black mt-1 sm:mt-2">

@@ -79,10 +79,10 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
               <span>وجهاتنا الرئيسية</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black mb-3.5 font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-bold text-brand-black mb-3.5 font-heading heading-engraved">
             اختر وجهتك المفضلة في المملكة
           </motion.h2>
-          <motion.p variants={fadeUpVariants} className="text-sm sm:text-base text-gray-600 max-w-2xl sm:max-w-3xl mx-auto font-cairo leading-relaxed text-pretty">
+          <motion.p variants={fadeUpVariants} className="mar-section-lead text-gray-600 max-w-2xl sm:max-w-3xl mx-auto font-cairo leading-relaxed text-pretty">
             نساعدك على امتلاك منزل أحلامك في أرقى أحياء المدن الرئيسية
           </motion.p>
         </motion.div>
@@ -132,7 +132,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
                 </div>
 
                 <div className="absolute bottom-4 start-4 sm:bottom-6 sm:start-6 z-20 text-start">
-                  <h3 className="text-base sm:text-lg md:text-xl font-extrabold text-white mb-1 font-heading">{city.name}</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-1 font-heading">{city.name}</h3>
                   <p className="text-xs text-[#DFC07A] font-semibold uppercase tracking-wider font-cairo">{city.subtitle}</p>
                   {isLoading ? (
                     <span className="inline-block h-3.5 w-16 rounded skeleton-luxury mt-1.5" />

@@ -58,7 +58,7 @@ function FeaturedProjectCard({ project }: { project: Project }) {
             </div>
 
             <Link href={`/projects/${project.slug}`}>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-brand-black mb-4 leading-snug font-heading group-hover:text-[#CAA048] transition-colors duration-300">
+              <h3 className="text-lg sm:text-xl font-bold text-brand-black mb-4 leading-snug font-heading group-hover:text-[#CAA048] transition-colors duration-300">
                 {project.name}
               </h3>
             </Link>
@@ -140,7 +140,7 @@ function SimplifiedProjectCard({ project }: { project: Project }) {
 
       <div className="p-4 sm:p-5 flex flex-col flex-1 text-start">
         <Link href={`/projects/${project.slug}`}>
-          <h4 className="text-xs sm:text-sm font-bold text-brand-black line-clamp-1 mb-2 group-hover:text-[#CAA048] transition-colors duration-300 font-heading">
+          <h4 className="text-sm sm:text-base font-semibold text-brand-black line-clamp-1 mb-2 group-hover:text-[#CAA048] transition-colors duration-300 font-heading">
             {project.name}
           </h4>
         </Link>
@@ -248,7 +248,7 @@ export default function ProjectHighlightSection({ projects, isLoading = false }:
               <span>مشاريعنا العقارية الكبرى</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black mt-1 font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-bold text-brand-black mt-1 font-heading heading-engraved">
             نسعى لإيجاد مجتمعات سكنية متكاملة
           </motion.h2>
 

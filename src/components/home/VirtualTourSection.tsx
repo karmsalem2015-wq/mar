@@ -75,10 +75,10 @@ export default function VirtualTourSection({ onOpenInquiry }: VirtualTourSection
               <span>تجربة غامرة فريدة</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-bold text-brand-black font-heading heading-engraved">
             جولة افتراضية تفاعلية 360°
           </motion.h2>
-          <motion.p variants={fadeUpVariants} className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-md font-cairo">
+          <motion.p variants={fadeUpVariants} className="mar-section-lead text-gray-600 max-w-md font-cairo">
             عش تجربة التواجد الفعلي داخل أرقى مشاريعنا السكنية. اسحب الصورة البانورامية للمشاهدة حولك واكتشف التفاصيل الهندسية والتشطيبات الفاخرة للغرف المزدوجة والصالات الواسعة.
           </motion.p>
           <div className="flex flex-wrap gap-4 pt-2">

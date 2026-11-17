@@ -146,8 +146,8 @@ export default function ContactFormSection() {
               <span>تواصل معنا</span>
             </span>
           </div>
-          <h2 className="mar-section-title font-black text-brand-black font-heading heading-engraved">أبق على اتصال</h2>
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-2xl sm:max-w-3xl mx-auto font-cairo text-pretty">
+          <h2 className="mar-section-title font-bold text-brand-black font-heading heading-engraved">أبق على اتصال</h2>
+          <p className="mar-section-lead text-gray-600 max-w-2xl sm:max-w-3xl mx-auto font-cairo text-pretty">
             تمتلك شركتنا العقارية عدداً من القوائم الفاخرة والحصرية المثالية للعملاء الراغبين في التملك أو الاستثمار.
           </p>
         </div>

@@ -186,7 +186,7 @@ export default function TestimonialsSection() {
               <span>آراء عملائنا</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-bold text-brand-black font-heading heading-engraved">
             تجارب حقيقية لشركاء النجاح
           </motion.h2>
         </motion.div>
@@ -229,7 +229,7 @@ export default function TestimonialsSection() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-extrabold text-brand-black font-heading">
+                    <h3 className="text-base sm:text-lg font-bold text-brand-black font-heading">
                       {TESTIMONIALS[currentTestimonialIndex].author}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5 font-cairo">
@@ -246,7 +246,7 @@ export default function TestimonialsSection() {
                 </div>
 
                 {/* 3. Quote Text (Bottom) */}
-                <p className="text-base sm:text-lg md:text-xl text-brand-black leading-relaxed font-bold max-w-2xl px-2 font-cairo">
+                <p className="text-base md:text-lg text-brand-black leading-relaxed font-medium max-w-2xl px-2 font-cairo">
                   &ldquo;{TESTIMONIALS[currentTestimonialIndex].quote}&rdquo;
                 </p>
               </motion.div>

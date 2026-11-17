@@ -188,10 +188,10 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-black leading-[1.2] font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
+            className="mar-page-title font-bold leading-[1.2] font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
           >
             <span className="block text-white">بناء الغد برؤية</span>
-            <span className="block bg-gradient-to-r from-[#FDE36E] via-[#F9CC40] to-[#E6A821] bg-clip-text text-transparent drop-shadow-md font-black mt-1 sm:mt-2">
+            <span className="block bg-gradient-to-r from-[#FDE36E] via-[#F9CC40] to-[#E6A821] bg-clip-text text-transparent drop-shadow-md font-bold mt-1 sm:mt-2">
               مار العقارية
             </span>
           </motion.h1>
@@ -315,7 +315,7 @@ export default function AboutPage() {
       {/* ----------------------------------------------------
          2. Legacy & Identity Section (Our Story)
          ---------------------------------------------------- */}
-      <section className="py-20 sm:py-24 bg-[#FAF8F5] relative overflow-hidden border-b border-gray-200/70">
+      <section className="mar-section-space bg-[#FAF8F5] relative overflow-hidden border-b border-gray-200/70">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
           <motion.div
             initial="hidden"
@@ -338,10 +338,10 @@ export default function AboutPage() {
               
               <motion.h2
                 variants={fadeUpVariants}
-                className="text-2xl sm:text-4xl lg:text-5xl font-black text-brand-black leading-[1.25] font-cairo"
+                className="mar-section-title font-bold text-brand-black leading-[1.25] font-cairo"
               >
                 <span>مفهوم ريادي للتطوير العقاري</span>
-                <span className="block bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] bg-clip-text text-transparent font-black mt-1">
+                <span className="block bg-gradient-to-r from-[#CB841B] via-[#E6A821] to-[#FDE36E] bg-clip-text text-transparent font-bold mt-1">
                   يصنع فارقاً معمارياً مستداماً
                 </span>
               </motion.h2>
@@ -443,7 +443,7 @@ export default function AboutPage() {
                 <div className="w-12 h-12 rounded-2xl bg-[#111315] border border-[#E6A821]/30 flex items-center justify-center text-[#E6A821] shadow-sm mb-4 transition-colors group-hover:bg-[#E6A821] group-hover:text-[#111315]">
                   <Eye className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-bold text-brand-black font-cairo">
+                <h3 className="text-lg sm:text-xl font-bold text-brand-black font-cairo">
                   رؤيتنا الاستراتيجية
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed font-cairo">
@@ -467,7 +467,7 @@ export default function AboutPage() {
                 <div className="w-12 h-12 rounded-2xl bg-[#111315] border border-[#E6A821]/30 flex items-center justify-center text-[#E6A821] shadow-sm mb-4 transition-colors group-hover:bg-[#E6A821] group-hover:text-[#111315]">
                   <Target className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-bold text-brand-black font-cairo">
+                <h3 className="text-lg sm:text-xl font-bold text-brand-black font-cairo">
                   رسالتنا التشغيلية
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed font-cairo">
@@ -487,7 +487,7 @@ export default function AboutPage() {
       {/* ----------------------------------------------------
          4. Interactive Legacy Timeline
          ---------------------------------------------------- */}
-      <section className="py-20 relative z-10 bg-[#FAF8F5] border-b border-gray-200/70">
+      <section className="mar-section-space relative z-10 bg-[#FAF8F5] border-b border-gray-200/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Section Header */}
@@ -496,7 +496,7 @@ export default function AboutPage() {
               <Milestone className="w-3.5 h-3.5 text-white shrink-0" />
               <span>رحلة التطوير العقاري</span>
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-brand-black leading-tight font-cairo">
+            <h2 className="mar-section-title font-bold text-brand-black leading-tight font-cairo">
               مسيرة مكللة بالإنجازات والنمو
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-2 max-w-xl mx-auto font-cairo">
@@ -590,7 +590,7 @@ export default function AboutPage() {
               <Target className="w-3.5 h-3.5 text-white shrink-0" />
               <span>مبادئنا وقيمنا الراسخة</span>
             </motion.span>
-            <h2 className="text-xl sm:text-3xl font-bold text-brand-black leading-tight font-cairo">
+            <h2 className="mar-section-title font-bold text-brand-black leading-tight font-cairo">
               الركائز الأساسية التي تقود مسيرتنا اليومية
             </h2>
             <div className="mt-4 flex items-center justify-center gap-2">
@@ -638,7 +638,7 @@ export default function AboutPage() {
       {/* ----------------------------------------------------
          6. Operational System & Partners Section
          ---------------------------------------------------- */}
-      <section className="py-20 relative z-10 bg-[#FAF8F5]">
+      <section className="mar-section-space relative z-10 bg-[#FAF8F5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"

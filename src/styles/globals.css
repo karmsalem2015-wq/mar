@@ -12,18 +12,24 @@
   }
 
   .mar-section-space {
-    padding-block: clamp(3rem, 2rem + 4.1vw, 6rem);
+    padding-block: clamp(2.75rem, 2.1rem + 2.6vw, 5rem);
   }
 
   .mar-section-title {
-    font-size: clamp(1.5rem, 1.125rem + 1.55vw, 2.625rem);
-    line-height: 1.2;
+    font-size: clamp(1.375rem, 1.06rem + 0.75vw, 1.625rem);
+    line-height: 1.3;
     text-wrap: balance;
   }
 
+  .mar-section-lead {
+    font-size: clamp(0.875rem, 0.82rem + 0.25vw, 0.9375rem);
+    line-height: 1.85;
+    text-wrap: pretty;
+  }
+
   .mar-page-title {
-    font-size: clamp(1.875rem, 0.95rem + 3.8vw, 4.2rem);
-    line-height: 1.2;
+    font-size: clamp(2rem, 1.2rem + 1.5vw, 2.625rem);
+    line-height: 1.22;
     text-wrap: balance;
   }
 }
@@ -267,6 +273,11 @@
 
 .font-alexandria {
   font-family: var(--font-mar-alexandria), 'Alexandria', system-ui, sans-serif;
+}
+
+/* Scoped lead-copy hierarchy for public-facing sections only. */
+.mar-section-lead.font-cairo {
+  font-weight: 400;
 }
 
 /* ----------------------------------------------------

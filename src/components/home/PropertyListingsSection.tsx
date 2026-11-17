@@ -135,7 +135,7 @@ function FeaturedPropertyCard({ property }: { property: Property }) {
               <span>{property.project.name}</span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-extrabold text-brand-black mb-4 leading-snug font-heading group-hover:text-[#CAA048] transition-colors duration-300 line-clamp-2">
+            <h3 className="text-lg sm:text-xl font-bold text-brand-black mb-4 leading-snug font-heading group-hover:text-[#CAA048] transition-colors duration-300 line-clamp-2">
               {property.title}
             </h3>
 
@@ -382,10 +382,10 @@ export default function PropertyListingsSection({
               <span>قائمتنا المحدثة</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black mb-3 font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-bold text-brand-black mb-3 font-heading heading-engraved">
             تصفح آخر العروض والفرص الحالية
           </motion.h2>
-          <motion.p variants={fadeUpVariants} className="text-sm sm:text-base text-gray-600 max-w-3xl sm:max-w-4xl mx-auto font-cairo leading-relaxed text-pretty">
+          <motion.p variants={fadeUpVariants} className="mar-section-lead text-gray-600 max-w-3xl sm:max-w-4xl mx-auto font-cairo leading-relaxed text-pretty">
             اختر من بين مجموعة حصرية من الوحدات السكنية والاستثمارية المصممة بأعلى معايير الجودة
           </motion.p>
         </motion.div>
