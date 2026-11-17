@@ -594,7 +594,7 @@ export default function PropertiesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-black leading-[1.2] font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
+            className="mar-page-title font-black font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
           >
             <span className="block text-white">استكشف الوحدات</span>
             <span className="block bg-gradient-to-r from-[#FDE36E] via-[#F9CC40] to-[#E6A821] bg-clip-text text-transparent drop-shadow-md font-black mt-1 sm:mt-2">
@@ -660,7 +660,7 @@ export default function PropertiesPage() {
       </section>
 
       {/* 2. Listings Wrapper */}
-      <div id="properties-listings-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
+      <div id="properties-listings-section" className="mar-container mar-section-space relative z-10 scroll-mt-20">
 
         {/* Filter panel card */}
         <motion.section

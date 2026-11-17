@@ -61,8 +61,8 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
   ];
 
   return (
-    <div className="relative z-10 w-full bg-[#FAF8F5] pt-16 md:border-t md:border-gray-200/80 md:pt-36 lg:pt-40 pb-16">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative z-10 w-full bg-[#FAF8F5] mar-section-space md:border-t md:border-gray-200/80">
+      <section className="mar-container">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -79,7 +79,7 @@ export default function CitiesSection({ selectedCity, setSelectedCity, propertie
               <span>وجهاتنا الرئيسية</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="text-2xl sm:text-4xl lg:text-[2.6rem] font-black text-brand-black mb-3.5 font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black mb-3.5 font-heading heading-engraved">
             اختر وجهتك المفضلة في المملكة
           </motion.h2>
           <motion.p variants={fadeUpVariants} className="text-sm sm:text-base text-gray-600 max-w-2xl sm:max-w-3xl mx-auto font-cairo leading-relaxed text-pretty">

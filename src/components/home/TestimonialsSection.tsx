@@ -168,8 +168,8 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 sm:py-24 bg-[#F7F7F7] border-y border-gray-200/80 z-10">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+    <section ref={sectionRef} className="relative w-full overflow-hidden mar-section-space bg-[#F7F7F7] border-y border-gray-200/80 z-10">
+      <div className="relative mar-container z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -186,7 +186,7 @@ export default function TestimonialsSection() {
               <span>آراء عملائنا</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-brand-black leading-tight font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black font-heading heading-engraved">
             تجارب حقيقية لشركاء النجاح
           </motion.h2>
         </motion.div>

@@ -168,7 +168,7 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-black leading-[1.2] font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
+            className="mar-page-title font-black font-heading mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] text-center tracking-tight"
           >
             <span className="block text-white">قنوات الاتصال المباشر لـ</span>
             <span className="block bg-gradient-to-r from-[#FDE36E] via-[#F9CC40] to-[#E6A821] bg-clip-text text-transparent drop-shadow-md font-black mt-1 sm:mt-2">
@@ -239,8 +239,8 @@ export default function ContactPage() {
       {/* ----------------------------------------------------
          2. Main Content: Form & Corporate Branches Info
          ---------------------------------------------------- */}
-      <section className="py-16 relative z-10 bg-[#FAF8F5] border-b border-gray-200/70">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="mar-section-space relative z-10 bg-[#FAF8F5] border-b border-gray-200/70">
+        <div className="mar-container">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-10 items-stretch">
             
             {/* Right Column: Contact Form (Col span 7) */}
@@ -664,7 +664,7 @@ export default function ContactPage() {
       {/* ----------------------------------------------------
          3. Social Media Grid Section
          ---------------------------------------------------- */}
-      <section className="py-16 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="mar-container mar-section-space relative z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"

@@ -68,16 +68,20 @@ export default function Navbar() {
     const timeoutId = setTimeout(checkHeroExit, 100);
 
     const handleTourComplete = () => setIsTourCompleted(true);
+    const handleResize = () => {
+      if (window.matchMedia('(min-width: 64rem)').matches) setShowMobileMenu(false);
+      checkHeroExit();
+    };
     window.addEventListener('mar:tour-complete', handleTourComplete);
     window.addEventListener('scroll', checkHeroExit, { passive: true });
-    window.addEventListener('resize', checkHeroExit);
+    window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
       window.removeEventListener('mar:tour-complete', handleTourComplete);
       window.removeEventListener('scroll', checkHeroExit);
-      window.removeEventListener('resize', checkHeroExit);
+      window.removeEventListener('resize', handleResize);
     };
   }, [checkHeroExit, pathname]);
 
@@ -106,10 +110,10 @@ export default function Navbar() {
       }`}
     >
       <div className="mx-auto flex h-16 sm:h-20 w-full max-w-[1600px] items-center justify-between px-4 sm:px-8 lg:px-12">
-        <BrandMark priority variant="white" size="lg" withArabicText />
+        <BrandMark priority variant="white" size="lg" withArabicText className="max-[360px]:[&_img]:h-9" />
 
         <nav
-          className={`hidden items-center gap-1 rounded-2xl p-1 transition-all md:flex ${
+          className={`hidden items-center gap-1 rounded-2xl p-1 transition-all lg:flex ${
             showDarkHeader
               ? 'border border-white/15 bg-black/40 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.3)]'
               : 'border border-white/20 bg-black/28 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.25)]'
@@ -145,23 +149,23 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex shrink-0 items-center gap-2.5">
           {pathname === '/' && !isPastHero && !isTourCompleted && !showMobileMenu && (
             <button
               type="button"
               onClick={handleSkipTour}
-              className="inline-flex items-center gap-1.5 min-h-10 px-3 sm:px-4 text-xs font-semibold text-white bg-black/28 hover:bg-black/50 border border-white/20 hover:border-white/40 rounded-full backdrop-blur-md transition-all shadow-sm cursor-pointer"
+              aria-label="تخطي الجولة"
+              className="inline-flex items-center gap-1.5 min-h-11 px-3 sm:px-4 text-xs font-semibold text-white bg-black/28 hover:bg-black/50 border border-white/20 hover:border-white/40 rounded-full backdrop-blur-md transition-all shadow-sm cursor-pointer"
             >
               <span>تخطي <span className="hidden sm:inline">الجولة</span></span>
               <ArrowDown className="size-3.5 text-white/80" aria-hidden="true" />
             </button>
           )}
 
-          {/* احجز استشارتك: يظهر على أجهزة الكمبيوتر والشاشات الكبيرة md فقط، ويختفي تماماً من شريط الجوال */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden items-center lg:flex">
             <button
               type="button"
-              className="btn-premium-gold min-h-10 px-4 text-[0.68rem] sm:px-6 sm:text-xs font-bold cursor-pointer"
+              className="btn-premium-gold min-h-11 px-6 text-xs font-bold cursor-pointer"
               onClick={openInquiry}
             >
               احجز استشارتك
@@ -171,7 +175,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setShowMobileMenu((isOpen) => !isOpen)}
-            className="flex size-10 items-center justify-center rounded-xl border border-white/20 text-white bg-black/35 backdrop-blur-md hover:bg-black/50 transition-colors md:hidden"
+            className="flex size-11 items-center justify-center rounded-xl border border-white/20 text-white bg-black/35 backdrop-blur-md hover:bg-black/50 transition-colors lg:hidden"
             aria-label={showMobileMenu ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={showMobileMenu}
             aria-controls="mobile-navigation"
@@ -189,7 +193,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            className="w-full border-t border-white/15 bg-black/95 px-4 py-4 shadow-2xl backdrop-blur-2xl md:hidden overflow-hidden flex flex-col gap-2"
+            className="w-full border-t border-white/15 bg-black/95 px-4 py-4 shadow-2xl backdrop-blur-2xl lg:hidden overflow-hidden flex flex-col gap-2"
             aria-label="التنقل على الهاتف"
           >
             {NAV_LINKS.map((link) => {

@@ -230,8 +230,8 @@ export default function ProjectHighlightSection({ projects, isLoading = false }:
   }, [projectsViewMode]);
 
   return (
-    <section id="projects-section" className="bg-[#F7F7F7] border-y border-gray-200/80 py-20 sm:py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="projects-section" className="bg-[#F7F7F7] border-y border-gray-200/80 mar-section-space">
+      <div className="mar-container">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -248,7 +248,7 @@ export default function ProjectHighlightSection({ projects, isLoading = false }:
               <span>مشاريعنا العقارية الكبرى</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-brand-black mt-1 font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black mt-1 font-heading heading-engraved">
             نسعى لإيجاد مجتمعات سكنية متكاملة
           </motion.h2>
 

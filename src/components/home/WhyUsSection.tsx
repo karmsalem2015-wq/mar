@@ -40,10 +40,10 @@ export default function WhyUsSection() {
   ];
 
   return (
-    <section id="about-section" className="relative w-full overflow-hidden py-20 sm:py-24 bg-white border-y border-gray-200/80 z-10">
+    <section id="about-section" className="relative w-full overflow-hidden mar-section-space bg-white border-y border-gray-200/80 z-10">
       <div className="absolute top-0 start-1/4 w-[400px] h-[400px] bg-[#CAA048]/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+      <div className="relative mar-container z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -60,7 +60,7 @@ export default function WhyUsSection() {
               <span>سر تميزنا</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-brand-black leading-tight font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black font-heading heading-engraved">
             لماذا يختار العملاء شركة مار العقارية؟
           </motion.h2>
         </motion.div>

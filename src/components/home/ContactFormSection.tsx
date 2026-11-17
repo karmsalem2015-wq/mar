@@ -134,11 +134,11 @@ export default function ContactFormSection() {
   };
 
   return (
-    <section id="contact-section" className="relative w-full overflow-hidden py-12 sm:py-20 bg-[#F7F7F7] border-y border-gray-200/80 z-10">
+    <section id="contact-section" className="relative w-full overflow-hidden mar-section-space bg-[#F7F7F7] border-y border-gray-200/80 z-10">
       {/* Background Decorative Blob */}
       <div className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#CAA048]/5 rounded-full blur-3xl z-0 pointer-events-none"></div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center">
+      <div className="relative mar-container z-10 text-center">
         <div className="space-y-4 max-w-3xl mx-auto">
           <div className="flex items-center justify-center mb-2">
             <span className="inline-flex items-center gap-2 py-1.5 px-4 text-xs sm:text-sm font-bold text-white bg-[#111315] border border-white/20 rounded-full font-cairo shadow-sm backdrop-blur-md">
@@ -146,7 +146,7 @@ export default function ContactFormSection() {
               <span>تواصل معنا</span>
             </span>
           </div>
-          <h2 className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-brand-black leading-tight font-heading heading-engraved">أبق على اتصال</h2>
+          <h2 className="mar-section-title font-black text-brand-black font-heading heading-engraved">أبق على اتصال</h2>
           <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-2xl sm:max-w-3xl mx-auto font-cairo text-pretty">
             تمتلك شركتنا العقارية عدداً من القوائم الفاخرة والحصرية المثالية للعملاء الراغبين في التملك أو الاستثمار.
           </p>

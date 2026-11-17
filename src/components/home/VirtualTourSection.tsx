@@ -54,10 +54,10 @@ export default function VirtualTourSection({ onOpenInquiry }: VirtualTourSection
   };
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 sm:py-24 bg-white border-y border-gray-200/80">
+    <section ref={sectionRef} className="relative w-full overflow-hidden mar-section-space bg-white border-y border-gray-200/80">
       <div className="absolute top-1/2 start-0 -translate-y-1/2 w-[500px] h-[500px] bg-[#E6A821]/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
-      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="relative mar-container z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Info Details */}
         <motion.div
           initial="hidden"
@@ -75,7 +75,7 @@ export default function VirtualTourSection({ onOpenInquiry }: VirtualTourSection
               <span>تجربة غامرة فريدة</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-brand-black font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black font-heading heading-engraved">
             جولة افتراضية تفاعلية 360°
           </motion.h2>
           <motion.p variants={fadeUpVariants} className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-md font-cairo">

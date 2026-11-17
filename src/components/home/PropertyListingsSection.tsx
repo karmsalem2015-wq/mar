@@ -363,8 +363,8 @@ export default function PropertyListingsSection({
   }, [hasMore, onLoadMore, properties.length]);
 
   return (
-    <div className="w-full bg-white pb-16">
-      <section id="listings-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-28">
+    <div className="w-full bg-white mar-section-space">
+      <section id="listings-section" className="mar-container scroll-mt-28">
         {/* 1. Section Header: Tag & Heading Above Filters */}
         <motion.div
           initial="hidden"
@@ -374,7 +374,7 @@ export default function PropertyListingsSection({
             hidden: {},
             visible: { transition: { staggerChildren: 0.1 } }
           }}
-          className="flex flex-col items-center text-center pt-16 pb-6 sm:pb-8"
+          className="flex flex-col items-center text-center pb-6 sm:pb-8"
         >
           <motion.div variants={fadeUpVariants} className="mb-3">
             <span className="inline-flex items-center gap-2 py-1.5 px-4 text-xs sm:text-sm font-bold text-white bg-[#111315] border border-white/20 rounded-full font-cairo shadow-sm backdrop-blur-md">
@@ -382,7 +382,7 @@ export default function PropertyListingsSection({
               <span>قائمتنا المحدثة</span>
             </span>
           </motion.div>
-          <motion.h2 variants={fadeUpVariants} className="text-2xl sm:text-4xl lg:text-[2.6rem] font-black text-brand-black mb-3 font-heading heading-engraved">
+          <motion.h2 variants={fadeUpVariants} className="mar-section-title font-black text-brand-black mb-3 font-heading heading-engraved">
             تصفح آخر العروض والفرص الحالية
           </motion.h2>
           <motion.p variants={fadeUpVariants} className="text-sm sm:text-base text-gray-600 max-w-3xl sm:max-w-4xl mx-auto font-cairo leading-relaxed text-pretty">

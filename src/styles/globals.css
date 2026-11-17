@@ -2,6 +2,32 @@
 
 @import "tailwindcss";
 
+/* Fluid sizing for the public pages. */
+@layer components {
+  .mar-container {
+    inline-size: 100%;
+    max-inline-size: 80rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 0.55rem + 1.8vw, 2.5rem);
+  }
+
+  .mar-section-space {
+    padding-block: clamp(3rem, 2rem + 4.1vw, 6rem);
+  }
+
+  .mar-section-title {
+    font-size: clamp(1.5rem, 1.125rem + 1.55vw, 2.625rem);
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .mar-page-title {
+    font-size: clamp(1.875rem, 0.95rem + 3.8vw, 4.2rem);
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+}
+
 /* ----------------------------------------------------
    1. Brand Design Tokens & System Variables (Official MAR Identity)
    ---------------------------------------------------- */
